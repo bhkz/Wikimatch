@@ -1,3 +1,15 @@
+/**
+ * Seed wiki_articles + entities depuis un JSON.
+ *
+ * Usage :
+ *   npm run seed:watchlist                          # seed demo (5 entités, 7 articles)
+ *   npm run seed:watchlist -- --live                # seed live (16 entités, ~50 articles)
+ *   npm run seed:watchlist -- --file <path>         # JSON personnalisé
+ *
+ * Le format JSON est documenté dans worker/seeds/wc26-watchlist.live.json.
+ * Toutes les insertions sont des upserts idempotents : safe à relancer.
+ */
+
 import "dotenv/config";
 import { readFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
@@ -26,6 +38,20 @@ type SeedFile = {
   articles: SeedArticle[];
 };
 
+function parseArgs(argv: string[]): { filePath: string } {
+  let filePath = "worker/seeds/wc26-watchlist.demo.json";
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === "--live") {
+      filePath = "worker/seeds/wc26-watchlist.live.json";
+    } else if (arg === "--file") {
+      filePath = argv[i + 1] ?? filePath;
+      i += 1;
+    }
+  }
+  return { filePath };
+}
+
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
@@ -41,8 +67,12 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
 });
 
 async function main() {
-  const seedPath = new URL("../worker/seeds/wc26-watchlist.demo.json", import.meta.url);
-  const seed = JSON.parse(await readFile(seedPath, "utf8")) as SeedFile;
+  const { filePath } = parseArgs(process.argv.slice(2));
+  console.log(`[seed:watchlist] loading ${filePath}`);
+
+  const seedPath = new URL(`../${filePath}`, import.meta.url);
+  const seedRaw = JSON.parse(await readFile(seedPath, "utf8")) as SeedFile & { _comment?: string };
+  const seed: SeedFile = { entities: seedRaw.entities, articles: seedRaw.articles };
 
   const { data: entities, error: entityError } = await supabase
     .from("entities")
@@ -72,8 +102,8 @@ async function main() {
     .upsert(articleRows, { onConflict: "wiki_code,page_title" });
   if (articleError) throw articleError;
 
-  console.log(`Seeded ${seed.entities.length} entities.`);
-  console.log(`Seeded ${seed.articles.length} monitored wiki articles.`);
+  console.log(`[seed:watchlist] ✅ ${seed.entities.length} entities upserted`);
+  console.log(`[seed:watchlist] ✅ ${seed.articles.length} monitored wiki articles upserted`);
 }
 
 main().catch((error) => {
