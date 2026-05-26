@@ -1,4 +1,6 @@
 services:
+  # Worker SSE Wikimedia : collecte uniquement (revision_traces +
+  # trace_private_content + checkpoint). Aucun appel IA, aucune publication.
   - type: worker
     name: wikimatch-worker
     env: node
@@ -15,6 +17,58 @@ services:
       - key: WORKER_DRY_RUN
         value: "true"
       - key: WORKER_FETCH_DIFF
+        value: "true"
+      - key: LOG_LEVEL
+        value: "info"
+
+  # Analyzer : extrait des propositions normalisées depuis les traces
+  # observées. Provider OpenAI primaire, Gemini fallback, regex final.
+  # Cap budget journalier appliqué via AI_DAILY_EUR_CAP.
+  - type: worker
+    name: wikimatch-analyzer
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm run analyzer:start
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: AI_DAILY_EUR_CAP
+        value: "6.50"
+      - key: ANALYZER_POLL_INTERVAL_MS
+        value: "10000"
+      - key: ANALYZER_BATCH_SIZE
+        value: "5"
+      - key: ANALYZER_DRY_RUN
+        value: "true"
+      - key: LOG_LEVEL
+        value: "info"
+
+  # Pattern matcher + template publisher : lit les trace_propositions
+  # classifiées, détecte les patterns (article_instability,
+  # language_convergence, under_radar, etc.), génère des stories par
+  # template borné avec safety filters obligatoires, INSERT dans
+  # published_stories. Aucune copy libre IA.
+  - type: worker
+    name: wikimatch-patterns
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm run patterns:start
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: PATTERNS_POLL_INTERVAL_MS
+        value: "30000"
+      - key: PATTERNS_DRY_RUN
         value: "true"
       - key: LOG_LEVEL
         value: "info"

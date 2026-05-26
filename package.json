@@ -13,7 +13,11 @@
     "seed:watchlist": "tsx scripts/seed-worker-watchlist.ts",
     "trace:promote": "tsx scripts/promote-trace.ts",
     "worker:dev": "tsx worker/src/ingest.ts",
-    "worker:start": "tsx worker/src/ingest.ts"
+    "worker:start": "tsx worker/src/ingest.ts",
+    "analyzer:dev": "tsx watch analyzer/src/index.ts",
+    "analyzer:start": "tsx analyzer/src/index.ts",
+    "patterns:dev": "tsx watch patterns/src/index.ts",
+    "patterns:start": "tsx patterns/src/index.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
