@@ -12,57 +12,98 @@ import type {
   StoriesArchivePageData,
   StoryDetailPageData,
 } from "./PublicDataProvider";
-import { NotImplementedError } from "./PublicDataProvider";
+
+type RequestOptions = {
+  notFoundReturnsNull?: boolean;
+};
 
 /**
- * Implémentation "live" du contrat PublicDataProvider.
+ * Live implementation of the public data contract.
  *
- * Toutes les méthodes lèvent NotImplementedError tant que l'API
- * /api/public/v1/* n'est pas en place (Phase 2). Aucun fallback
- * sur les fixtures n'est jamais autorisé en mode live.
- *
- * Voir docs/v2/PUBLIC_API_PROPOSAL.md.
+ * It calls /api/public/v1/* and never falls back to demo fixtures. The API is
+ * not implemented in this repo yet; while Phase 2 is incomplete, live mode will
+ * fail honestly with a network/API error instead of silently showing fake data.
  */
 export class LivePublicDataProvider implements PublicDataProvider {
   public readonly mode: PublicDataMode = "live";
 
+  private readonly baseUrl =
+    (
+      (import.meta as { env?: Record<string, string | undefined> }).env
+        ?.VITE_PUBLIC_API_BASE?.replace(/\/$/, "") ?? ""
+    ) +
+    "/api/public/v1";
+
   async getHomePageData(): Promise<HomePageData> {
-    throw new NotImplementedError("getHomePageData", this.mode);
+    return this.request<HomePageData>("/home");
   }
 
-  async getStoryBySlug(_slug: string): Promise<StoryDetailPageData | null> {
-    throw new NotImplementedError("getStoryBySlug", this.mode);
+  async getStoryBySlug(slug: string): Promise<StoryDetailPageData | null> {
+    return this.request<StoryDetailPageData>(
+      `/stories/${encodeURIComponent(slug)}`,
+      { notFoundReturnsNull: true },
+    );
   }
 
-  async getMatchBySlug(_slug: string): Promise<MatchDetailPageData | null> {
-    throw new NotImplementedError("getMatchBySlug", this.mode);
+  async getMatchBySlug(slug: string): Promise<MatchDetailPageData | null> {
+    return this.request<MatchDetailPageData>(
+      `/matches/${encodeURIComponent(slug)}`,
+      { notFoundReturnsNull: true },
+    );
   }
 
-  async getEntityBySlug(_slug: string): Promise<EntityDetailPageData | null> {
-    throw new NotImplementedError("getEntityBySlug", this.mode);
+  async getEntityBySlug(slug: string): Promise<EntityDetailPageData | null> {
+    return this.request<EntityDetailPageData>(
+      `/entities/${encodeURIComponent(slug)}`,
+      { notFoundReturnsNull: true },
+    );
   }
 
   async getMatchesCalendarPageData(): Promise<MatchesCalendarPageData> {
-    throw new NotImplementedError("getMatchesCalendarPageData", this.mode);
+    return this.request<MatchesCalendarPageData>("/matches");
   }
 
   async getStoriesArchivePageData(): Promise<StoriesArchivePageData> {
-    throw new NotImplementedError("getStoriesArchivePageData", this.mode);
+    return this.request<StoriesArchivePageData>("/stories");
   }
 
   async getExplorerPageData(): Promise<ExplorerPageData> {
-    throw new NotImplementedError("getExplorerPageData", this.mode);
+    return this.request<ExplorerPageData>("/explorer");
   }
 
   async getObservatoryPageData(): Promise<ObservatoryPageData> {
-    throw new NotImplementedError("getObservatoryPageData", this.mode);
+    return this.request<ObservatoryPageData>("/observatory/traces");
   }
 
   async getMethodologyPageData(): Promise<MethodologyPageData> {
-    throw new NotImplementedError("getMethodologyPageData", this.mode);
+    return this.request<MethodologyPageData>("/methodology");
   }
 
   async getSearchPageData(): Promise<SearchPageData> {
-    throw new NotImplementedError("getSearchPageData", this.mode);
+    return this.request<SearchPageData>("/search");
+  }
+
+  private async request<T>(
+    path: string,
+    options: RequestOptions = {},
+  ): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${path}`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (response.status === 404 && options.notFoundReturnsNull) {
+      return null as T;
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        `API publique indisponible (${response.status}) pour ${path}`,
+      );
+    }
+
+    return (await response.json()) as T;
   }
 }
