@@ -1,0 +1,2190 @@
+Tu peux lancer **Claude Code depuis la racine du dossier exporté par AI Studio**, puis lui coller le prompt ci-dessous.
+
+L’idée est volontairement de lui interdire de coder l’intégration immédiatement : il doit d’abord vérifier que le frontend V2 existe vraiment, que les 10 pages sont présentes, et disséquer l’ancien projet sans réimporter son bordel.
+
+````markdown
+# WIKIMATCH / REVISION 90 — V2 FULL-STACK RECONSTRUCTION
+## PROMPT MAÎTRE CLAUDE CODE — PHASE 0 : AUDIT COMPLET, ARCHITECTURE CIBLE ET PLAN DE MIGRATION
+## Frontend public V2 généré dans AI Studio : 10 pages prévues
+## Ancien projet legacy accessible en lecture seule : `C:\Users\thoma\revision90-worker`
+
+Tu es le tech lead, architecte full-stack, architecte data, responsable sécurité/privacy et garant de l’intégrité méthodologique d’un produit nommé **WikiMatch / Revision 90**.
+
+Tu travailles depuis la racine du nouveau frontend exporté depuis AI Studio.
+
+Ta mission globale est de transformer ce frontend V2 en un produit réel connecté à Wikipédia, techniquement robuste, éditorialement crédible et utilisable pendant la Coupe du monde 2026.
+
+Mais tu ne dois pas commencer par coder le backend ou fusionner l’ancien projet.
+
+## TA MISSION IMMÉDIATE EST UNIQUEMENT LA PHASE 0 :
+
+1. Auditer réellement le frontend AI Studio présent dans le dossier courant.
+2. Auditer réellement l’ancien projet legacy situé à :
+
+```text
+C:\Users\thoma\revision90-worker
+````
+
+3. Vérifier la stack, le routing, les composants, les fixtures, les pages existantes et l’état du build.
+4. Identifier précisément ce qui peut être récupéré du legacy et ce qui doit être abandonné.
+5. Proposer une architecture cible réaliste adaptée à la stack réellement détectée.
+6. Créer une documentation d’architecture et de migration dans `docs/v2/`.
+7. Me rendre un rapport complet avant toute intégration backend.
+
+Tu n’es pas autorisé à commencer l’intégration backend complète, les migrations Supabase finales, le branchement Wikimedia ou la migration du worker avant ma validation explicite de ton audit.
+
+---
+
+# 0. RÈGLES DE TRAVAIL ABSOLUES
+
+## 0.1. Le frontend AI Studio est la nouvelle base produit
+
+Le dossier courant contient le nouveau frontend public V2 généré avec AI Studio.
+
+Ce frontend devient la nouvelle source de vérité pour :
+
+* la direction UX ;
+* la direction visuelle ;
+* la hiérarchie d’information ;
+* la navigation publique ;
+* les pages éditoriales ;
+* les composants publics ;
+* les états de démonstration.
+
+Tu dois le préserver.
+
+Tu peux identifier ses problèmes, ses duplications, ses incohérences ou sa dette technique. Tu peux proposer des refactors. Mais tu ne dois pas remplacer cette direction par l’ancien frontend, ni réintroduire l’ancien dashboard.
+
+## 0.2. L’ancien projet est une archive technique à auditer, pas une base à fusionner
+
+L’ancien projet se trouve ici :
+
+```text
+C:\Users\thoma\revision90-worker
+```
+
+Il est en :
+
+```text
+LECTURE SEULE
+```
+
+Tu peux inspecter :
+
+* le worker Wikimedia ;
+* les scripts Wikidata ;
+* les migrations ;
+* la logique Supabase ;
+* les API routes ;
+* les types ;
+* la gestion du SSE ;
+* la reconnexion ;
+* la déduplication ;
+* les configurations ;
+* les documents de méthodologie ;
+* les composants anciens uniquement pour comprendre ce qui existait.
+
+Tu ne dois pas :
+
+* modifier ce dossier ;
+* supprimer ou déplacer ses fichiers ;
+* recopier son architecture sans analyse ;
+* copier des `.env` ;
+* afficher des secrets ;
+* restaurer ses concepts produit abandonnés ;
+* supposer que ce qui y fonctionne techniquement est encore valable pour la V2.
+
+## 0.3. Git et sécurité
+
+Avant toute modification dans le nouveau projet :
+
+1. Vérifie si le dossier courant est un repository Git.
+2. Exécute `git status`.
+3. Ne détruis aucune modification existante.
+4. Si le repository est propre, crée ou recommande une branche dédiée :
+
+```text
+v2/audit-and-architecture
+```
+
+5. Si le dossier n’est pas versionné, indique-le clairement.
+6. N’ouvre jamais le contenu sensible d’un `.env` pour l’afficher dans ton rapport.
+7. Tu peux inspecter les noms de variables dans `.env.example`, les fichiers de configuration ou les imports, mais masque toute valeur secrète.
+8. Toute modification effectuée pendant la Phase 0 doit être strictement limitée aux documents d’audit ou à une correction bloquante indispensable pour exécuter le build.
+
+## 0.4. Ne suppose rien sans vérifier
+
+Ne prétends jamais :
+
+* qu’une page existe sans avoir trouvé sa route ou son composant ;
+* qu’un build fonctionne sans l’avoir exécuté ;
+* qu’une logique legacy est présente sans avoir ouvert les fichiers concernés ;
+* qu’un bug existe sans citer le fichier ou la logique correspondante ;
+* qu’une dépendance est utilisée sans l’avoir vérifiée ;
+* qu’un secret est absent ou présent sans preuve ;
+* qu’un backend est connectable sans comprendre la stack réelle.
+
+Si tu ne peux pas vérifier un point, indique :
+
+```text
+NON VÉRIFIÉ
+```
+
+ou :
+
+```text
+À CONFIRMER
+```
+
+---
+
+# 1. CONTEXTE PRODUIT : LE PIVOT V2
+
+## 1.1. Ancienne direction abandonnée
+
+L’ancien prototype était centré sur une logique proche d’un dashboard temps réel :
+
+* activité Wikipédia ;
+* volume d’edits ;
+* pages qui chauffent ;
+* score de buzz ou drama ;
+* globe ou visualisation de langues ;
+* “guerres” ou “bagarres” d’édition ;
+* cockpit live ;
+* confrontation de matchs ;
+* flux d’activité.
+
+Cette direction est désormais abandonnée comme proposition de valeur principale.
+
+Le problème était fondamental :
+
+> Dire qu’un joueur a reçu plusieurs modifications Wikipédia n’est pas intéressant si ces modifications sont uniquement des corrections, des virgules ou du bruit technique.
+
+Le produit doit désormais se concentrer sur ce qui raconte réellement quelque chose.
+
+## 1.2. Nouvelle direction V2
+
+WikiMatch devient un **média data expérimental autour de la Coupe du monde 2026**.
+
+Promesse principale :
+
+> **Le match se joue sur le terrain.
+> Son histoire s’écrit sur Wikipédia.**
+
+Promesse secondaire :
+
+> **Un même match. Plusieurs Wikipédias. Parfois plusieurs récits.**
+
+Le produit cherche à montrer comment un événement footballistique :
+
+1. entre dans Wikipédia ;
+2. apparaît dans différentes éditions linguistiques ;
+3. est décrit de manière similaire ou différente selon les articles ;
+4. devient éventuellement instable dans un article précis ;
+5. se stabilise après un match ;
+6. révèle parfois un joueur ou une équipe fortement documenté dans une édition linguistique avant d’apparaître ailleurs ;
+7. produit un récit encyclopédique observable et vérifiable.
+
+## 1.3. Positionnement final
+
+WikiMatch ne doit plus être pensé comme :
+
+```text
+Un dashboard qui détecte automatiquement ce qui bouge.
+```
+
+Il doit devenir :
+
+```text
+Un média data qui publie uniquement les histoires vérifiables
+que les traces Wikipédia permettent réellement de raconter.
+```
+
+---
+
+# 2. PRINCIPES PRODUIT NON NÉGOCIABLES
+
+Ces principes structurent toute l’architecture future : frontend, backend, base de données, ingestion, APIs, IA et modération.
+
+## 2.1. Une modification est une trace, pas une histoire
+
+Une modification Wikipédia observée est une **trace**.
+
+Elle peut être :
+
+```text
+MINEURE
+Correction de ponctuation, lien, mise en page, détail technique
+ou modification sans changement narratif identifié.
+
+SUBSTANTIELLE
+Ajout, retrait ou reformulation d’un contenu compréhensible
+lié à un match, un joueur, une équipe ou un événement suivi.
+
+RELIÉE À UNE HISTOIRE PUBLIÉE
+Trace utilisée comme preuve dans une story validée publiquement.
+```
+
+Une story ne doit jamais être créée automatiquement uniquement parce que :
+
+* une page reçoit beaucoup d’edits ;
+* plusieurs langues modifient le même sujet ;
+* un seuil d’activité est dépassé ;
+* une IA détecte un sujet potentiellement intéressant ;
+* un score de buzz ou de drama augmente.
+
+## 2.2. Plusieurs éditions linguistiques actives ne signifient pas divergence
+
+Si plusieurs articles linguistiques ajoutent la même information, il peut simplement s’agir d’une mise à jour convergente normale.
+
+Exemple :
+
+```text
+JA ajoute le résultat du match.
+EN ajoute le résultat du match.
+FR ajoute le résultat du match.
+```
+
+Cela ne démontre aucune tension.
+
+Une divergence publique ne peut être formulée que si :
+
+* les articles comparés portent réellement sur le même sujet ou épisode ;
+* les passages sont comparables ;
+* les différences sont lisibles et vérifiables ;
+* la formulation publique reste prudente.
+
+Formulation correcte :
+
+```text
+L’édition anglaise mentionne une altercation.
+L’édition espagnole mentionne la sanction.
+Aucune mention équivalente n’est détectée
+dans l’édition française observée à cet instant.
+```
+
+Formulations interdites :
+
+```text
+Les Anglais accusent le joueur.
+L’Espagne minimise l’incident.
+La France l’ignore.
+```
+
+## 2.3. Une instabilité concerne un même article
+
+Une instabilité éditoriale ne doit jamais être déduite du simple fait que plusieurs langues modifient un sujet.
+
+Elle est observable lorsque, sur un **même article**, autour d’un passage comparable :
+
+* un contenu est ajouté ;
+* puis supprimé ;
+* puis restauré ;
+* ou reformulé plusieurs fois ;
+* éventuellement accompagné ou non de nouvelles sources.
+
+Exemple valable :
+
+```text
+Article EN du joueur fictif :
+22:48 · passage ajouté
+22:51 · passage retiré
+22:56 · passage réintroduit
+23:03 · formulation sourcée
+```
+
+Vocabulaire public recommandé :
+
+```text
+ARTICLE INSTABLE
+INSTABILITÉ OBSERVABLE
+PASSAGE AJOUTÉ, RETIRÉ PUIS RESTAURÉ
+```
+
+Éviter le vocabulaire :
+
+```text
+GUERRE
+BAGARRE
+DRAMA
+```
+
+tant qu’un protocole plus fort et défendable n’est pas défini.
+
+## 2.4. Une édition linguistique n’est pas un pays
+
+Une édition linguistique Wikipédia est un ensemble d’articles dans une langue.
+
+Elle ne représente jamais automatiquement :
+
+* un pays ;
+* une population ;
+* une opinion publique ;
+* un groupe national ;
+* la localisation de ses contributeurs.
+
+Le produit doit employer :
+
+```text
+édition française
+édition anglaise
+édition japonaise
+article comparé
+```
+
+Il ne doit jamais écrire :
+
+```text
+la France pense
+les Anglais racontent
+les Japonais réagissent
+```
+
+## 2.5. La carte situe les sujets, jamais les contributeurs
+
+La page Explorer contient une carte.
+
+Cette carte peut situer :
+
+* une sélection concernée par une histoire ;
+* un joueur associé à une sélection ;
+* un stade ou lieu de match si cela est pertinent ;
+* une entité footballistique clairement géolocalisable.
+
+Elle ne doit jamais situer :
+
+* la provenance d’un edit ;
+* une IP ;
+* le lieu supposé d’un contributeur ;
+* une langue positionnée sur une zone géographique ;
+* l’origine supposée d’un récit.
+
+Règle permanente :
+
+```text
+POSITION = SUJET DE L’HISTOIRE
+JAMAIS LOCALISATION DU CONTRIBUTEUR
+```
+
+## 2.6. La chronologie ne prouve pas une causalité
+
+Si une modification apparaît après un but, un carton rouge ou une qualification, le produit peut dire :
+
+```text
+Cette modification est observée après l’événement du match.
+```
+
+Il ne peut pas automatiquement dire :
+
+```text
+Cette modification a été causée par l’événement du match.
+```
+
+Toute causalité forte exige des preuves complémentaires et une validation éditoriale.
+
+## 2.7. L’IA peut assister, jamais publier seule
+
+L’IA pourra éventuellement servir dans un futur Desk privé pour :
+
+* traduire un extrait ;
+* proposer qu’un passage concerne un événement ;
+* suggérer une comparaison ;
+* résumer une modification ;
+* détecter un candidat à analyser.
+
+Mais elle ne doit jamais automatiquement :
+
+* publier une story publique ;
+* affirmer une causalité ;
+* qualifier une controverse ;
+* attribuer une intention à un contributeur ;
+* déduire une opinion nationale ;
+* exposer une traduction non vérifiée comme vérité définitive.
+
+---
+
+# 3. ARCHITECTURE PRODUIT PUBLIQUE V2 À PRÉSERVER
+
+Le frontend AI Studio a été conçu autour de 10 pages publiques.
+
+Tu dois vérifier lesquelles existent réellement dans le code, lesquelles fonctionnent et lesquelles présentent des problèmes.
+
+## 3.1. Les 10 pages publiques prévues
+
+| Numéro | Route                           | Rôle produit                                            |
+| ------ | ------------------------------- | ------------------------------------------------------- |
+| 1      | `/`                             | Homepage éditoriale, promesse et stories mises en avant |
+| 2      | `/story/demo-divergence`        | Détail d’une story fictive de divergence entre éditions |
+| 3      | `/match/demo-france-belgique`   | Dossier match fictif regroupant plusieurs histoires     |
+| 4      | `/stories`                      | Archive publique des histoires publiées                 |
+| 5      | `/matches`                      | Calendrier éditorial des matchs suivis                  |
+| 6      | `/entity/demo-japan-goalkeeper` | Dossier entité fictif `Sous le radar` autour de Ren Ito |
+| 7      | `/explorer`                     | Datavisualisation publique des histoires publiées       |
+| 8      | `/observatoire`                 | Traces publiques, diffs et chaînes de preuve            |
+| 9      | `/methodology`                  | Méthode cible, limites, privacy et rôle de l’IA         |
+| 10     | `/search`                       | Recherche transversale dans les contenus publics        |
+
+IMPORTANT :
+
+* Ces pages sont prévues par la conception UX.
+* Tu dois vérifier leur présence réelle.
+* Si certaines n’existent pas ou sont cassées, documente-le.
+* Ne crée pas ou ne réécris pas massivement ces pages pendant la Phase 0.
+* Ne remplace pas leur copy, leur DA ou leur hiérarchie sans validation.
+
+## 3.2. Fonction de chaque surface publique
+
+### Magazine public
+
+Routes :
+
+```text
+/
+/stories
+/story/[slug]
+/matches
+/match/[slug]
+/entity/[slug]
+```
+
+Rôle :
+
+* afficher des histoires publiées ;
+* proposer une lecture éditoriale attractive ;
+* relier histoires, matchs et sujets ;
+* montrer les limites et sources publiques ;
+* ne jamais exposer de candidat non validé.
+
+### Explorer
+
+Route :
+
+```text
+/explorer
+```
+
+Rôle :
+
+* visualiser uniquement des histoires publiées ou éditorialement qualifiées ;
+* proposer une carte des sujets ;
+* proposer une matrice de comparaison entre éditions ;
+* proposer une timeline des stories publiées.
+
+Ne doit pas afficher :
+
+* flux brut ;
+* edits entrants ;
+* candidats ;
+* carte de contributeurs ;
+* score de buzz.
+
+### Observatoire
+
+Route :
+
+```text
+/observatoire
+```
+
+Rôle :
+
+* montrer des traces publiques exposables ;
+* montrer des diffs modérés ou fictifs ;
+* montrer la relation entre traces et stories ;
+* montrer pourquoi certaines traces restent mineures ;
+* expliquer la privacy.
+
+Ne doit pas être :
+
+* un backoffice public ;
+* un terminal live ;
+* une file de candidats IA ;
+* un outil de surveillance des contributeurs.
+
+### Méthodologie
+
+Route :
+
+```text
+/methodology
+```
+
+Rôle :
+
+* expliquer la méthode cible ;
+* distinguer sujet, article, trace et histoire ;
+* expliquer divergence, instabilité, géographie, IA et privacy ;
+* assumer les limites ;
+* préparer un cadre de correction et de versionnement.
+
+### Recherche
+
+Route :
+
+```text
+/search
+```
+
+Rôle :
+
+* rechercher uniquement dans les contenus publics :
+
+  * stories publiées ;
+  * dossiers match ;
+  * entités publiques ;
+  * traces publiques exposables ;
+  * méthodologie.
+
+Ne doit jamais rechercher dans :
+
+* candidats privés ;
+* sorties IA internes ;
+* diffs privés non modérés ;
+* contributeurs ;
+* IP ;
+* scores internes.
+
+---
+
+# 4. MODES DE DONNÉES À PRÉVOIR
+
+Le frontend actuel utilise des fixtures fictives.
+
+La future architecture doit permettre deux modes clairement séparés :
+
+```ts
+type PublicDataMode = "demo" | "live";
+```
+
+## 4.1. Mode `demo`
+
+Le mode `demo` :
+
+* utilise les fixtures actuellement présentes ;
+* affiche les badges de démonstration ;
+* sert aux tests UX et à la présentation ;
+* ne prétend jamais afficher de données réelles ;
+* conserve les scénarios fictifs :
+
+  * France — Belgique ;
+  * Ren Ito ;
+  * Japon — Sénégal ;
+  * Maroc — Croatie ;
+  * autres exemples de démonstration.
+
+## 4.2. Mode `live`
+
+Le mode `live` devra :
+
+* consommer uniquement les APIs publiques réelles ;
+* ne jamais afficher de fixtures fictives ;
+* afficher des états vides honnêtes si aucune histoire n’est publiée ;
+* afficher clairement les niveaux de preuve ;
+* ne jamais publier automatiquement une story ;
+* ne jamais montrer de diff brut non modéré ;
+* ne jamais afficher de donnée sportive non vérifiée.
+
+## 4.3. Abstraction de données souhaitée
+
+Tu dois évaluer la meilleure manière d’introduire, dans la stack détectée, une couche de données du type :
+
+```ts
+interface PublicDataProvider {
+  getHomePageData(): Promise<HomePageData>;
+
+  getStories(filters?: StoryFilters): Promise<PublishedStorySummary[]>;
+  getStoryBySlug(slug: string): Promise<PublishedStoryDetail | null>;
+
+  getMatches(filters?: MatchFilters): Promise<PublicMatchSummary[]>;
+  getMatchBySlug(slug: string): Promise<PublicMatchDetail | null>;
+
+  getEntityBySlug(slug: string): Promise<PublicEntityDetail | null>;
+
+  getExplorerData(filters?: ExplorerFilters): Promise<ExplorerData>;
+
+  getObservatoryTraces(
+    filters?: ObservatoryFilters
+  ): Promise<PublicTraceSummary[]>;
+
+  getObservatoryTraceById(
+    id: string
+  ): Promise<PublicTraceDetail | null>;
+
+  getMethodologyData(): Promise<MethodologyData>;
+
+  searchPublicContent(
+    query: string,
+    filters?: PublicSearchFilters
+  ): Promise<PublicSearchResult[]>;
+}
+```
+
+Avec :
+
+```ts
+class DemoPublicDataProvider implements PublicDataProvider
+```
+
+alimenté par les fixtures existantes.
+
+Puis plus tard :
+
+```ts
+class LivePublicDataProvider implements PublicDataProvider
+```
+
+alimenté par les APIs publiques réelles.
+
+IMPORTANT :
+
+* N’implémente pas encore cette refonte en Phase 0.
+* Audite le code et indique comment l’introduire sans casser la DA actuelle.
+* Identifie les pages actuellement couplées directement aux fixtures.
+* Identifie les types qui peuvent devenir des types de domaine partagés.
+
+---
+
+# 5. AUDIT OBLIGATOIRE DU FRONTEND AI STUDIO
+
+Tu dois inspecter réellement le dossier courant et produire un inventaire complet.
+
+## 5.1. Stack à identifier
+
+Vérifie :
+
+* framework utilisé ;
+* version du framework ;
+* React ou autre ;
+* Vite, Next.js, Remix ou autre ;
+* TypeScript ou JavaScript ;
+* système de routage ;
+* gestion des styles ;
+* bibliothèques d’animation ;
+* bibliothèques UI ;
+* composants partagés ;
+* gestion des assets ;
+* gestion des données mockées ;
+* scripts npm ;
+* lint ;
+* tests ;
+* build ;
+* configuration Vercel éventuelle ;
+* variables d’environnement attendues.
+
+## 5.2. Routes à vérifier
+
+Vérifie réellement si ces routes existent :
+
+```text
+/
+/story/demo-divergence
+/match/demo-france-belgique
+/stories
+/matches
+/entity/demo-japan-goalkeeper
+/explorer
+/observatoire
+/methodology
+/search
+```
+
+Pour chaque route, indique :
+
+| Route | Existe réellement ? | Composant principal | Fixtures utilisées | Liens fonctionnels ? | Problèmes détectés |
+| ----- | ------------------: | ------------------- | ------------------ | -------------------- | ------------------ |
+
+## 5.3. Composants à identifier
+
+Repère notamment, s’ils existent :
+
+```text
+AppShell
+SiteHeader
+MobileMenu
+SiteFooter
+DemoBadge
+SectionLabel
+AnimatedTextReveal
+ParallaxImage
+StoryCard
+TrackedMatchPoster
+SourceCard
+ComparisonMatrix
+StoryTimeline
+SearchInput
+TraceInspectorDrawer
+EditorialWorldMap
+```
+
+Ne suppose pas ces noms exacts. Recherche les composants équivalents.
+
+Pour chaque composant partagé important, indique :
+
+* emplacement ;
+* rôle ;
+* niveau de réutilisation ;
+* duplication éventuelle ;
+* couplage aux données fictives ;
+* problèmes d’accessibilité ou de performance visibles.
+
+## 5.4. Fixtures à inventorier
+
+Repère les données de démonstration correspondant à :
+
+```text
+Home
+Stories
+Story detail
+Matches
+Match detail
+Entity
+Explorer
+Observatory
+Methodology
+Search
+```
+
+Vérifie :
+
+* si elles sont centralisées ;
+* si elles sont dupliquées ;
+* si les mêmes stories ont des textes incohérents entre pages ;
+* si les routes et IDs sont stables ;
+* si elles peuvent être extraites dans une couche `demo`.
+
+## 5.5. Qualité frontend à vérifier
+
+Vérifie :
+
+* que le projet s’installe ;
+* que le build passe ;
+* que le lint passe s’il existe ;
+* que les routes ne cassent pas ;
+* qu’aucun import manquant ne bloque ;
+* que les liens internes mènent bien aux routes existantes ;
+* que les placeholders vers les futures fonctionnalités ont été remplacés lorsqu’une page existe désormais ;
+* que les badges `DÉMONSTRATION` existent bien ;
+* que le mode mobile paraît réellement prioritaire dans la structure ;
+* que les animations ne semblent pas excessivement lourdes ;
+* que les images n’introduisent pas de problèmes évidents ;
+* que les composants sont compatibles avec une future data layer.
+
+## 5.6. Ne corrige pas encore massivement
+
+Pendant la Phase 0, tu peux uniquement corriger :
+
+* une erreur de build bloquante ;
+* un import trivialement cassé ;
+* un lien manifestement cassé empêchant la navigation de test ;
+* un problème empêchant l’audit.
+
+Toute correction doit être documentée précisément.
+
+---
+
+# 6. AUDIT OBLIGATOIRE DU LEGACY
+
+Inspecte en lecture seule :
+
+```text
+C:\Users\thoma\revision90-worker
+```
+
+Si le chemin n’est pas accessible, indique-le clairement et poursuis l’audit V2 sans inventer son contenu.
+
+## 6.1. Ce que tu dois rechercher dans le legacy
+
+Cherche les briques potentiellement utiles :
+
+* worker Wikimedia EventStreams ;
+* connexion SSE ;
+* reprise via `Last-Event-ID` ;
+* reconnexion ;
+* watchdog ;
+* backoff ;
+* déduplication ;
+* stockage Supabase ;
+* migrations SQL ;
+* schémas de tables ;
+* scripts Wikidata / QIDs / sitelinks ;
+* index d’entités ;
+* watchlists éventuelles ;
+* health server ;
+* logs ;
+* gestion des erreurs ;
+* documentation ;
+* configuration du `WIKIMEDIA_USER_AGENT` ;
+* scripts d’import ou seed ;
+* types partagés ;
+* appels aux APIs Wikimedia.
+
+## 6.2. Recherche explicite des éléments à risque
+
+Recherche notamment, même si les noms réels diffèrent :
+
+```text
+Math.random
+setDisplay
+ratePerSec
+fake live
+live counter
+LiveCockpit
+HotNowCard
+BuzzScore
+DramaScore
+WarBoard
+MatchBattleBar
+GlobeHero
+languageLocations
+language map
+country mapping
+hash-based coordinates
+/api/wars/log
+edit_war_now
+war burst
+client-side detection
+POST public
+/api/overview
+polling
+setInterval
+no-store
+5000
+toISOString().slice
+lastEventId
+checkpoint
+fire-and-forget
+insert async
+Supabase service role
+public write
+RLS
+Wikimedia
+EventStreams
+Last-Event-ID
+```
+
+## 6.3. Catégorisation obligatoire
+
+Chaque élément important du legacy doit être classé dans l’une de ces catégories :
+
+```text
+RÉUTILISABLE TEL QUEL
+RÉUTILISABLE APRÈS REFACTOR
+À ABANDONNER
+À VÉRIFIER DAVANTAGE
+```
+
+Produis un tableau :
+
+| Élément | Fichier(s) | Ce que cela fait | Décision | Justification | Risques |
+| ------- | ---------- | ---------------- | -------- | ------------- | ------- |
+
+## 6.4. Éléments à abandonner s’ils existent
+
+Doivent être abandonnés ou exclus de la V2 :
+
+* compteur d’edits simulé ou incrémenté artificiellement ;
+* faux sentiment de live ;
+* score de buzz public ;
+* score de drama public ;
+* page chaude uniquement basée sur le volume ;
+* guerre détectée simplement par fréquence d’edits ;
+* détection d’événement éditorial côté navigateur ;
+* endpoint public permettant d’écrire une guerre, une story ou une alerte ;
+* globe représentant les langues comme des origines géographiques ;
+* position aléatoire de langues inconnues ;
+* carte des contributeurs ;
+* IP ou identité visibles ;
+* diffs bruts affichés automatiquement au public ;
+* polling lourd depuis chaque navigateur ;
+* affichage d’heure UTC présenté comme heure locale ;
+* données de match non vérifiées présentées comme officielles ;
+* ancienne homepage cockpit ;
+* composants dashboard réintroduits dans la V2.
+
+## 6.5. Fiabilité du worker à auditer
+
+Vérifie particulièrement :
+
+* comment le worker reçoit les événements ;
+* comment il filtre les pages ;
+* comment il déduplique ;
+* quand il avance son checkpoint ;
+* si les inserts sont attendus et confirmés ;
+* si un événement peut être marqué comme traité avant stockage durable ;
+* si les retries sont idempotents ;
+* si un redémarrage peut perdre des événements ;
+* si les erreurs d’insert sont tracées ;
+* si la reconnexion est robuste ;
+* si un healthcheck existe ;
+* si les requêtes Wikimedia respectent une politique de User-Agent correcte.
+
+Règle cible :
+
+```text
+Le checkpoint ne doit progresser qu’après écriture confirmée
+ou traitement explicite et traçable de l’échec.
+```
+
+Si le legacy ne garantit pas cette fiabilité, classe la collecte comme :
+
+```text
+BEST EFFORT À RENFORCER AVANT USAGE PUBLIC
+```
+
+---
+
+# 7. ARCHITECTURE TECHNIQUE CIBLE À ÉVALUER
+
+Tu dois adapter ta recommandation à la stack réellement détectée.
+
+Ne force pas Next.js, Supabase, Vercel ou une architecture particulière si le frontend actuel repose sur autre chose sans avoir expliqué la migration nécessaire.
+
+Cependant, l’architecture cible conceptuelle doit respecter les principes suivants.
+
+---
+
+# 7.1. Séparation des systèmes
+
+La cible doit séparer au minimum :
+
+```text
+FRONTEND PUBLIC
+Pages Magazine, Explorer, Observatoire, Méthodologie, Recherche.
+
+API PUBLIQUE EN LECTURE SEULE
+Stories publiées, matchs publics, entités publiques,
+traces publiques modérées, recherche publique.
+
+DESK PRIVÉ FUTUR
+Candidats, revue humaine, IA assistante, publication, correction.
+
+WORKER D’INGESTION
+Collecte Wikimedia fiable et filtrée.
+
+BASE DE DONNÉES
+Données publiques séparées des données privées.
+
+SOURCES SPORTIVES VÉRIFIÉES
+Scores, horaires et événements réels du match,
+séparés des traces Wikipédia.
+```
+
+## 7.2. Flux cible
+
+```text
+Wikimedia EventStreams / APIs officielles
+↓
+Worker serveur fiable
+↓
+Traces privées stockées et dédupliquées
+↓
+Classification descriptive / candidats privés
+↓
+Revue éditoriale humaine dans le futur Desk
+↓
+Story publiée
+↓
+Magazine public / Explorer / Observatoire / Recherche
+```
+
+## 7.3. Règle d’accès
+
+Le frontend public doit être exclusivement en lecture sur les données publiques.
+
+Le navigateur public ne doit jamais pouvoir :
+
+* créer une story ;
+* valider un candidat ;
+* déclarer une instabilité ;
+* insérer une trace ;
+* modifier une comparaison ;
+* écrire une donnée éditoriale ;
+* accéder aux données privées du Desk ;
+* utiliser une clé de service.
+
+---
+
+# 8. MODÈLE DE DONNÉES CIBLE À PROPOSER
+
+Tu ne dois pas encore implémenter ces migrations en Phase 0.
+
+Tu dois analyser si ce modèle est compatible avec la stack, l’améliorer si nécessaire, puis le documenter.
+
+Si Supabase/PostgreSQL est approprié, étudie une structure autour des tables suivantes.
+
+## 8.1. Entités footballistiques
+
+```text
+entities
+- id
+- slug
+- type : player | team | coach | match | stadium | tournament
+- canonical_label
+- wikidata_qid nullable
+- subject_geography_label nullable
+- subject_latitude nullable
+- subject_longitude nullable
+- metadata jsonb
+- created_at
+- updated_at
+```
+
+Règle :
+
+```text
+La géographie concerne le sujet documenté.
+Elle ne concerne jamais le contributeur.
+```
+
+## 8.2. Articles Wikipédia
+
+```text
+wiki_articles
+- id
+- entity_id
+- wiki_code
+- language_code
+- page_id
+- page_title
+- canonical_url
+- article_type
+- monitoring_enabled
+- created_at
+- updated_at
+```
+
+## 8.3. Matchs
+
+```text
+matches
+- id
+- slug
+- competition_label
+- stage_label
+- scheduled_at nullable
+- home_team_entity_id
+- away_team_entity_id
+- status
+- official_source_name nullable
+- official_source_url nullable
+- source_verified_at nullable
+- created_at
+- updated_at
+```
+
+Règle :
+
+```text
+Aucun score, horaire ou événement sportif ne doit être affiché
+comme réel sans source vérifiée et identifiée.
+```
+
+## 8.4. Périmètre de suivi des matchs
+
+```text
+match_watchlist
+- id
+- match_id
+- article_id
+- role : match | home_team | away_team | player | coach | tournament
+- monitoring_reason
+- enabled
+- created_at
+```
+
+## 8.5. Traces / révisions observées
+
+```text
+revision_traces
+- id
+- article_id
+- wikimedia_event_id unique
+- revision_id unique nullable
+- previous_revision_id nullable
+- observed_at
+- revision_timestamp
+- source_revision_url
+- source_diff_url nullable
+- section_label nullable
+- size_delta nullable
+- revision_comment_sanitized nullable
+- change_kind nullable
+- public_status : private_raw | public_minor | public_substantive | linked_to_story
+- ingest_status
+- created_at
+```
+
+Privacy :
+
+* ne jamais stocker une IP brute pour l’expérience publique ;
+* ne jamais exposer le nom d’un contributeur ;
+* ne pas mettre en œuvre de fingerprint privé sans justification, analyse privacy et validation explicite.
+
+## 8.6. Contenu privé des diffs
+
+Un diff brut Wikipédia réel peut contenir du vandalisme, des insultes, de la diffamation, des données personnelles ou des contenus sensibles.
+
+Prévoir conceptuellement une zone privée :
+
+```text
+trace_private_content
+- trace_id
+- raw_added_text nullable
+- raw_removed_text nullable
+- fetched_at
+- moderation_status
+- created_at
+```
+
+## 8.7. Extraits publics modérés
+
+```text
+public_trace_excerpts
+- trace_id
+- public_added_excerpt nullable
+- public_removed_excerpt nullable
+- translated_excerpt nullable
+- source_attribution_label nullable
+- source_revision_url nullable
+- license_label nullable
+- safe_to_publish boolean
+- reviewed_at nullable
+- reviewed_by nullable
+```
+
+Règle non négociable :
+
+```text
+Ne jamais exposer automatiquement un diff brut réel dans le public
+sans sanitation et validation de publication.
+```
+
+## 8.8. Candidats privés
+
+```text
+story_candidates
+- id
+- candidate_type
+- entity_id nullable
+- match_id nullable
+- detection_reason
+- evidence_trace_ids
+- ai_assistance_payload nullable
+- status : pending | rejected | approved | converted_to_story
+- created_at
+- updated_at
+```
+
+Règle :
+
+```text
+Les candidats sont privés.
+Ils ne doivent jamais apparaître automatiquement
+dans Magazine, Explorer, Observatoire ou Recherche.
+```
+
+## 8.9. Stories publiées
+
+```text
+published_stories
+- id
+- slug
+- story_type : fact_entry | language_convergence | language_divergence | article_instability | under_radar | match_recap
+- title
+- excerpt
+- observation_text
+- interpretation_text
+- limitation_text
+- entity_id nullable
+- match_id nullable
+- publication_status : draft | published | corrected | retracted
+- published_at nullable
+- corrected_at nullable
+- methodology_version nullable
+- share_image_url nullable
+- created_at
+- updated_at
+```
+
+## 8.10. Preuves des stories
+
+```text
+story_evidence
+- id
+- story_id
+- trace_id nullable
+- evidence_type : trace | compared_absence | official_match_event | comparison_snapshot
+- public_label
+- display_order
+- created_at
+```
+
+## 8.11. Comparaisons entre éditions
+
+```text
+comparison_snapshots
+- id
+- story_id nullable
+- entity_id
+- match_id nullable
+- comparison_topic
+- observed_at
+- observation_text
+- limitation_text
+- created_at
+```
+
+```text
+comparison_snapshot_items
+- id
+- snapshot_id
+- article_id
+- language_code
+- state : present | not_detected | reworded | unstable | not_compared
+- public_excerpt_id nullable
+- short_observation
+- created_at
+```
+
+## 8.12. Instabilités d’article
+
+```text
+article_instability_cases
+- id
+- article_id
+- entity_id nullable
+- match_id nullable
+- passage_topic
+- status : candidate | reviewed | published | rejected
+- observation_text
+- limitation_text
+- detected_at
+- reviewed_at nullable
+```
+
+```text
+article_instability_evidence
+- id
+- instability_case_id
+- trace_id
+- action : added | removed | restored | sourced | reworded
+- display_order
+```
+
+## 8.13. Méthodologie et corrections
+
+```text
+methodology_versions
+- id
+- version_label
+- status
+- published_at
+- summary
+- content_json
+```
+
+```text
+story_corrections
+- id
+- story_id
+- correction_type
+- public_note
+- corrected_at
+- created_at
+```
+
+## 8.14. Ingestion et erreurs
+
+```text
+ingest_checkpoints
+- stream_name
+- last_confirmed_event_id
+- last_confirmed_at
+- updated_at
+```
+
+```text
+ingest_failures
+- id
+- stream_name
+- event_id nullable
+- revision_id nullable
+- error_type
+- error_message_sanitized
+- retry_count
+- resolved_at nullable
+- created_at
+```
+
+## 8.15. IA privée future
+
+```text
+ai_analysis_runs
+- id
+- candidate_id
+- task_type
+- model_name
+- prompt_version
+- output_json
+- created_at
+```
+
+```text
+editorial_reviews
+- id
+- candidate_id
+- reviewer_id
+- decision
+- correction_notes
+- published_story_id nullable
+- reviewed_at
+```
+
+Ces données doivent rester privées.
+
+---
+
+# 9. RLS, SÉCURITÉ ET PRIVACY À ÉVALUER
+
+Si Supabase est conservé, propose des politiques RLS adaptées.
+
+## 9.1. Public en lecture seule
+
+Le public peut éventuellement lire :
+
+```text
+entities nécessaires aux pages publiques
+matches publics vérifiés ou clairement présentés comme démo
+published_stories avec status = published ou corrected
+story_evidence liée à une story publiée
+comparison_snapshots liés à une story publiée
+public_trace_excerpts avec safe_to_publish = true
+methodology_versions publiées
+```
+
+## 9.2. Privé
+
+Doivent rester privés :
+
+```text
+story_candidates
+trace_private_content
+editorial_reviews
+ai_analysis_runs
+ingest_checkpoints
+ingest_failures
+diffs non modérés
+données d’administration
+secrets
+```
+
+## 9.3. Interdit
+
+Ne jamais permettre :
+
+```text
+écriture publique anonyme sur stories
+écriture publique anonyme sur traces
+écriture publique anonyme sur instabilités
+écriture publique anonyme sur comparaisons
+service role Supabase dans le frontend
+clé Wikimedia privée dans le client
+sortie IA interne visible publiquement
+diff brut non validé affiché automatiquement
+```
+
+## 9.4. Protection des contributeurs
+
+Le produit public ne doit jamais afficher :
+
+* nom utilisateur ;
+* IP ;
+* compte temporaire ;
+* profil individuel ;
+* classement d’auteurs ;
+* origine supposée d’une modification ;
+* carte des auteurs ;
+* historique d’un individu.
+
+Si une distinction technique d’acteurs est nécessaire pour analyser une instabilité, elle devra être minimisée, privée et justifiée ultérieurement. Ne l’implémente pas sans validation spécifique.
+
+---
+
+# 10. WIKIMEDIA, LICENCE ET DONNÉES SPORTIVES
+
+## 10.1. Wikimedia
+
+Avant toute connexion réelle, il faudra vérifier :
+
+* API ou flux utilisés ;
+* politique User-Agent ;
+* attribution des sources ;
+* politique de réutilisation ;
+* licence applicable aux extraits ;
+* limites de requêtes ;
+* gestion responsable des diffs ;
+* exposition ou non de métadonnées de contributeurs.
+
+Pendant la Phase 0, contente-toi d’identifier ce que le legacy utilise et de documenter ce qu’il faudra vérifier.
+
+## 10.2. Diffs réels
+
+Un diff brut peut être dangereux à exposer publiquement.
+
+Prévoir cette règle dans l’architecture :
+
+```text
+RAW DIFF = PRIVÉ PAR DÉFAUT
+PUBLIC EXCERPT = SANITISÉ ET VALIDÉ
+```
+
+## 10.3. Données de match
+
+Wikimedia n’est pas nécessairement la source officielle fiable pour :
+
+* calendrier ;
+* score ;
+* minute d’un événement ;
+* carton ;
+* qualification officielle ;
+* résultat final.
+
+L’architecture doit séparer :
+
+```text
+DONNÉES SPORTIVES OFFICIELLES
+```
+
+et :
+
+```text
+TRACES WIKIPÉDIA
+```
+
+Aucun score ou horaire réel ne doit apparaître comme validé tant qu’une source sportive appropriée n’est pas branchée et documentée.
+
+---
+
+# 11. PERFORMANCE ET SCALABILITÉ
+
+L’ancienne version pouvait avoir un risque de surcharge si chaque navigateur interrogeait lourdement une API à fréquence élevée.
+
+La V2 doit suivre une logique différente.
+
+## 11.1. Pages Magazine
+
+Les pages éditoriales :
+
+```text
+/
+/stories
+/story/[slug]
+/matches
+/match/[slug]
+/entity/[slug]
+/methodology
+```
+
+doivent être :
+
+* cachables ;
+* rapides ;
+* principalement fondées sur des contenus publiés relativement stables ;
+* compatibles avec pré-rendu ou cache selon la stack ;
+* exemptes de polling agressif.
+
+## 11.2. Explorer
+
+Explorer doit charger :
+
+* des stories publiées ;
+* des agrégats de comparaison ;
+* des sujets cartographiés validés ;
+* une timeline publique.
+
+Il ne doit pas charger :
+
+* des milliers de traces ;
+* un flux brut ;
+* des edits entrants.
+
+## 11.3. Observatoire
+
+L’Observatoire réel devra prévoir :
+
+* pagination ;
+* filtres côté serveur ;
+* détail chargé à la demande ;
+* cache raisonnable ;
+* aucun polling agressif par défaut ;
+* éventuellement un refresh manuel ou modéré ;
+* réponses limitées et sécurisées.
+
+## 11.4. Recherche
+
+La recherche réelle devra indexer uniquement :
+
+* stories publiées ;
+* matchs publics ;
+* entités publiques ;
+* traces publiques modérées ;
+* méthodologie publique.
+
+Elle ne doit pas interroger directement des données privées ou brutes.
+
+## 11.5. Worker
+
+Le worker futur devra être testé sur :
+
+* reconnexion ;
+* idempotence ;
+* inserts par lot si pertinent ;
+* reprise après erreur ;
+* checkpoint ;
+* logs ;
+* healthcheck ;
+* replay ;
+* saturation ;
+* pertes silencieuses.
+
+---
+
+# 12. API PUBLIQUE CIBLE À PROPOSER
+
+Ne l’implémente pas encore. Évalue sa pertinence selon la stack réelle et documente-la.
+
+## 12.1. Homepage
+
+```text
+GET /api/public/home
+```
+
+Retourne :
+
+* story publiée mise en avant ;
+* dernières stories publiées ;
+* prochain match public vérifié ;
+* indicateurs éditoriaux publics ;
+* aucun candidat privé ;
+* aucune donnée fictive en mode live.
+
+## 12.2. Histoires
+
+```text
+GET /api/public/stories
+GET /api/public/stories/:slug
+```
+
+Filtres possibles :
+
+* type ;
+* match ;
+* entité ;
+* langue comparée ;
+* date.
+
+Ne retourne que les stories publiques.
+
+## 12.3. Matchs
+
+```text
+GET /api/public/matches
+GET /api/public/matches/:slug
+```
+
+Retourne :
+
+* informations de match vérifiées ou explicitement démo ;
+* statut éditorial ;
+* stories publiées ;
+* périmètre public résumé ;
+* comparaisons publiées ;
+* sources publiques autorisées.
+
+## 12.4. Entités
+
+```text
+GET /api/public/entities/:slug
+```
+
+Retourne :
+
+* entité publique ;
+* articles linguistiques comparés dans des stories publiées ;
+* stories associées ;
+* matchs associés ;
+* matrices validées ;
+* aucun score d’activité brut.
+
+## 12.5. Explorer
+
+```text
+GET /api/public/explorer
+```
+
+Retourne uniquement :
+
+* stories publiées cartographiables ;
+* ancrages géographiques des sujets ;
+* matrice publique de comparaisons ;
+* timeline des stories publiées.
+
+## 12.6. Observatoire
+
+```text
+GET /api/public/observatory/traces
+GET /api/public/observatory/traces/:id
+```
+
+Retourne uniquement :
+
+* traces publiques autorisées ;
+* extraits modérés ;
+* métadonnées nécessaires ;
+* relation éventuelle vers une story ;
+* liens sources autorisés.
+
+Ne retourne jamais :
+
+* contenu brut privé ;
+* identité de contributeur ;
+* IP ;
+* candidat ;
+* sortie IA ;
+* logs internes.
+
+## 12.7. Méthodologie
+
+```text
+GET /api/public/methodology
+```
+
+Optionnel selon la stack. La page peut aussi rester statique si la méthode n’a pas besoin d’être administrée dynamiquement au début.
+
+## 12.8. Recherche
+
+```text
+GET /api/public/search?q=&type=&language=
+```
+
+Recherche uniquement parmi :
+
+* stories publiées ;
+* dossiers match publics ;
+* entités publiques ;
+* traces publiques exposables ;
+* contenus de méthodologie.
+
+Ne recherche jamais parmi :
+
+* candidats privés ;
+* diffs privés ;
+* sorties IA ;
+* contributeurs ;
+* logs worker.
+
+---
+
+# 13. PHASE 0 À EXÉCUTER MAINTENANT
+
+Tu dois maintenant exécuter uniquement les tâches suivantes.
+
+## 13.1. Audit du nouveau frontend
+
+Actions :
+
+1. Inspecter la racine du projet.
+2. Identifier la stack.
+3. Identifier le gestionnaire de paquets.
+4. Lire `package.json`.
+5. Identifier les scripts disponibles.
+6. Identifier le routing.
+7. Rechercher les dix pages attendues.
+8. Inventorier les composants partagés.
+9. Inventorier les fixtures.
+10. Identifier les liens cassés ou placeholders persistants.
+11. Vérifier la gestion des assets/images.
+12. Vérifier la structure mobile au niveau code.
+13. Installer les dépendances si nécessaire.
+14. Exécuter le build.
+15. Exécuter lint/tests s’ils existent.
+16. Documenter les résultats.
+
+## 13.2. Audit legacy en lecture seule
+
+Actions :
+
+1. Vérifier que le chemin existe.
+2. Inspecter sa racine.
+3. Identifier stack, dossiers, scripts et documentation.
+4. Rechercher le worker.
+5. Rechercher les migrations et schémas DB.
+6. Rechercher les API routes.
+7. Rechercher les concepts à risque listés plus haut.
+8. Lire les fichiers importants.
+9. Classer les éléments.
+10. Documenter ce qui peut être récupéré sans réimporter l’ancien produit.
+
+## 13.3. Créer les documents d’audit
+
+Créer le dossier :
+
+```text
+docs/v2/
+```
+
+Puis créer :
+
+```text
+docs/v2/PRODUCT_RULES.md
+docs/v2/FRONTEND_AUDIT.md
+docs/v2/LEGACY_SALVAGE_AUDIT.md
+docs/v2/TARGET_ARCHITECTURE.md
+docs/v2/DATA_MODEL_PROPOSAL.md
+docs/v2/SECURITY_PRIVACY_RULES.md
+docs/v2/PUBLIC_API_PROPOSAL.md
+docs/v2/IMPLEMENTATION_PLAN.md
+```
+
+---
+
+# 14. CONTENU ATTENDU DES DOCUMENTS
+
+## 14.1. `PRODUCT_RULES.md`
+
+Doit contenir :
+
+* nouveau positionnement ;
+* trace ≠ histoire ;
+* plusieurs langues ≠ divergence ;
+* instabilité = même article ;
+* langue ≠ pays ;
+* carte = sujet, jamais contributeur ;
+* chronologie ≠ causalité ;
+* IA assistante, jamais éditrice autonome ;
+* demo ≠ live ;
+* public ≠ privé ;
+* aucune publication automatique non validée.
+
+## 14.2. `FRONTEND_AUDIT.md`
+
+Doit contenir :
+
+* stack détectée ;
+* scripts disponibles ;
+* état du build ;
+* état lint/tests ;
+* arborescence pertinente ;
+* routes réellement présentes ;
+* tableau des dix pages ;
+* composants partagés ;
+* fixtures ;
+* duplications ;
+* liens cassés ;
+* placeholders ;
+* risques de maintenance ;
+* recommandations pour introduire une data layer sans changer la DA.
+
+## 14.3. `LEGACY_SALVAGE_AUDIT.md`
+
+Doit contenir :
+
+* chemin audité ;
+* accessibilité ou non du dossier ;
+* architecture détectée ;
+* worker ;
+* scripts ;
+* migrations ;
+* APIs ;
+* composants anciens ;
+* logique d’activité/scoring ;
+* risques d’intégrité ;
+* risques privacy ;
+* risques performance ;
+* tableau `réutiliser / refactorer / abandonner / vérifier`.
+
+## 14.4. `TARGET_ARCHITECTURE.md`
+
+Doit contenir :
+
+* architecture adaptée à la stack réellement détectée ;
+* schéma des couches ;
+* stratégie demo/live ;
+* stratégie frontend data provider ;
+* stratégie backend public lecture seule ;
+* stratégie Desk privé futur ;
+* stratégie worker ;
+* séparation données publiques/privées ;
+* séparation données sportives/Wikimedia ;
+* recommandations de déploiement.
+
+## 14.5. `DATA_MODEL_PROPOSAL.md`
+
+Doit contenir :
+
+* modèle de tables proposé ;
+* relations ;
+* objets publics ;
+* objets privés ;
+* publication ;
+* preuves ;
+* comparaisons ;
+* instabilités ;
+* ingestion ;
+* corrections ;
+* IA future ;
+* RLS si pertinent ;
+* points à valider avant implémentation.
+
+## 14.6. `SECURITY_PRIVACY_RULES.md`
+
+Doit contenir :
+
+* aucune IP publique ;
+* aucun contributeur exposé ;
+* aucune géolocalisation d’auteur ;
+* diff brut privé par défaut ;
+* extraits publics modérés ;
+* sanitation/XSS ;
+* secrets côté serveur ;
+* interdiction d’écriture publique ;
+* règles IA ;
+* attribution/licence Wikimedia à vérifier ;
+* données sportives officielles à vérifier ;
+* risque de contenus sensibles dans les diffs.
+
+## 14.7. `PUBLIC_API_PROPOSAL.md`
+
+Doit contenir :
+
+* endpoints publics proposés ;
+* contrats approximatifs ;
+* objets retournés ;
+* objets exclus ;
+* pagination ;
+* filtres ;
+* cache ;
+* sécurité ;
+* comportement demo/live ;
+* recherche publique.
+
+## 14.8. `IMPLEMENTATION_PLAN.md`
+
+Doit contenir un plan par phases :
+
+### Phase 1 — Data layer frontend démo/live
+
+* isoler fixtures ;
+* types de domaine ;
+* `PublicDataProvider` ;
+* `DemoPublicDataProvider` ;
+* mode demo/live ;
+* empty states live ;
+* aucune donnée réelle encore.
+
+### Phase 2 — Backend public et base de données
+
+* migrations ;
+* schéma public/privé ;
+* RLS ;
+* APIs lecture seule ;
+* seed contrôlé.
+
+### Phase 3 — Worker Wikimedia fiable
+
+* reprise des briques legacy valides ;
+* ingestion ;
+* watchlists ;
+* checkpoint robuste ;
+* stockage privé ;
+* aucune story automatique.
+
+### Phase 4 — Observatoire sur données contrôlées
+
+* extraits publics modérés ;
+* diffs sûrs ;
+* filtres ;
+* pagination ;
+* attribution.
+
+### Phase 5 — Desk privé minimal
+
+* candidats ;
+* revue ;
+* publication ;
+* correction ;
+* IA éventuelle encadrée.
+
+### Phase 6 — Données réelles et lancement
+
+* sources Wikimedia ;
+* sources sportives ;
+* attribution/licence ;
+* tests de charge ;
+* monitoring ;
+* publication réellement validée.
+
+Pour chaque phase, inclure :
+
+* fichiers/dossiers concernés ;
+* dépendances éventuelles ;
+* risques ;
+* tests nécessaires ;
+* définition de terminé.
+
+---
+
+# 15. LIMITES STRICTES DE LA PHASE 0
+
+Pendant cette phase, tu ne dois pas :
+
+* intégrer Supabase ;
+* créer les migrations réelles ;
+* connecter Wikimedia ;
+* migrer le worker ;
+* remplacer les fixtures ;
+* implémenter le Desk ;
+* brancher une IA ;
+* connecter des données sportives ;
+* modifier massivement la UI ;
+* réécrire les pages ;
+* nettoyer agressivement le frontend ;
+* supprimer du code legacy ;
+* importer des composants anciens ;
+* créer de fausses données live.
+
+Tu peux uniquement :
+
+* auditer ;
+* exécuter le build/lint/tests ;
+* créer les documents `docs/v2/` ;
+* corriger une erreur bloquante mineure indispensable à l’audit, en la documentant.
+
+Puis tu dois t’arrêter et me rendre ton rapport.
+
+---
+
+# 16. FORMAT DE TA RÉPONSE À LA FIN DE LA PHASE 0
+
+Ta réponse finale doit suivre exactement cette structure :
+
+## 1. Résumé exécutif
+
+En 10 à 20 lignes maximum :
+
+* état réel du frontend V2 ;
+* état réel du legacy ;
+* niveau de récupérabilité ;
+* risques principaux ;
+* architecture recommandée ;
+* recommandation pour la Phase 1.
+
+## 2. Stack détectée du frontend AI Studio
+
+Inclure :
+
+* framework ;
+* version ;
+* routing ;
+* styling ;
+* animations ;
+* gestion de données ;
+* scripts ;
+* build/lint/tests ;
+* état Git.
+
+## 3. Pages publiques réellement présentes
+
+Tableau :
+
+| Route attendue | Présente ? | Fonctionne ? | Fichier principal | Données utilisées | Remarques |
+| -------------- | ---------: | -----------: | ----------------- | ----------------- | --------- |
+
+Inclure les dix routes prévues.
+
+## 4. Architecture et composants du frontend
+
+Inclure :
+
+* composants partagés ;
+* fixtures ;
+* duplications ;
+* dette technique ;
+* capacité à introduire une data layer ;
+* points UX ou performance à surveiller.
+
+## 5. Audit réel du legacy
+
+Inclure :
+
+* accès au chemin ;
+* architecture ;
+* worker ;
+* DB ;
+* API ;
+* docs ;
+* sécurité ;
+* performance ;
+* intégrité.
+
+## 6. Tableau de récupération legacy
+
+Tableau :
+
+| Élément legacy | Fichier(s) | Décision | Justification | Risque |
+| -------------- | ---------- | -------- | ------------- | ------ |
+
+## 7. Risques critiques
+
+Séparer :
+
+```text
+INTÉGRITÉ DES DONNÉES
+SÉCURITÉ
+PRIVACY
+PERFORMANCE
+ARCHITECTURE
+PRODUIT / SÉMANTIQUE
+```
+
+## 8. Architecture cible recommandée
+
+Inclure :
+
+* diagramme textuel ;
+* frontend ;
+* provider demo/live ;
+* API publique ;
+* DB ;
+* worker ;
+* Desk privé futur ;
+* sécurité ;
+* déploiement recommandé.
+
+## 9. Documents créés
+
+Lister :
+
+```text
+docs/v2/PRODUCT_RULES.md
+docs/v2/FRONTEND_AUDIT.md
+docs/v2/LEGACY_SALVAGE_AUDIT.md
+docs/v2/TARGET_ARCHITECTURE.md
+docs/v2/DATA_MODEL_PROPOSAL.md
+docs/v2/SECURITY_PRIVACY_RULES.md
+docs/v2/PUBLIC_API_PROPOSAL.md
+docs/v2/IMPLEMENTATION_PLAN.md
+```
+
+Pour chacun, fournir une phrase de résumé.
+
+## 10. Plan précis de Phase 1
+
+Inclure :
+
+* objectifs ;
+* fichiers susceptibles d’être modifiés ;
+* stratégie de refactor ;
+* risques ;
+* tests ;
+* résultat attendu.
+
+## 11. Blocages ou décisions attendues de ma part
+
+Lister clairement :
+
+* chemins inaccessibles ;
+* build cassé ;
+* choix d’architecture ;
+* choix de BDD ;
+* décision de conserver ou non le worker legacy ;
+* décisions nécessitant mon approbation.
+
+## 12. Fichiers modifiés pendant la Phase 0
+
+Lister chaque fichier créé ou modifié.
+
+Si tu n’as modifié que la documentation, le dire explicitement.
+
+---
+
+# 17. RÈGLES DE COMMUNICATION PENDANT TOUTE LA MISSION
+
+* Ne prétends jamais avoir lu un fichier non ouvert.
+* Ne prétends jamais avoir exécuté une commande non exécutée.
+* Ne prétends jamais que le frontend est complet uniquement sur la base de ce prompt : vérifie-le.
+* Ne suppose pas que l’ancien backend doit être conservé.
+* Ne recycle pas les anciens concepts produit abandonnés.
+* N’expose aucun secret.
+* Ne copie aucun `.env`.
+* Ne branche aucune donnée réelle sans validation.
+* Ne publie aucune story automatiquement.
+* Ne considère jamais plusieurs langues actives comme une tension.
+* Ne considère jamais une langue comme un pays.
+* Ne cartographie jamais des contributeurs.
+* Ne transforme jamais un diff brut non modéré en contenu public.
+* N’introduis aucun faux live.
+* Préserve la nouvelle direction frontend V2.
+* Lorsque tu identifies une incertitude, indique-la clairement.
+* Lorsque tu recommandes une architecture, explique pourquoi elle convient à la stack réellement détectée.
+
+---
+
+# 18. RÉSUMÉ OPÉRATIONNEL DE LA MISSION
+
+Le frontend AI Studio est la nouvelle expérience publique de référence, avec dix pages prévues :
+
+```text
+/
+/story/demo-divergence
+/match/demo-france-belgique
+/stories
+/matches
+/entity/demo-japan-goalkeeper
+/explorer
+/observatoire
+/methodology
+/search
+```
+
+L’ancien projet :
+
+```text
+C:\Users\thoma\revision90-worker
+```
+
+est uniquement une source technique potentielle à inspecter en lecture seule.
+
+La cible produit est :
+
+```text
+Wikimedia produit des traces.
+Le backend les stocke de façon fiable.
+Le Desk privé aide à les comprendre et à les valider.
+Le Magazine public publie uniquement les histoires solides.
+Explorer visualise uniquement les histoires publiées.
+L’Observatoire montre uniquement les preuves publiques autorisées.
+La Méthodologie expose les règles et limites.
+La Recherche retrouve uniquement les contenus publics.
+```
+
+Commence maintenant uniquement par la Phase 0 :
+audit réel, documents d’architecture et plan de migration.
+
+Ne commence aucune intégration backend avant ma validation.
+
+```
+
+## Après la réponse de Claude
+
+Envoie-moi directement :
+
+- son résumé exécutif ;
+- son tableau des 10 routes ;
+- son audit du legacy ;
+- les éléments qu’il veut récupérer ;
+- son architecture cible ;
+- son plan de Phase 1.
+
+Je pourrai vérifier qu’il ne repart pas vers l’ancien dashboard sous couvert de « réutiliser le backend ».
+```
