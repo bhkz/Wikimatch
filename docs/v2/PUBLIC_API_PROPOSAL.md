@@ -15,6 +15,12 @@ Proposition d'API publique en lecture seule. **À ne pas implémenter en Phase 0
 - Anonyme uniquement : aucun token, aucun cookie. CORS large (`Access-Control-Allow-Origin: *`).
 - Mode `demo` vs `live` : géré côté frontend via `PublicDataProvider` ; l'API ne sert **que** des données publiques **réelles**. Les fixtures restent côté frontend en mode `demo` (cf. [[TARGET_ARCHITECTURE]] §3).
 
+**Implémentation P2 initiale (2026-05-26)** : les endpoints Vercel
+`api/public/v1/*` lisent `public_page_snapshots.page_key` dans Supabase.
+C'est un pont volontaire entre les contrats frontend riches et le modèle
+normalisé. Il sera remplacé progressivement par des projections SQL / Desk
+publication workflow, sans changer les routes publiques.
+
 ## 1. Homepage
 
 ```

@@ -8,10 +8,12 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "seed:snapshots": "tsx scripts/seed-public-page-snapshots.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
+    "@supabase/supabase-js": "^2.106.2",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
     "dotenv": "^17.2.3",

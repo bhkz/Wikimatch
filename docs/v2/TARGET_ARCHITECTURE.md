@@ -142,11 +142,9 @@ Empty states honnêtes obligatoires en mode `live`. Aucune fixture ne doit fuite
 
 - **PostgreSQL via Supabase** (cohérent avec le legacy, gratuit en Phase 0, RLS natif, edge functions pour l'API publique éventuellement).
 - **Node 20+ TypeScript** pour worker (cohérent avec le legacy).
-- **API publique** : deux options à arbitrer en Phase 2.
-  - **(a)** PostgREST / Supabase auto-generated APIs sous RLS strict.
-  - **(b)** Couche API HTTP minimale (Edge Functions Supabase, Cloud Run, ou Express) qui appelle Postgres en service-role et applique les contrats.
-- **Hébergement worker** : Railway/Render/Cloud Run avec healthcheck (existe déjà côté legacy).
-- **Hébergement frontend** : Vercel ou hôte statique (le build Vite produit une SPA), avec rewrite SPA pour `react-router-dom` BrowserRouter.
+- **API publique** : Vercel Functions `api/public/v1/*`, lecture seule, service-role côté serveur uniquement.
+- **Hébergement worker** : Render Background Worker avec healthcheck (refactor du legacy).
+- **Hébergement frontend** : Vercel (le build Vite produit une SPA), avec rewrite SPA pour `react-router-dom` BrowserRouter.
 
 ### 4.2 Pourquoi cette stack
 
@@ -221,7 +219,7 @@ Voir [[SECURITY_PRIVACY_RULES]] pour le détail. Résumé :
 | Composant | Cible | Statut | Variables d'env requises |
 | --------- | ----- | ------ | ------------------------ |
 | Frontend V2 (Vite SPA) | **Vercel** + CDN | ✅ confirmé | `VITE_DATA_MODE` (`demo`/`live`), `VITE_PUBLIC_API_BASE`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
-| API publique | **Supabase Edge Functions** (reco) — Vercel Functions en seconde intention | ✅ confirmé (provider), 🟡 forme à arbitrer P2 | clé Supabase service-role côté Function uniquement, jamais côté client |
+| API publique | **Vercel Functions** `api/public/v1/*` | ✅ confirmé P2 | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` côté Function uniquement, jamais côté client |
 | Base Postgres | **Supabase** (3 projets : dev/staging/prod, séparés du legacy) | ✅ confirmé | URL + service-role côté worker + auth pour le Desk |
 | Worker | **Render Background Worker** (`Dockerfile` legacy réutilisable) | ✅ confirmé | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `WIKIMEDIA_USER_AGENT`, `LOG_LEVEL` |
 | Desk privé (P5) | Vercel (sous-domaine `desk.…`) + auth Supabase | 🟡 à confirmer P5 | TBD |

@@ -82,17 +82,18 @@ Plan par phases. Chaque phase a un périmètre, une définition de terminé (DoD
 - Migrations SQL : tables [[DATA_MODEL_PROPOSAL]] §1–§15.
 - Vues publiques : `v_public_stories`, `v_public_observatory_traces`, etc. (DATA_MODEL §16).
 - Policies RLS : [[SECURITY_PRIVACY_RULES]] §9.
-- API publique : Edge Functions Supabase ou Vercel Functions implémentant [[PUBLIC_API_PROPOSAL]] §1–§8.
-- Seed contrôlé : insertion de la story `demo-divergence` réelle, du match `demo-france-belgique`, de l'entité `demo-japan-goalkeeper`, etc. — basé sur les fixtures existantes mais en base.
+- API publique : Vercel Functions `api/public/v1/*` implémentant [[PUBLIC_API_PROPOSAL]] §1–§8.
+- Seed contrôlé : `public_page_snapshots` alimenté par `npm run seed:snapshots` depuis les fixtures existantes, puis remplacé progressivement par les snapshots produits par le Desk.
 - Variables d'env : `SUPABASE_URL`, `SUPABASE_ANON_KEY` (frontend), `SUPABASE_SERVICE_KEY` (backend), `VITE_PUBLIC_API_BASE`.
 
 **Stratégie :**
 1. Créer un projet Supabase V2 dédié.
-2. Appliquer les migrations dans l'ordre `DATA_MODEL` §1 → §15.
+2. Appliquer les migrations Supabase dans l'ordre `202605260001_*` puis `202605260002_*`.
 3. Activer RLS sur toutes les tables. Ajouter les policies `published`/`safe_to_publish`.
-4. Implémenter les endpoints `/api/public/v1/*` un par un, dans l'ordre de la `PublicDataProvider`.
+4. Implémenter les endpoints Vercel `/api/public/v1/*` un par un, dans l'ordre de la `PublicDataProvider`.
 5. Câbler `LivePublicDataProvider` côté frontend pour chaque endpoint implémenté.
-6. Tests d'intégration : requêtes anonymes refusées sur tables privées (cf. SECURITY_PRIVACY §9).
+6. Seed initial : `npm run seed:snapshots`, puis smoke test `VITE_DATA_MODE=live`.
+7. Tests d'intégration : requêtes anonymes refusées sur tables privées (cf. SECURITY_PRIVACY §9).
 
 **Risques :**
 - Mauvaise policy RLS exposant des candidats → tests d'intégration obligatoires AVANT merge.
@@ -228,7 +229,7 @@ Plan par phases. Chaque phase a un périmètre, une définition de terminé (DoD
 | - | ----- | ------ |
 | 1 | Initialiser un Git dans le dossier V2 actuel ? (recommandé) | ✅ fait (branche `v2/audit-and-architecture`) |
 | 2 | Conserver Supabase comme base V2 ? | ✅ confirmé |
-| 3 | API publique : Edge Functions Supabase vs Vercel Functions vs PostgREST ? | 🟡 reco Supabase Edge Functions, à arbitrer en début P2 |
+| 3 | API publique : Edge Functions Supabase vs Vercel Functions vs PostgREST ? | ✅ confirmé : Vercel Functions pour l'API publique V2 initiale ; Supabase reste la base/RLS |
 | 4 | Conserver le worker legacy (refactor) ou repartir from-scratch ? | ✅ refactor confirmé (cf. [[LEGACY_SALVAGE_AUDIT]] §3) |
 | 5 | Source sportive officielle | 🟡 ouvert ; Wikipedia (page WC2026) en bootstrap P3 (cf. [[DATA_MODEL_PROPOSAL]] §4) |
 | 6 | Domaine de production / sous-domaine du Desk | 🟡 ouvert P5 |
