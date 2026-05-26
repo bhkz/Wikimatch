@@ -1,22 +1,16 @@
 import type {
-  ExplorerData,
-  ExplorerFilters,
+  EntityDetailPageData,
+  ExplorerPageData,
   HomePageData,
-  MatchFilters,
-  MethodologyData,
-  ObservatoryFilters,
+  MatchDetailPageData,
+  MatchesCalendarPageData,
+  MethodologyPageData,
+  ObservatoryPageData,
   PublicDataMode,
   PublicDataProvider,
-  PublicEntityDetail,
-  PublicMatchDetail,
-  PublicMatchSummary,
-  PublicSearchFilters,
-  PublicSearchResult,
-  PublicTraceDetail,
-  PublicTraceSummary,
-  PublishedStoryDetail,
-  PublishedStorySummary,
-  StoryFilters,
+  SearchPageData,
+  StoriesArchivePageData,
+  StoryDetailPageData,
 } from "./PublicDataProvider";
 import { NotImplementedError } from "./PublicDataProvider";
 
@@ -36,50 +30,39 @@ export class LivePublicDataProvider implements PublicDataProvider {
     throw new NotImplementedError("getHomePageData", this.mode);
   }
 
-  async getStories(_filters?: StoryFilters): Promise<PublishedStorySummary[]> {
-    throw new NotImplementedError("getStories", this.mode);
-  }
-
-  async getStoryBySlug(_slug: string): Promise<PublishedStoryDetail | null> {
+  async getStoryBySlug(_slug: string): Promise<StoryDetailPageData | null> {
     throw new NotImplementedError("getStoryBySlug", this.mode);
   }
 
-  async getMatches(_filters?: MatchFilters): Promise<PublicMatchSummary[]> {
-    throw new NotImplementedError("getMatches", this.mode);
-  }
-
-  async getMatchBySlug(_slug: string): Promise<PublicMatchDetail | null> {
+  async getMatchBySlug(_slug: string): Promise<MatchDetailPageData | null> {
     throw new NotImplementedError("getMatchBySlug", this.mode);
   }
 
-  async getEntityBySlug(_slug: string): Promise<PublicEntityDetail | null> {
+  async getEntityBySlug(_slug: string): Promise<EntityDetailPageData | null> {
     throw new NotImplementedError("getEntityBySlug", this.mode);
   }
 
-  async getExplorerData(_filters?: ExplorerFilters): Promise<ExplorerData> {
-    throw new NotImplementedError("getExplorerData", this.mode);
+  async getMatchesCalendarPageData(): Promise<MatchesCalendarPageData> {
+    throw new NotImplementedError("getMatchesCalendarPageData", this.mode);
   }
 
-  async getObservatoryTraces(
-    _filters?: ObservatoryFilters,
-  ): Promise<PublicTraceSummary[]> {
-    throw new NotImplementedError("getObservatoryTraces", this.mode);
+  async getStoriesArchivePageData(): Promise<StoriesArchivePageData> {
+    throw new NotImplementedError("getStoriesArchivePageData", this.mode);
   }
 
-  async getObservatoryTraceById(
-    _id: string,
-  ): Promise<PublicTraceDetail | null> {
-    throw new NotImplementedError("getObservatoryTraceById", this.mode);
+  async getExplorerPageData(): Promise<ExplorerPageData> {
+    throw new NotImplementedError("getExplorerPageData", this.mode);
   }
 
-  async getMethodologyData(): Promise<MethodologyData> {
-    throw new NotImplementedError("getMethodologyData", this.mode);
+  async getObservatoryPageData(): Promise<ObservatoryPageData> {
+    throw new NotImplementedError("getObservatoryPageData", this.mode);
   }
 
-  async searchPublicContent(
-    _query: string,
-    _filters?: PublicSearchFilters,
-  ): Promise<PublicSearchResult[]> {
-    throw new NotImplementedError("searchPublicContent", this.mode);
+  async getMethodologyPageData(): Promise<MethodologyPageData> {
+    throw new NotImplementedError("getMethodologyPageData", this.mode);
+  }
+
+  async getSearchPageData(): Promise<SearchPageData> {
+    throw new NotImplementedError("getSearchPageData", this.mode);
   }
 }

@@ -1,8 +1,12 @@
 import { motion } from "motion/react";
 import SectionLabel from "../SectionLabel";
-import { publicationCriteria } from "../../mockMethodologyData";
+import type { PublicationCriterion } from "../../types";
 
-export default function PublicationCriteriaSection() {
+export default function PublicationCriteriaSection({
+  publicationCriteria,
+}: {
+  publicationCriteria: PublicationCriterion[];
+}) {
   return (
     <section className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10">
       <div className="w-full max-w-screen-xl mx-auto flex flex-col gap-16">

@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import SectionLabel from "../SectionLabel";
-import { methodologyFaq } from "../../mockMethodologyData";
+import type { MethodologyFAQItem } from "../../types";
 
-export default function MethodologyFAQ() {
+export default function MethodologyFAQ({
+  methodologyFaq,
+}: {
+  methodologyFaq: MethodologyFAQItem[];
+}) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   const toggleOpen = (id: string) => {

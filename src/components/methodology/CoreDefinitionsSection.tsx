@@ -1,8 +1,12 @@
 import { motion } from "motion/react";
 import SectionLabel from "../SectionLabel";
-import { methodologyDefinitions } from "../../mockMethodologyData";
+import type { MethodologyDefinition } from "../../types";
 
-export default function CoreDefinitionsSection() {
+export default function CoreDefinitionsSection({
+  methodologyDefinitions,
+}: {
+  methodologyDefinitions: MethodologyDefinition[];
+}) {
   return (
     <section className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10">
       <div className="w-full max-w-screen-xl mx-auto flex flex-col gap-16">

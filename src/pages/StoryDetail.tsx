@@ -13,31 +13,46 @@ import StorySourcesSection from "../components/story/StorySourcesSection";
 import RelatedMatchPoster from "../components/story/RelatedMatchPoster";
 import RelatedStoriesSection from "../components/story/RelatedStoriesSection";
 import StoryFinalCTA from "../components/story/StoryFinalCTA";
-
-import { demoDivergenceStory } from "../mockStoryData";
+import { dataProvider, useAsyncData } from "../data";
 
 export default function StoryDetail() {
   const { slug } = useParams();
 
-  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // For this prototype, we only have one complete story
-  if (slug !== "demo-divergence") {
+  const state = useAsyncData(
+    () => dataProvider.getStoryBySlug(slug ?? ""),
+    [slug],
+  );
+
+  if (state.status === "loading") {
+    return (
+      <div className="min-h-screen bg-cream">
+        <SiteHeader />
+        <div className="flex items-center justify-center min-h-[60vh] font-mono text-[10px] uppercase tracking-widest text-navy/40 pt-32">
+          Chargement…
+        </div>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  if (state.status === "error" || state.data === null) {
+    // Slug inconnu en mode demo → on renvoie vers la home, comportement
+    // historique préservé.
     return <Navigate to="/" replace />;
   }
 
-  const story = demoDivergenceStory;
+  const { story } = state.data;
 
   return (
     <div className="min-h-screen bg-cream selection:bg-blue-electric selection:text-white">
       <SiteHeader />
       <ReadingProgressBar category={story.categoryLabel} />
-      
+
       <main className="relative pt-[72px]">
-        {/* Mobile structural order matches the desktop layout conceptually but CSS flex/grid handles the layout */}
         <StoryHero story={story} />
         <StoryExecutiveSummary story={story} />
         <LanguageComparison story={story} />

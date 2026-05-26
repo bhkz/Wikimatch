@@ -12,32 +12,49 @@ import MinorTraceExplanationSection from "../components/observatoire/MinorTraceE
 import ObservatoryPrivacySection from "../components/observatoire/ObservatoryPrivacySection";
 import PublicVsPrivateSection from "../components/observatoire/PublicVsPrivateSection";
 import ObservatoryFinalCTA from "../components/observatoire/ObservatoryFinalCTA";
-
-import {
-  observatoryStats,
-  publicPipelineSteps,
-  trackedArticles,
-  publicTraces,
-  featuredSourceChain
-} from "../mockObservatoryData";
+import { dataProvider, useAsyncData } from "../data";
 
 export default function Observatory() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  const state = useAsyncData(() => dataProvider.getObservatoryPageData(), []);
+
+  if (state.status !== "ready") {
+    return (
+      <div className="min-h-screen bg-cream">
+        <SiteHeader />
+        <div className="flex items-center justify-center min-h-[60vh] font-mono text-[10px] uppercase tracking-widest text-navy/40 pt-32">
+          {state.status === "loading"
+            ? "Chargement…"
+            : `Données indisponibles : ${state.error.message}`}
+        </div>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  const {
+    stats,
+    pipelineSteps,
+    trackedArticles,
+    traces,
+    sourceChain,
+  } = state.data;
+
   return (
     <div className="min-h-screen bg-cream selection:bg-blue-electric selection:text-white pb-0">
       <SiteHeader />
-      
+
       <main className="relative pt-[72px]">
          <ObservatoryHero />
          <ObservatoryScopeStatement />
-         <ObservatoryStatsStrip stats={observatoryStats} />
-         <PublicPipelineSection steps={publicPipelineSteps} />
+         <ObservatoryStatsStrip stats={stats} />
+         <PublicPipelineSection steps={pipelineSteps} />
          <TrackedArticlesSection articles={trackedArticles} />
-         <ObservatoryTraceBrowser traces={publicTraces} />
-         <StorySourceChainSection chain={featuredSourceChain} />
+         <ObservatoryTraceBrowser traces={traces} />
+         <StorySourceChainSection chain={sourceChain} />
          <MinorTraceExplanationSection />
          <ObservatoryPrivacySection />
          <PublicVsPrivateSection />

@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom";
 import { useCustomSearch } from "./SearchContext";
-import { searchSuggestions } from "../../mockSearchData";
 
 export default function SearchEmptyState() {
-  const { setQuery, clearSearch } = useCustomSearch();
+  const {
+    setQuery,
+    clearSearch,
+    suggestions: searchSuggestions,
+  } = useCustomSearch();
 
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 md:px-8 text-center border border-dashed border-white/20 mt-8">

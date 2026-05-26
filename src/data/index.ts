@@ -20,9 +20,19 @@ export const dataProvider: PublicDataProvider =
     : new DemoPublicDataProvider();
 
 export type {
+  EntityDetailPageData,
+  ExplorerPageData,
+  ExplorerUnmappedStory,
   HomePageData,
+  MatchDetailPageData,
+  MatchesCalendarPageData,
+  MethodologyPageData,
+  ObservatoryPageData,
   PublicDataMode,
   PublicDataProvider,
+  SearchPageData,
+  StoriesArchivePageData,
+  StoryDetailPageData,
 } from "./PublicDataProvider";
 export { NotImplementedError } from "./PublicDataProvider";
 export { useAsyncData } from "./usePublicData";

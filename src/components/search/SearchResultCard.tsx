@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { PublicSearchResult } from "../../mockSearchData";
+import type { PublicSearchResult } from "../../mockSearchData";
 
 export default function SearchResultCard({
   item,

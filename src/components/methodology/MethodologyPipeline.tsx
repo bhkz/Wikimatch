@@ -1,9 +1,13 @@
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import SectionLabel from "../SectionLabel";
-import { methodologyPipeline } from "../../mockMethodologyData";
+import type { MethodologyPipelineStep } from "../../types";
 
-export default function MethodologyPipeline() {
+export default function MethodologyPipeline({
+  methodologyPipeline,
+}: {
+  methodologyPipeline: MethodologyPipelineStep[];
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,

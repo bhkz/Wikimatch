@@ -1,8 +1,8 @@
 import { createContext, useState, useContext, useMemo, ReactNode } from "react";
-import {
+import type {
   PublicSearchResult,
   SearchFilterType,
-  publicSearchResults,
+  SearchSuggestion,
 } from "../../mockSearchData";
 
 interface SearchContextType {
@@ -15,11 +15,23 @@ interface SearchContextType {
   results: PublicSearchResult[];
   searchState: "idle" | "results";
   clearSearch: () => void;
+  /** All public results available in the current data mode. Read-only. */
+  allResults: PublicSearchResult[];
+  /** Query suggestions surfaced in the Hero / EmptyState. Read-only. */
+  suggestions: SearchSuggestion[];
 }
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
-export function CustomSearchProvider({ children }: { children: ReactNode }) {
+export function CustomSearchProvider({
+  children,
+  allResults,
+  suggestions,
+}: {
+  children: ReactNode;
+  allResults: PublicSearchResult[];
+  suggestions: SearchSuggestion[];
+}) {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<SearchFilterType>("all");
   const [activeLang, setActiveLang] = useState<string | null>(null);
@@ -34,7 +46,7 @@ export function CustomSearchProvider({ children }: { children: ReactNode }) {
 
     const lowerQuery = query.toLowerCase();
 
-    return publicSearchResults.filter((res) => {
+    return allResults.filter((res) => {
       // 1. Text match
       const textMatch =
         res.title.toLowerCase().includes(lowerQuery) ||
@@ -58,7 +70,7 @@ export function CustomSearchProvider({ children }: { children: ReactNode }) {
 
       return true;
     });
-  }, [query, activeFilter, activeLang, searchState]);
+  }, [query, activeFilter, activeLang, searchState, allResults]);
 
   const clearSearch = () => {
     setQuery("");
@@ -78,6 +90,8 @@ export function CustomSearchProvider({ children }: { children: ReactNode }) {
         results,
         searchState,
         clearSearch,
+        allResults,
+        suggestions,
       }}
     >
       {children}

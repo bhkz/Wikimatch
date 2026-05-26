@@ -2,11 +2,16 @@ import { motion } from "motion/react";
 import AnimatedTextReveal from "../AnimatedTextReveal";
 import { useCustomSearch } from "./SearchContext";
 import { Search } from "lucide-react";
-import { searchSuggestions } from "../../mockSearchData";
 
 export default function SearchHero() {
-  const { query, setQuery, searchState, clearSearch, setActiveFilter } =
-    useCustomSearch();
+  const {
+    query,
+    setQuery,
+    searchState,
+    clearSearch,
+    setActiveFilter,
+    suggestions: searchSuggestions,
+  } = useCustomSearch();
 
   const handleSuggestionClick = (queryVal: string, filterVal?: string) => {
     setQuery(queryVal);

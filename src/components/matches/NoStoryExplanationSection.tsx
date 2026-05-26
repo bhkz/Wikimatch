@@ -1,13 +1,17 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import NoStoryMatchCard from "./cards/NoStoryMatchCard";
-import { featuredMatch } from "../../mockMatchesData";
+import type { TrackedMatchCard } from "../../types";
 
-export default function NoStoryExplanationSection() {
+export default function NoStoryExplanationSection({
+  baseMatch,
+}: {
+  baseMatch: TrackedMatchCard;
+}) {
 
   // Create a fake match for the example
   const exampleMatch = {
-    ...featuredMatch,
+    ...baseMatch,
     id: "demo-canada-ghana-example",
     dateLabel: "29 JUIN 2026",
     timeLabel: "TERMINÉ",

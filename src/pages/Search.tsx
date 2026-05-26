@@ -1,5 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useEffect } from "react";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import SearchHero from "../components/search/SearchHero";
@@ -16,6 +15,7 @@ import {
   CustomSearchProvider,
   useCustomSearch,
 } from "../components/search/SearchContext";
+import { dataProvider, useAsyncData } from "../data";
 
 function SearchContent() {
   const { query, results, searchState } = useCustomSearch();
@@ -26,7 +26,6 @@ function SearchContent() {
 
   return (
     <div className="min-h-screen bg-navy text-white selection:bg-blue-electric selection:text-white flex flex-col pt-20">
-      {/* Mobile/Desktop Hero changes depending on search state */}
       <SearchHero />
 
       {searchState === "idle" ? (
@@ -81,10 +80,29 @@ function SearchContent() {
 }
 
 export default function Search() {
+  const state = useAsyncData(() => dataProvider.getSearchPageData(), []);
+
+  if (state.status !== "ready") {
+    return (
+      <>
+        <SiteHeader />
+        <div className="min-h-screen bg-navy text-white flex items-center justify-center pt-20 font-mono text-[10px] uppercase tracking-widest text-white/40">
+          {state.status === "loading"
+            ? "Chargement…"
+            : `Données indisponibles : ${state.error.message}`}
+        </div>
+        <SiteFooter />
+      </>
+    );
+  }
+
   return (
     <>
       <SiteHeader />
-      <CustomSearchProvider>
+      <CustomSearchProvider
+        allResults={state.data.allResults}
+        suggestions={state.data.suggestions}
+      >
         <SearchContent />
       </CustomSearchProvider>
       <SiteFooter />

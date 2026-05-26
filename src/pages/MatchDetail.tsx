@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import DemoStateSwitcher from "../components/match/DemoStateSwitcher";
@@ -14,25 +14,47 @@ import TrackedSubjectsSection from "../components/match/TrackedSubjectsSection";
 import MatchSourcesSection from "../components/match/MatchSourcesSection";
 import MatchShareCardPreview from "../components/match/MatchShareCardPreview";
 import MatchFinalCTA from "../components/match/MatchFinalCTA";
-
-import { 
-  demoMatch, 
-  demoRecap, 
-  matchStories,
-  matchTimeline,
-  matchComparison,
-  demoInstability,
-  trackedSubjects
-} from "../mockMatchData";
 import { MatchPageState } from "../types";
+import { dataProvider, useAsyncData } from "../data";
 
 export default function MatchDetail() {
+  const { slug } = useParams();
   const [matchState, setMatchState] = useState<MatchPageState>("post_match");
 
-  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const state = useAsyncData(
+    () => dataProvider.getMatchBySlug(slug ?? ""),
+    [slug],
+  );
+
+  if (state.status === "loading") {
+    return (
+      <div className="min-h-screen bg-cream">
+        <SiteHeader />
+        <div className="flex items-center justify-center min-h-[60vh] font-mono text-[10px] uppercase tracking-widest text-navy/40 pt-32">
+          Chargement…
+        </div>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  if (state.status === "error" || state.data === null) {
+    return <Navigate to="/" replace />;
+  }
+
+  const {
+    match: demoMatch,
+    recap: demoRecap,
+    stories: matchStories,
+    timeline: matchTimeline,
+    comparison: matchComparison,
+    instability: demoInstability,
+    trackedSubjects,
+  } = state.data;
 
   // Create a copy of the match object with the current state applied
   const currentMatch = { ...demoMatch, state: matchState };
@@ -40,13 +62,13 @@ export default function MatchDetail() {
   return (
     <div className="min-h-screen bg-cream selection:bg-blue-electric selection:text-white pb-32 md:pb-0">
       <SiteHeader />
-      
+
       {/* State Switcher for Demo Purposes */}
       <DemoStateSwitcher activeState={matchState} onChange={setMatchState} />
 
       <main className="relative pt-[124px] md:pt-[72px]">
         <MatchHero match={currentMatch} />
-        
+
         {matchState === "post_match" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             <MatchEditorialRecap recap={demoRecap} />
@@ -64,7 +86,7 @@ export default function MatchDetail() {
 
         {matchState === "live" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 bg-cream min-h-screen pb-24">
-            
+
             {/* Live Observation Banner */}
             <div className="w-full bg-navy text-white px-4 md:px-8 py-8 border-b-4 border-red-signal shadow-inner">
                <div className="max-w-screen-xl mx-auto flex flex-col md:flex-row gap-8 items-start md:items-center justify-between">
@@ -131,7 +153,7 @@ export default function MatchDetail() {
         {matchState === "pre_match" && (
            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 bg-cream min-h-screen">
              <TrackedSubjectsSection subjects={trackedSubjects} />
-             
+
              <section className="py-24 px-4 md:px-8 max-w-screen-xl mx-auto">
                <h2 className="font-display text-4xl sm:text-5xl uppercase text-navy mb-12">CE QUE WIKIMATCH CHERCHERA</h2>
                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

@@ -1,6 +1,10 @@
-import { methodologyVersions } from "../../mockMethodologyData";
+import type { MethodologyVersionEntry } from "../../types";
 
-export default function CorrectionsAndVersioningSection() {
+export default function CorrectionsAndVersioningSection({
+  methodologyVersions,
+}: {
+  methodologyVersions: MethodologyVersionEntry[];
+}) {
   const handleAlert = () =>
     alert("Le canal de correction sera connecté après stabilisation de la V2.");
   const handleSourceAlert = () =>

@@ -1,8 +1,12 @@
 import { motion } from "motion/react";
 import SectionLabel from "../SectionLabel";
-import { methodologyLimitations } from "../../mockMethodologyData";
+import type { MethodologyLimitation } from "../../types";
 
-export default function MethodologyLimitationsSection() {
+export default function MethodologyLimitationsSection({
+  methodologyLimitations,
+}: {
+  methodologyLimitations: MethodologyLimitation[];
+}) {
   return (
     <section className="py-24 px-4 md:px-8 bg-white border-b border-navy/10 relative">
       <div className="w-full max-w-screen-xl mx-auto flex flex-col gap-16">

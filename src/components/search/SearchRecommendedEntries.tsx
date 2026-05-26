@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom";
-import { publicSearchResults } from "../../mockSearchData";
+import { useCustomSearch } from "./SearchContext";
 import SearchResultCard from "./SearchResultCard";
 
 export default function SearchRecommendedEntries() {
-  const recommendedItems = publicSearchResults.filter(
+  const { allResults } = useCustomSearch();
+  const recommendedItems = allResults.filter(
     (res) =>
       res.id === "result-story-divergence" ||
       res.id === "result-match-fr-bel" ||

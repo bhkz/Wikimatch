@@ -1,8 +1,12 @@
 import { motion } from "motion/react";
 import SectionLabel from "../SectionLabel";
-import { privacyPrinciples } from "../../mockMethodologyData";
+import type { MethodologyPrivacyPrinciple } from "../../types";
 
-export default function PrivacyPrinciplesSection() {
+export default function PrivacyPrinciplesSection({
+  privacyPrinciples,
+}: {
+  privacyPrinciples: MethodologyPrivacyPrinciple[];
+}) {
   return (
     <section className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10">
       <div className="w-full max-w-screen-xl mx-auto flex flex-col gap-16">

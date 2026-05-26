@@ -1,9 +1,6 @@
 import { useEffect } from "react";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
-import AnimatedTextReveal from "../components/AnimatedTextReveal";
-import DemoBadge from "../components/DemoBadge";
-// Next components will be imported here
 import MethodologyHero from "../components/methodology/MethodologyHero";
 import MethodologyInternalNav from "../components/methodology/MethodologyInternalNav";
 import CoreDefinitionsSection from "../components/methodology/CoreDefinitionsSection";
@@ -21,61 +18,90 @@ import CorrectionsAndVersioningSection from "../components/methodology/Correctio
 import MethodologyFAQ from "../components/methodology/MethodologyFAQ";
 import MethodologyFinalCTA from "../components/methodology/MethodologyFinalCTA";
 import ReadingProgressBar from "../components/methodology/ReadingProgressBar";
+import { dataProvider, useAsyncData } from "../data";
 
 export default function Methodology() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  const state = useAsyncData(() => dataProvider.getMethodologyPageData(), []);
+
+  if (state.status !== "ready") {
+    return (
+      <div className="min-h-screen bg-cream">
+        <SiteHeader />
+        <div className="flex items-center justify-center min-h-[60vh] font-mono text-[10px] uppercase tracking-widest text-navy/40 pt-32">
+          {state.status === "loading"
+            ? "Chargement…"
+            : `Données indisponibles : ${state.error.message}`}
+        </div>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  const {
+    definitions,
+    pipeline,
+    comparisonRules,
+    publicationCriteria,
+    aiRules,
+    privacyPrinciples,
+    limitations,
+    faq,
+    versions,
+  } = state.data;
+
   return (
     <div className="min-h-screen bg-cream selection:bg-blue-electric selection:text-white">
       <SiteHeader />
       <ReadingProgressBar />
-      
+
       <main className="flex flex-col w-full bg-cream min-h-screen">
         <MethodologyHero />
         <MethodologyInternalNav />
-        
+
         <div id="methodology-definitions">
-          <CoreDefinitionsSection />
+          <CoreDefinitionsSection methodologyDefinitions={definitions} />
         </div>
-        
+
         <div id="methodology-pipeline">
-          <MethodologyPipeline />
+          <MethodologyPipeline methodologyPipeline={pipeline} />
         </div>
-        
+
         <div id="methodology-publication">
-          <PublicationCriteriaSection />
+          <PublicationCriteriaSection publicationCriteria={publicationCriteria} />
           <StoryTypesMethodologySection />
         </div>
-        
+
         <div id="methodology-comparison">
-          <LanguageIsNotCountrySection />
+          <LanguageIsNotCountrySection comparisonRules={comparisonRules} />
           <ArticleInstabilityMethodSection />
           <GeographyMethodSection />
         </div>
-        
+
         <div id="methodology-ai">
-          <AiGovernanceSection />
+          <AiGovernanceSection aiRules={aiRules} />
         </div>
-        
+
         <div id="methodology-privacy">
-          <PrivacyPrinciplesSection />
+          <PrivacyPrinciplesSection privacyPrinciples={privacyPrinciples} />
         </div>
-        
+
         <div id="methodology-limitations">
-          <MethodologyLimitationsSection />
+          <MethodologyLimitationsSection methodologyLimitations={limitations} />
           <MethodologyCaseStudy />
-          <CorrectionsAndVersioningSection />
+          <CorrectionsAndVersioningSection methodologyVersions={versions} />
         </div>
-        
+
         <div id="methodology-faq">
-          <MethodologyFAQ />
+          <MethodologyFAQ methodologyFaq={faq} />
         </div>
-        
+
         <MethodologyFinalCTA />
       </main>
-      
+
       <SiteFooter />
     </div>
   );

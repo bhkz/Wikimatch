@@ -1,97 +1,204 @@
 import {
-  featuredStory,
+  featuredStory as homeFeaturedStory,
   latestStories,
   nextMatch,
   observatoryData,
 } from "../mockHomeData";
+import { demoDivergenceStory } from "../mockStoryData";
+import {
+  demoMatch,
+  demoRecap,
+  matchStories,
+  matchTimeline,
+  matchComparison,
+  demoInstability,
+  trackedSubjects,
+} from "../mockMatchData";
+import {
+  demoEntity,
+  featuredEntityStory,
+  languageArticleStates,
+  entityComparison,
+  entityTimeline,
+  relatedMatches,
+} from "../mockEntityData";
+import {
+  matchesStats,
+  featuredMatch,
+  allMatchesGroups,
+} from "../mockMatchesData";
+import {
+  archiveStats,
+  featuredStory as archiveFeaturedStory,
+  archiveFilters,
+  archiveStories,
+  featuredCollection,
+} from "../mockStoriesData";
+import {
+  explorerStats,
+  explorerLegend,
+  storyGeoAnchors,
+  unmappedStories,
+  explorerMatrixRows,
+  explorerTimelineEvents,
+} from "../mockExplorerData";
+import {
+  observatoryStats,
+  publicPipelineSteps,
+  trackedArticles,
+  publicTraces,
+  featuredSourceChain,
+} from "../mockObservatoryData";
+import {
+  methodologyDefinitions,
+  methodologyPipeline,
+  methodologyCases,
+  comparisonRules,
+  publicationCriteria,
+  aiRules,
+  privacyPrinciples,
+  methodologyLimitations,
+  methodologyFaq,
+  methodologyVersions,
+} from "../mockMethodologyData";
+import {
+  searchDemoStats,
+  searchSuggestions,
+  publicSearchResults,
+} from "../mockSearchData";
+
 import type {
-  ExplorerData,
-  ExplorerFilters,
+  EntityDetailPageData,
+  ExplorerPageData,
   HomePageData,
-  MatchFilters,
-  MethodologyData,
-  NotImplementedError as _NotImplementedError,
-  ObservatoryFilters,
+  MatchDetailPageData,
+  MatchesCalendarPageData,
+  MethodologyPageData,
+  ObservatoryPageData,
   PublicDataMode,
   PublicDataProvider,
-  PublicEntityDetail,
-  PublicMatchDetail,
-  PublicMatchSummary,
-  PublicSearchFilters,
-  PublicSearchResult,
-  PublicTraceDetail,
-  PublicTraceSummary,
-  PublishedStoryDetail,
-  PublishedStorySummary,
-  StoryFilters,
+  SearchPageData,
+  StoriesArchivePageData,
+  StoryDetailPageData,
 } from "./PublicDataProvider";
-import { NotImplementedError } from "./PublicDataProvider";
 
 /**
  * Implémentation "demo" du contrat PublicDataProvider.
  *
- * Réutilise les fixtures existantes dans src/mock*Data.ts sans les modifier,
- * en les exposant via une interface uniforme et asynchrone (parité avec Live).
- *
- * Les méthodes non encore migrées lèvent NotImplementedError : cela signale
- * une page qui n'est pas encore branchée sur la data layer (Phase 1 itérative).
+ * Réutilise les fixtures de src/mock*Data.ts en les exposant via une
+ * interface uniforme asynchrone (parité avec Live). Toute incohérence
+ * de slug retourne `null` plutôt que de lever — comme l'API publique
+ * réelle.
  */
 export class DemoPublicDataProvider implements PublicDataProvider {
   public readonly mode: PublicDataMode = "demo";
 
   async getHomePageData(): Promise<HomePageData> {
     return {
-      featuredStory,
+      featuredStory: homeFeaturedStory,
       latestStories,
       nextMatch,
       observatoryData,
     };
   }
 
-  async getStories(_filters?: StoryFilters): Promise<PublishedStorySummary[]> {
-    throw new NotImplementedError("getStories", this.mode);
+  async getStoryBySlug(slug: string): Promise<StoryDetailPageData | null> {
+    if (slug === demoDivergenceStory.slug) {
+      return { story: demoDivergenceStory };
+    }
+    return null;
   }
 
-  async getStoryBySlug(_slug: string): Promise<PublishedStoryDetail | null> {
-    throw new NotImplementedError("getStoryBySlug", this.mode);
+  async getMatchBySlug(slug: string): Promise<MatchDetailPageData | null> {
+    // En mode demo, on ne dispose que d'un dossier match complet.
+    // Tout autre slug est traité comme inexistant côté page.
+    if (slug === demoMatch.slug) {
+      return {
+        match: demoMatch,
+        recap: demoRecap,
+        stories: matchStories,
+        timeline: matchTimeline,
+        comparison: matchComparison,
+        instability: demoInstability,
+        trackedSubjects,
+      };
+    }
+    return null;
   }
 
-  async getMatches(_filters?: MatchFilters): Promise<PublicMatchSummary[]> {
-    throw new NotImplementedError("getMatches", this.mode);
+  async getEntityBySlug(slug: string): Promise<EntityDetailPageData | null> {
+    if (slug === demoEntity.slug) {
+      return {
+        entity: demoEntity,
+        featuredStory: featuredEntityStory,
+        languageStates: languageArticleStates,
+        comparison: entityComparison,
+        timeline: entityTimeline,
+        relatedMatches,
+      };
+    }
+    return null;
   }
 
-  async getMatchBySlug(_slug: string): Promise<PublicMatchDetail | null> {
-    throw new NotImplementedError("getMatchBySlug", this.mode);
+  async getMatchesCalendarPageData(): Promise<MatchesCalendarPageData> {
+    return {
+      stats: matchesStats,
+      featured: featuredMatch,
+      allGroups: allMatchesGroups,
+    };
   }
 
-  async getEntityBySlug(_slug: string): Promise<PublicEntityDetail | null> {
-    throw new NotImplementedError("getEntityBySlug", this.mode);
+  async getStoriesArchivePageData(): Promise<StoriesArchivePageData> {
+    return {
+      stats: archiveStats,
+      featured: archiveFeaturedStory,
+      filters: archiveFilters,
+      stories: archiveStories,
+      collection: featuredCollection,
+    };
   }
 
-  async getExplorerData(_filters?: ExplorerFilters): Promise<ExplorerData> {
-    throw new NotImplementedError("getExplorerData", this.mode);
+  async getExplorerPageData(): Promise<ExplorerPageData> {
+    return {
+      stats: explorerStats,
+      legend: explorerLegend,
+      anchors: storyGeoAnchors,
+      unmapped: unmappedStories,
+      matrixRows: explorerMatrixRows,
+      timelineEvents: explorerTimelineEvents,
+    };
   }
 
-  async getObservatoryTraces(
-    _filters?: ObservatoryFilters,
-  ): Promise<PublicTraceSummary[]> {
-    throw new NotImplementedError("getObservatoryTraces", this.mode);
+  async getObservatoryPageData(): Promise<ObservatoryPageData> {
+    return {
+      stats: observatoryStats,
+      pipelineSteps: publicPipelineSteps,
+      trackedArticles,
+      traces: publicTraces,
+      sourceChain: featuredSourceChain,
+    };
   }
 
-  async getObservatoryTraceById(
-    _id: string,
-  ): Promise<PublicTraceDetail | null> {
-    throw new NotImplementedError("getObservatoryTraceById", this.mode);
+  async getMethodologyPageData(): Promise<MethodologyPageData> {
+    return {
+      definitions: methodologyDefinitions,
+      pipeline: methodologyPipeline,
+      cases: methodologyCases,
+      comparisonRules,
+      publicationCriteria,
+      aiRules,
+      privacyPrinciples,
+      limitations: methodologyLimitations,
+      faq: methodologyFaq,
+      versions: methodologyVersions,
+    };
   }
 
-  async getMethodologyData(): Promise<MethodologyData> {
-    throw new NotImplementedError("getMethodologyData", this.mode);
-  }
-
-  async searchPublicContent(
-    _query: string,
-    _filters?: PublicSearchFilters,
-  ): Promise<PublicSearchResult[]> {
-    throw new NotImplementedError("searchPublicContent", this.mode);
+  async getSearchPageData(): Promise<SearchPageData> {
+    return {
+      demoStats: searchDemoStats,
+      suggestions: searchSuggestions,
+      allResults: publicSearchResults,
+    };
   }
 }
