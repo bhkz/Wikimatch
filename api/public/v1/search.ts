@@ -2,6 +2,10 @@ import { createServerSupabaseClient } from "../../_lib/supabase.js";
 import { setPublicCache, sendServerError, firstQueryValue, type ApiRequest, type ApiResponse } from "../../_lib/http.js";
 import { entityTypeLabel, storyTypeLabel } from "../../_lib/labels.js";
 
+function escapeIlike(str: string): string {
+  return str.replace(/[%_\\]/g, '\\$&');
+}
+
 export default async function handler(
   request: ApiRequest,
   response: ApiResponse,
@@ -73,7 +77,7 @@ export default async function handler(
     const { data: entities } = await supabase
       .from("entities")
       .select("id, slug, canonical_label, type, subject_geography_label")
-      .ilike("canonical_label", `%${queryStr}%`)
+      .ilike("canonical_label", `%${escapeIlike(queryStr)}%`)
       .limit(10);
 
     if (entities) {
@@ -97,7 +101,7 @@ export default async function handler(
     const { data: matches } = await supabase
       .from("matches")
       .select("id, slug, team_a_label, team_b_label, stage_label")
-      .or(`team_a_label.ilike.%${queryStr}%,team_b_label.ilike.%${queryStr}%`)
+      .or(`team_a_label.ilike.%${escapeIlike(queryStr)}%,team_b_label.ilike.%${escapeIlike(queryStr)}%`)
       .limit(10);
 
     if (matches) {
@@ -120,7 +124,7 @@ export default async function handler(
     const { data: stories } = await supabase
       .from("published_stories")
       .select("id, slug, title, excerpt, story_type, languages")
-      .or(`title.ilike.%${queryStr}%,excerpt.ilike.%${queryStr}%`)
+      .or(`title.ilike.%${escapeIlike(queryStr)}%,excerpt.ilike.%${escapeIlike(queryStr)}%`)
       .in("publication_status", ["published", "corrected"])
       .limit(10);
 

@@ -1,5 +1,5 @@
 import { useCustomSearch } from "./SearchContext";
-import type { SearchFilterType } from "../../mockSearchData";
+import type { SearchFilterType } from "../../types";
 import { useState } from "react";
 
 export default function SearchResultToolbar() {

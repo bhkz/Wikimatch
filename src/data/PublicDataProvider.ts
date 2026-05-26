@@ -43,12 +43,10 @@ import type {
   StoryGeoAnchor,
   TrackedMatch,
   TrackedMatchCard,
-} from "../types";
-import type {
-  PublicSearchResult,
   SearchDemoStats,
   SearchSuggestion,
-} from "../mockSearchData";
+  PublicSearchResult,
+} from "../types";
 
 export type PublicDataMode = "demo" | "live";
 

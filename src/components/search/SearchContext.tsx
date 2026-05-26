@@ -3,7 +3,7 @@ import type {
   PublicSearchResult,
   SearchFilterType,
   SearchSuggestion,
-} from "../../mockSearchData";
+} from "../../types";
 
 interface SearchContextType {
   query: string;

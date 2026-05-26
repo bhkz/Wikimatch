@@ -1,6 +1,7 @@
 import type { ApiRequest, ApiResponse } from "../../../_lib/http.js";
 import { createServerSupabaseClient } from "../../../_lib/supabase.js";
 import { setPublicCache, sendServerError } from "../../../_lib/http.js";
+import { languageLabel } from "../../../_lib/labels.js";
 
 export default async function handler(
   request: ApiRequest,
@@ -101,18 +102,7 @@ export default async function handler(
 
     if (articlesError) throw articlesError;
 
-    const languageMap: Record<string, string> = {
-      en: "anglaise",
-      fr: "française",
-      es: "espagnole",
-      ja: "japonaise",
-      ar: "arabe",
-      pt: "portugaise",
-      de: "allemande",
-      ko: "coréenne",
-    };
-
-    const getLanguageLabel = (code: string) => languageMap[code.toLowerCase()] || code;
+    const getLanguageLabel = languageLabel;
 
     const getMonitoringReason = (type: string, name: string) => {
       switch (type) {

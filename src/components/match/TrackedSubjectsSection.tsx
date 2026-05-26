@@ -11,7 +11,7 @@ export default function TrackedSubjectsSection({ subjects }: { subjects: MatchTr
             CE QUE WIKIMATCH<br/>SURVEILLE<br/>POUR CE MATCH
           </h2>
           <p className="font-sans text-lg text-navy/70 leading-relaxed font-light mb-8 lg:mb-0">
-            WikiMatch ne considère pas tout le football mondial comme lié à cette rencontre. Le suivi porte sur une sélection explicite de pages associées au match fictif.
+            WikiMatch ne considère pas tout le football mondial comme lié à cette rencontre. Le suivi porte sur une sélection explicite de pages associées au match.
           </p>
         </div>
 

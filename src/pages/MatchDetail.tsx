@@ -96,55 +96,63 @@ export default function MatchDetail() {
                        EN COURS D'OBSERVATION
                     </div>
                     <p className="font-sans text-sm md:text-base font-light leading-relaxed max-w-xl text-white/90">
-                      Une mise à jour liée au score final n'existe pas encore : le match est toujours en cours.<br/>Deux articles suivis ont été modifiés depuis le coup d'envoi. Ces modifications restent en cours d'analyse.
+                      {matchTimeline.length > 0
+                        ? `${matchTimeline.length} modification${matchTimeline.length > 1 ? "s" : ""} captée${matchTimeline.length > 1 ? "s" : ""} sur les articles suivis. Ces modifications sont en cours d'analyse.`
+                        : "Aucune modification captée sur les articles suivis pour le moment. Le suivi est actif."}
                     </p>
                   </div>
                </div>
             </div>
 
-            {/* Live Timeline simple preview */}
+            {/* Live Timeline from real data */}
             <div className="max-w-screen-xl mx-auto px-4 md:px-8 mt-16 flex flex-col gap-8">
                <h3 className="font-display text-3xl uppercase text-navy border-b border-navy/10 pb-4">Chronologie en direct</h3>
-               <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-4 bg-white p-4 shadow-sm border border-navy/10">
-                     <span className="font-display text-2xl w-12 text-center text-navy font-bold text-navy/40">34'</span>
-                     <span className="w-2 h-2 rounded-full bg-navy" />
-                     <span className="font-sans font-light">But inscrit · événement fictif</span>
-                  </div>
-                  <div className="flex items-center gap-4 bg-white p-4 shadow-sm border border-navy/10 border-l-4 border-l-blue-electric">
-                     <span className="font-display text-2xl w-12 text-center text-navy opacity-80">21:41</span>
-                     <span className="font-mono text-[10px] font-bold px-2 py-0.5 bg-navy/5 text-navy border border-navy/10">EN</span>
-                     <div className="flex flex-col">
-                       <span className="font-sans font-medium text-sm">Page du match modifiée</span>
-                       <span className="font-mono text-[10px] text-blue-electric font-bold uppercase tracking-widest mt-1">Analyse en cours</span>
+               {matchTimeline.length > 0 ? (
+                 <div className="flex flex-col gap-4">
+                   {matchTimeline.map((entry: any, i: number) => (
+                     <div key={entry.id || i} className="flex items-center gap-4 bg-white p-4 shadow-sm border border-navy/10 border-l-4 border-l-blue-electric">
+                       <span className="font-display text-2xl w-12 text-center text-navy opacity-80">{entry.timeLabel || ""}</span>
+                       {entry.languageCode && (
+                         <span className="font-mono text-[10px] font-bold px-2 py-0.5 bg-navy/5 text-navy border border-navy/10">{entry.languageCode}</span>
+                       )}
+                       <div className="flex flex-col">
+                         <span className="font-sans font-medium text-sm">{entry.label || "Article modifié"}</span>
+                         <span className="font-mono text-[10px] text-blue-electric font-bold uppercase tracking-widest mt-1">
+                           {entry.statusLabel || "OBSERVATION CAPTÉE"}
+                         </span>
+                       </div>
                      </div>
-                  </div>
-                  <div className="flex items-center gap-4 bg-white p-4 shadow-sm border border-navy/10 border-l-4 border-l-blue-electric">
-                     <span className="font-display text-2xl w-12 text-center text-navy opacity-80">21:46</span>
-                     <span className="font-mono text-[10px] font-bold px-2 py-0.5 bg-navy/5 text-navy border border-navy/10">FR</span>
-                     <div className="flex flex-col">
-                       <span className="font-sans font-medium text-sm">Page d'un joueur modifiée</span>
-                       <span className="font-mono text-[10px] text-blue-electric font-bold uppercase tracking-widest mt-1">Analyse en cours</span>
-                     </div>
-                  </div>
-               </div>
+                   ))}
+                 </div>
+               ) : (
+                 <div className="bg-navy/5 border border-navy/10 p-8 text-center">
+                   <p className="font-sans text-lg font-light text-navy/60">Aucune modification captée pour le moment.</p>
+                   <p className="font-mono text-[10px] uppercase tracking-widest text-navy/30 mt-4">Le suivi est actif — les éditions apparaîtront ici en temps réel.</p>
+                 </div>
+               )}
             </div>
 
-            {/* Candidates Preview */}
+            {/* Stories candidates from real data */}
             <div className="max-w-screen-xl mx-auto px-4 md:px-8 mt-16 mb-24">
-               <h3 className="font-display text-3xl uppercase text-navy border-b border-navy/10 pb-4 mb-8">Changements à analyser</h3>
-               <div className="bg-navy/5 border border-navy/10 p-8 shadow-sm">
-                  <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-navy/40 mb-4 bg-white w-fit px-2 py-1 rounded">CANDIDAT · NON PUBLIÉ</div>
-                  <p className="font-sans text-lg font-light leading-relaxed text-navy">
-                     Deux éditions ont modifié une page liée au buteur. WikiMatch doit encore vérifier si elles parlent du même fait.
-                  </p>
-                  <button className="mt-6 font-mono text-[10px] font-bold uppercase tracking-widest text-navy underline decoration-navy/30 hover:text-blue-electric transition-colors">
-                     Voir l'observation
-                  </button>
-               </div>
-               <div className="mt-8 font-mono text-[10px] uppercase tracking-widest text-navy/40 text-center">
-                  Aucune carte partageable tant qu'aucune story n'est publiée.
-               </div>
+               <h3 className="font-display text-3xl uppercase text-navy border-b border-navy/10 pb-4 mb-8">Histoires liées</h3>
+               {matchStories.length > 0 ? (
+                 <div className="flex flex-col gap-4">
+                   {matchStories.map((s: any) => (
+                     <div key={s.id} className="bg-white border border-navy/10 p-6 shadow-sm hover:border-blue-electric transition-colors">
+                       <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-blue-electric mb-2">{s.categoryLabel || "HISTOIRE"}</div>
+                       <h4 className="font-display text-xl uppercase text-navy">{s.title}</h4>
+                       {s.excerpt && <p className="font-sans text-sm font-light text-navy/70 mt-2">{s.excerpt}</p>}
+                     </div>
+                   ))}
+                 </div>
+               ) : (
+                 <div className="bg-navy/5 border border-navy/10 p-8 text-center">
+                   <p className="font-sans text-lg font-light text-navy/60">Aucune histoire publiée pour ce match.</p>
+                   <p className="font-mono text-[10px] uppercase tracking-widest text-navy/30 mt-4">
+                     Les histoires seront publiées ici dès que le pipeline éditorial valide une observation.
+                   </p>
+                 </div>
+               )}
             </div>
 
           </div>

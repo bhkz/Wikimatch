@@ -28,6 +28,17 @@ export default async function handler(
       return;
     }
 
+    const { data: relatedStories } = await supabase
+      .from("published_stories")
+      .select("slug")
+      .eq("story_type", story.story_type)
+      .in("publication_status", ["published", "corrected"])
+      .neq("id", story.id)
+      .order("published_at", { ascending: false })
+      .limit(3);
+
+    const relatedStoryIds = (relatedStories ?? []).map((s: any) => s.slug);
+
     const responsePayload = {
       story: {
         id: story.id,
@@ -49,7 +60,7 @@ export default async function handler(
         limitationSummary: story.limitation_text || "",
         languageStates: story.detail_language_states_payload || [],
         timeline: story.detail_timeline_payload || [],
-        relatedStoryIds: [],
+        relatedStoryIds,
       },
     };
 

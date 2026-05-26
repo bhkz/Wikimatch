@@ -691,3 +691,74 @@ export type MethodologyVersionEntry = {
   status: string;
   changes: string[];
 };
+
+export type PublicSearchResultType =
+  | "story"
+  | "match"
+  | "entity"
+  | "public_trace"
+  | "methodology";
+
+export type SearchStoryCategory =
+  | "fact_entry"
+  | "language_convergence"
+  | "language_divergence"
+  | "article_instability"
+  | "under_radar"
+  | "match_recap";
+
+export type SearchLanguageCode =
+  | "EN"
+  | "FR"
+  | "ES"
+  | "JA"
+  | "AR"
+  | "PT"
+  | "DE"
+  | "KO";
+
+export type PublicSearchResult = {
+  id: string;
+  type: PublicSearchResultType;
+  subtype?: SearchStoryCategory;
+  title: string;
+  excerpt: string;
+  metadataLabel: string;
+  languages?: SearchLanguageCode[];
+  matchLabel?: string;
+  entityLabel?: string;
+  publicStatusLabel: string;
+  keywords: string[];
+  route?: string;
+  available: boolean;
+  isDemo: boolean;
+};
+
+export type SearchFilterType =
+  | "all"
+  | "story"
+  | "match"
+  | "entity"
+  | "public_trace"
+  | "methodology";
+
+export type SearchSuggestion = {
+  id: string;
+  label: string;
+  query: string;
+  filter?: SearchFilterType;
+  description: string;
+};
+
+export type SearchDemoStats = {
+  indexedStories: number;
+  indexedMatches: number;
+  indexedSubjects: number;
+  indexedPublicTraces: number;
+  isDemo: boolean;
+};
+
+export type SearchPrivacyRule = {
+  label: string;
+  description: string;
+};
