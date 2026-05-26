@@ -88,7 +88,7 @@ create table match_watchlist (
   id                 uuid primary key default gen_random_uuid(),
   match_id           uuid not null references matches(id) on delete cascade,
   article_id         uuid not null references wiki_articles(id) on delete cascade,
-  role               text not null check (role in ('match','home_team','away_team','player','coach','tournament')),
+  role               text not null check (role in ('match','home_team','away_team','player','coach','referee','tournament')),
   monitoring_reason  text not null,
   enabled            boolean not null default true,
   created_at         timestamptz not null default now(),
@@ -97,6 +97,20 @@ create table match_watchlist (
 ```
 
 Hérité du legacy `match_watchlist` (cf. [[LEGACY_SALVAGE_AUDIT]] §7).
+
+**Note ajoutée 2026-05-26** : `role` inclut désormais `referee`. Les articles Wikipédia des arbitres sont des cibles éditoriales intéressantes (édité avant/après une rencontre — biographie, controverse, palmarès). Cf. [[#bootstrap-wikipedia-phase-3]] ci-dessous.
+
+### Bootstrap Wikipedia (Phase 3)
+
+La page Wikipédia de la Coupe du monde 2026 (et ses équivalents EN/ES/JA) contient horaires, équipes, **arbitres**, et probablement à terme des **pages dédiées par match**. Ces pages constituent une **source seed gratuite** pour bootstrap `matches`, `wiki_articles` et `match_watchlist`.
+
+Règles de bootstrap :
+- Le script `scripts/import-wc26-from-wikipedia.ts` (Phase 3) parse la liste des matchs depuis Wikipedia et crée :
+  - `matches` (`status='upcoming'`, `official_source_name='Wikipedia'`, `official_source_url=<url page WC>`),
+  - `wiki_articles` avec `article_type='match'` pour les pages dédiées par match dès qu'elles existent (un par édition linguistique surveillée),
+  - `match_watchlist` rows pour `home_team`, `away_team`, `referee`, `tournament`.
+- **Wikipedia ne peut JAMAIS être `matches.official_source_*` pour `status in ('live','completed')`**. La vérification `source_verified_at IS NOT NULL` exige une source officielle (FIFA, etc.) pour les données live. Cf. [[PRODUCT_RULES]] §11.
+- Re-parse hebdomadaire jusqu'à 7 jours avant le tournoi, puis quotidien pendant le tournoi (les arbitres sont annoncés tardivement).
 
 ## 5. Traces / révisions observées
 

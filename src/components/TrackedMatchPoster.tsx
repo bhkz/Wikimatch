@@ -1,9 +1,13 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import DemoBadge from "./DemoBadge";
-import { nextMatch } from "../mockHomeData";
+import type { TrackedMatch } from "../types";
 
-export default function TrackedMatchPoster() {
+export default function TrackedMatchPoster({
+  nextMatch,
+}: {
+  nextMatch: TrackedMatch;
+}) {
   return (
     <section id="matchs" className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10 relative overflow-hidden bg-grid-pattern-light">
       <div className="w-full max-w-screen-2xl mx-auto flex flex-col gap-12">

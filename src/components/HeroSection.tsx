@@ -1,9 +1,13 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import DemoBadge from "./DemoBadge";
-import { featuredStory } from "../mockHomeData";
+import type { PublishedStory } from "../types";
 
-export default function HeroSection() {
+export default function HeroSection({
+  featuredStory,
+}: {
+  featuredStory: PublishedStory;
+}) {
   return (
     <section className="relative min-h-[100svh] w-full flex flex-col justify-end overflow-hidden pt-24 pb-12 px-4 md:px-8 bg-navy text-cream">
       

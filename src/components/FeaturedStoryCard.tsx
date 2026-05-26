@@ -1,9 +1,13 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import DemoBadge from "./DemoBadge";
-import { featuredStory } from "../mockHomeData";
+import type { PublishedStory } from "../types";
 
-export default function FeaturedStoryCard() {
+export default function FeaturedStoryCard({
+  featuredStory,
+}: {
+  featuredStory: PublishedStory;
+}) {
   return (
     <section id="stories" className="py-24 px-4 md:px-8 bg-cream w-full overflow-hidden border-b border-navy/10 relative z-30">
       <div className="w-full max-w-screen-2xl mx-auto flex flex-col gap-12 lg:gap-16">

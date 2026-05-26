@@ -1,9 +1,13 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import DemoBadge from "./DemoBadge";
-import { latestStories } from "../mockHomeData";
+import type { PublishedStory } from "../types";
 
-export default function StoriesGrid() {
+export default function StoriesGrid({
+  latestStories,
+}: {
+  latestStories: PublishedStory[];
+}) {
   return (
     <section className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10">
       <div className="w-full max-w-screen-2xl mx-auto flex flex-col gap-12">

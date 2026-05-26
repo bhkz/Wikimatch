@@ -1,9 +1,13 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import DemoBadge from "./DemoBadge";
-import { observatoryData } from "../mockHomeData";
+import type { ObservatoryTeaserType } from "../types";
 
-export default function ObservatoryTeaser() {
+export default function ObservatoryTeaser({
+  observatoryData,
+}: {
+  observatoryData: ObservatoryTeaserType;
+}) {
   return (
     <section id="observatoire" className="py-24 px-4 md:px-8 bg-navy text-cream relative overflow-hidden bg-grid-pattern">
       
