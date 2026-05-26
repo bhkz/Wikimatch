@@ -1,0 +1,132 @@
+# DEPLOYMENT_RUNBOOK — Vercel + Supabase + Render
+
+Runbook opérationnel pour remplacer l'ancien projet par WikiMatch V2 sans mélanger le legacy et la nouvelle base.
+
+## 1. GitHub
+
+Décision retenue : utiliser le nouveau dépôt `bhkz/Wikimatch`.
+
+- `bhkz/Revision90` reste l'archive de l'ancien essai.
+- `bhkz/Wikimatch` devient la source de vérité V2.
+- Ne pas écraser l'ancien dépôt : cela garde un rollback lisible et évite de mélanger les historiques.
+
+État actuel :
+
+```bash
+git remote -v
+# origin  https://github.com/bhkz/Wikimatch.git
+git branch --show-current
+# main
+```
+
+## 2. Vercel
+
+Objectif : garder le même projet Vercel si possible, mais remplacer le repo connecté.
+
+Étapes :
+
+1. Dans Vercel, ouvrir le projet existant.
+2. Settings → Git → Connected Git Repository.
+3. Déconnecter l'ancien repo si nécessaire.
+4. Connecter `bhkz/Wikimatch`, branche `main`.
+5. Framework preset : `Vite`.
+6. Build command : `npm run build`.
+7. Output directory : `dist`.
+8. Ajouter les variables :
+
+```bash
+VITE_DATA_MODE=demo
+VITE_PUBLIC_API_BASE=
+```
+
+Quand Supabase est prêt :
+
+```bash
+VITE_DATA_MODE=live
+VITE_PUBLIC_API_BASE=
+SUPABASE_URL=...
+SUPABASE_SERVICE_KEY=...
+```
+
+`SUPABASE_SERVICE_KEY` est uniquement pour les Vercel Functions. Ne jamais créer de variable `VITE_SUPABASE_SERVICE_KEY`.
+
+Le fichier `vercel.json` contient déjà :
+
+- rewrite SPA vers `/index.html` ;
+- exclusion de `/api/*` ;
+- headers sécurité ;
+- cache long sur les assets.
+
+## 3. Supabase
+
+Meilleure option : garder le même projet Supabase seulement s'il n'a plus de données utiles.
+
+Option recommandée :
+
+1. Faire un backup SQL depuis Supabase avant toute suppression.
+2. Créer un projet Supabase V2 dédié si le projet actuel contient encore des données utiles.
+3. Si tu veux vraiment garder le même projet : reset le schéma uniquement après backup.
+4. Appliquer les migrations dans l'ordre :
+
+```bash
+supabase link --project-ref <project-ref>
+supabase db push
+```
+
+Migrations actuelles :
+
+- `202605260001_v2_core_schema.sql`
+- `202605260002_public_page_snapshots.sql`
+
+Seed initial :
+
+```bash
+npm run seed:snapshots
+```
+
+Variables locales nécessaires :
+
+```bash
+SUPABASE_URL=...
+SUPABASE_SERVICE_KEY=...
+```
+
+Ce seed publie les 10 contrats de pages V2 dans `public_page_snapshots`. Il ne branche pas encore Wikimedia.
+
+## 4. Render
+
+Ne pas reconnecter Render tout de suite.
+
+Raison : le repo V2 contient pour l'instant le frontend, l'API publique Vercel et les migrations Supabase. Le worker Render refactoré n'existe pas encore dans ce repo.
+
+Étapes plus tard, Phase 3 :
+
+1. Ajouter un dossier `worker/`.
+2. Porter le legacy `revision90-worker/src/ingest.ts` vers le schéma V2.
+3. Ajouter Dockerfile / start command Render.
+4. Connecter Render à `bhkz/Wikimatch`.
+5. Variables Render :
+
+```bash
+SUPABASE_URL=...
+SUPABASE_SERVICE_KEY=...
+WIKIMEDIA_USER_AGENT=WikiMatch/2.0 (<contact>) Node
+LOG_LEVEL=info
+```
+
+## 5. Ordre Exact
+
+1. GitHub : utiliser `bhkz/Wikimatch`.
+2. Vercel : connecter `bhkz/Wikimatch`, rester en `VITE_DATA_MODE=demo`.
+3. Supabase : backup, migrations, seed snapshots.
+4. Vercel : passer `VITE_DATA_MODE=live` + ajouter `SUPABASE_URL` / `SUPABASE_SERVICE_KEY`.
+5. Smoke test public : `/`, `/stories`, `/story/demo-divergence`, `/matches`, `/match/demo-france-belgique`, `/entity/demo-japan-goalkeeper`, `/explorer`, `/observatoire`, `/methodology`, `/search`.
+6. Render : attendre Phase 3 worker.
+
+## 6. Ce Qu'il Ne Faut Pas Faire
+
+- Ne pas supprimer le projet Supabase sans backup.
+- Ne pas mettre `SUPABASE_SERVICE_KEY` dans une variable `VITE_*`.
+- Ne pas reconnecter Render avant que le worker V2 existe.
+- Ne pas écraser `bhkz/Revision90`.
+- Ne pas connecter le mode live Vercel avant d'avoir appliqué les migrations et seedé `public_page_snapshots`.
