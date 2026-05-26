@@ -111,7 +111,7 @@ export default function StoriesArchive() {
           />
         )}
 
-        <MatchRecapsSection />
+        <MatchRecapsSection stories={archiveStories} />
 
         <ArchiveMethodologyBlock />
 
