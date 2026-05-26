@@ -36,7 +36,7 @@ export default function HeroSection({
         <span>EN ................. [ 1.2K EDITS ]</span>
         <span>ES ................. [ 543 EDITS ]</span>
       </div>
-      <div className="absolute top-24 left-8 xl:left-16 hidden lg:flex flex-col gap-2 font-mono text-[10px] text-cream/40 z-0 pointer-events-none">
+      <div className="absolute top-24 left-4 xl:left-8 hidden lg:flex flex-col gap-2 font-mono text-[10px] text-cream/40 z-0 pointer-events-none">
         <span>ARTICLE COMPARÉ</span>
         <span>VERSION OBSERVÉE</span>
         <span>SOURCES DISPONIBLES</span>
