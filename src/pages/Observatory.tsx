@@ -54,7 +54,7 @@ export default function Observatory() {
          <PublicPipelineSection steps={pipelineSteps} />
          <TrackedArticlesSection articles={trackedArticles} />
          <ObservatoryTraceBrowser traces={traces} />
-         <StorySourceChainSection chain={sourceChain} />
+         {sourceChain && <StorySourceChainSection chain={sourceChain} />}
          <MinorTraceExplanationSection />
          <ObservatoryPrivacySection />
          <PublicVsPrivateSection />

@@ -1,5 +1,6 @@
-import { createServerSupabaseClient, readPublishedSnapshot } from "../../../_lib/supabase.js";
+import { createServerSupabaseClient } from "../../../_lib/supabase.js";
 import { firstQueryValue, sendNotFound, sendServerError, setPublicCache, type ApiRequest, type ApiResponse } from "../../../_lib/http.js";
+import { storyTypeLabel } from "../../../_lib/labels.js";
 
 export default async function handler(
   request: ApiRequest,
@@ -14,53 +15,46 @@ export default async function handler(
   try {
     const supabase = createServerSupabaseClient();
 
-    // 1. Try to fetch from the live relational table published_stories
     const { data: story } = await supabase
       .from("published_stories")
       .select("*")
       .eq("slug", slug)
-      .eq("publication_status", "published")
+      .in("publication_status", ["published", "corrected"])
       .maybeSingle();
 
-    // 2. If found, let's build the detail object dynamically!
-    if (story) {
-      const responsePayload = {
-        story: {
-          id: story.id,
-          slug: story.slug,
-          type: story.story_type || "language_divergence",
-          categoryLabel: (story.label || "HISTOIRE IA").toUpperCase(),
-          title: story.title,
-          subtitle: story.excerpt || "",
-          publishedAt: story.published_at ? new Date(story.published_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "Récemment",
-          matchLabel: story.meta_match_label || "Tournoi global",
-          matchStage: "Phase de groupes",
-          eventLabel: story.geo_subject_label || "Sujet suivi",
-          languages: story.languages || ["FR"],
-          isDemo: false,
-          observedSummary: story.content || "",
-          interpretationSummary: story.excerpt || "",
-          limitationSummary: "Cette analyse décrit les versions comparées de Wikipédia observées en direct. Elle respecte la neutralité et ne présuppose aucun parti pris national.",
-          languageStates: story.detail_language_states_payload || [],
-          timeline: story.detail_timeline_payload || [],
-          relatedStoryIds: []
-        }
-      };
-
-      setPublicCache(response, 30);
-      response.status(200).json(responsePayload);
+    if (!story) {
+      // Pas de fallback snapshot.
+      sendNotFound(response);
       return;
     }
 
-    // 3. Fallback to pre-seeded snapshot in the database if not found in relation tables
-    const snapshot = await readPublishedSnapshot(`story:${slug}`);
-    if (snapshot) {
-      setPublicCache(response, 60);
-      response.status(200).json({ story: snapshot });
-      return;
-    }
+    const responsePayload = {
+      story: {
+        id: story.id,
+        slug: story.slug,
+        type: story.story_type || "language_divergence",
+        categoryLabel: storyTypeLabel(story.story_type),
+        title: story.title,
+        subtitle: story.excerpt || "",
+        publishedAt: story.published_at
+          ? new Date(story.published_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
+          : "",
+        matchLabel: story.meta_match_label || "",
+        matchStage: story.meta_match_stage || "",
+        eventLabel: story.geo_subject_label || "",
+        languages: story.languages || [],
+        isDemo: false,
+        observedSummary: story.observation_text || "",
+        interpretationSummary: story.interpretation_text || "",
+        limitationSummary: story.limitation_text || "",
+        languageStates: story.detail_language_states_payload || [],
+        timeline: story.detail_timeline_payload || [],
+        relatedStoryIds: [],
+      },
+    };
 
-    sendNotFound(response);
+    setPublicCache(response, 30);
+    response.status(200).json(responsePayload);
   } catch (error) {
     console.error("Story Detail API failed:", error);
     sendServerError(response);

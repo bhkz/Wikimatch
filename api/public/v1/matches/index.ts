@@ -1,80 +1,71 @@
-import { createServerSupabaseClient, readPublishedSnapshot } from "../../../_lib/supabase.js";
+import { createServerSupabaseClient } from "../../../_lib/supabase.js";
 import { setPublicCache, sendServerError, type ApiRequest, type ApiResponse } from "../../../_lib/http.js";
+import { countDistinctMonitoredLanguages } from "../../../_lib/labels.js";
 
 export default async function handler(
-  request: ApiRequest,
+  _request: ApiRequest,
   response: ApiResponse,
 ) {
   try {
     const supabase = createServerSupabaseClient();
 
-    // 1. Fetch live matches
+    // 1. Fetch live matches. Pas de fallback snapshot.
     const { data: matchesData } = await supabase
       .from("matches")
       .select("*")
       .order("kickoff_time", { ascending: true });
 
-    // Fallback to snapshot if no matches found in database
-    if (!matchesData || matchesData.length === 0) {
-      const snapshot = await readPublishedSnapshot("matches");
-      if (snapshot) {
-        setPublicCache(response, 60);
-        response.status(200).json(snapshot);
-        return;
-      }
-    }
+    const matches = matchesData ?? [];
 
-    // 2. Fetch counts for stats
-    const { count: storiesCount } = await supabase
-      .from("published_stories")
-      .select("*", { count: "exact", head: true })
-      .eq("publication_status", "published");
+    // 2. Real counts only
+    const monitoredLanguages = await countDistinctMonitoredLanguages(supabase);
 
-    const upcomingCount = matchesData.filter(m => m.status === "upcoming").length;
-    const completedWithStories = matchesData.filter(m => m.status === "completed_with_stories").length;
+    const upcomingCount = matches.filter((m) => m.status === "upcoming").length;
+    const completedWithStories = matches.filter((m) => m.status === "completed_with_stories").length;
 
     const stats = {
-      trackedMatches: matchesData.length,
+      trackedMatches: matches.length,
       dossiersPublished: completedWithStories,
       upcomingMatches: upcomingCount,
-      comparedEditions: 8,
-      isDemo: false
+      comparedEditions: monitoredLanguages,
+      isDemo: false,
     };
 
-    // 3. Map matches to card schemas
-    const allCards = matchesData.map((m) => ({
+    // 3. Map matches to card schemas. Aucun placeholder éditorial fabriqué :
+    // les champs vides restent vides.
+    const allCards = matches.map((m) => ({
       id: m.id,
       slug: m.slug,
       dateLabel: new Date(m.kickoff_time).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }).toUpperCase(),
-      timeLabel: m.status === "upcoming" 
-        ? new Date(m.kickoff_time).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) 
-        : "TERMINÉ · LIVE",
+      timeLabel: m.status === "upcoming"
+        ? new Date(m.kickoff_time).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+        : "TERMINÉ",
       stage: m.stage || "group_stage",
-      stageLabel: m.stage_label || "PHASE DE GROUPES",
-      venueLabel: m.venue_label || "STADE HÔTE",
+      stageLabel: m.stage_label || "",
+      venueLabel: m.venue_label || undefined,
       homeTeam: {
         name: m.team_a_label,
-        shortName: m.team_a_label.slice(0, 3).toUpperCase(),
-        color: m.team_a_color || "blue"
+        shortName: (m.team_a_label || "").slice(0, 3).toUpperCase(),
+        color: m.team_a_color || "blue",
       },
       awayTeam: {
         name: m.team_b_label,
-        shortName: m.team_b_label.slice(0, 3).toUpperCase(),
-        color: m.team_b_color || "red"
+        shortName: (m.team_b_label || "").slice(0, 3).toUpperCase(),
+        color: m.team_b_color || "red",
       },
       status: m.status || "upcoming",
-      statusLabel: m.status === "upcoming" ? "À SUIVRE" : "DOSSIER LIVE DISPONIBLE",
+      statusLabel: m.status === "upcoming" ? "À SUIVRE" : m.status === "completed_with_stories" ? "DOSSIER DISPONIBLE" : "TERMINÉ",
       score: m.score || undefined,
       isDemo: false,
-      monitoredSubjects: ["Page du match", "Sélections", "Joueurs"],
-      storyCount: m.status === "completed_with_stories" ? 1 : 0,
-      languagesCompared: ["FR", "EN"],
-      storyTypes: ["language_divergence"],
-      editorialSummary: m.summary || "Dossier de match surveillé en direct.",
-      availableRoute: `/match/${m.slug}`
+      monitoredSubjects: m.monitored_subjects_payload || [],
+      storyCount: m.story_count_cached ?? 0,
+      languagesCompared: m.languages_compared_payload || [],
+      storyTypes: m.story_types_payload || [],
+      editorialSummary: m.summary || "",
+      availableRoute: `/match/${m.slug}`,
     }));
 
-    const featured = allCards.find(c => c.status === "completed_with_stories") || allCards[0];
+    const featured = allCards.find((c) => c.status === "completed_with_stories") ?? allCards[0] ?? null;
 
     // Group cards by date
     const groupsMap = new Map<string, typeof allCards>();

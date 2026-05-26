@@ -1,3 +1,27 @@
+/**
+ * ⚠️ FICHIER SUSPENDU — 2026-05-27
+ *
+ * Cf. docs/v2/CORRECTIVE_AUDIT_2026-05-27.md §3.2.
+ *
+ * Ce module a été conçu pour décider automatiquement public_minor vs
+ * public_substantive sur la sortie IA et publier directement dans
+ * public_trace_excerpts. Cela viole PRODUCT_RULES §8 + §11 et
+ * SECURITY_PRIVACY_RULES §5 + §8 :
+ *   - l'IA ne doit pas être l'autorité de publication ;
+ *   - le texte brut Wikipedia ne doit pas être exposé via une seule passe IA ;
+ *   - safe_to_publish doit être posé par le pattern matcher + safety filters,
+ *     jamais par une analyse de modification isolée.
+ *
+ * Ce fichier sera déplacé dans analyzer/src/extractor.ts au Jalon B et
+ * refactoré pour :
+ *   - extraire une proposition normalisée (claim structuré) au lieu d'un
+ *     public_status ;
+ *   - ne plus toucher à public_trace_excerpts ni à revision_traces.public_status ;
+ *   - rester confiné au service analyzer/.
+ *
+ * En attendant : ne pas appeler depuis le worker. L'import a été retiré
+ * de worker/src/ingest.ts.
+ */
 import "dotenv/config";
 import { supabase } from "./supabase";
 

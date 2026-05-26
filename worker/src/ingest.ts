@@ -17,7 +17,10 @@ import { isRevertComment } from "./revert";
 import { fetchDiff, diffUrl, revisionUrl } from "./wiki-diff";
 import { startHealthServer, updateHealthSnapshot } from "./health-server";
 import { supabase } from "./supabase";
-import { runAutomatedAIAnalysis } from "./ai.js";
+// NOTE 2026-05-27 — auto-publish IA boucle retirée (cf. docs/v2/CORRECTIVE_AUDIT_2026-05-27.md
+// §3.1). Le worker ne fait plus QUE de la collecte : revision_traces +
+// trace_private_content + checkpoint. L'analyse IA est déplacée dans le service
+// analyzer/ séparé au Jalon B. Ne pas réimporter runAutomatedAIAnalysis ici.
 import type {
   MonitoredArticle,
   PrivateContentInsert,
@@ -294,72 +297,11 @@ class WikiMatchWorker {
 
         this.stats.inserted += traces.length;
 
-        // Loop through the batch to automatically run AI Analysis and publish
-        for (const item of batch) {
-          if (!item.trace || !item.privateDiff) continue;
-
-          const traceId = traceIdsByEvent.get(item.trace.wikimedia_event_id);
-          if (!traceId) continue;
-
-          const added = item.privateDiff.raw_added_text;
-          const removed = item.privateDiff.raw_removed_text;
-          const title = item.articleTitle || "";
-          const lang = item.languageCode || "";
-          const type = item.articleType || "";
-
-          console.log(`[AI] Analyse automatique démarrée pour la trace ${traceId} (${title})...`);
-
-          try {
-            const aiRes = await runAutomatedAIAnalysis(title, lang, type, added, removed);
-            if (aiRes.allowed && aiRes.result) {
-              const res = aiRes.result;
-
-              // 1. Insert in public_trace_excerpts
-              const { error: excError } = await supabase
-                .from("public_trace_excerpts")
-                .upsert({
-                  trace_id: traceId,
-                  public_added_excerpt: res.translated_excerpt ? added : null,
-                  public_removed_excerpt: null,
-                  translated_excerpt: res.translated_excerpt,
-                  source_attribution_label: `Wikipedia (${lang}) — révision ${item.trace.revision_id}`,
-                  source_revision_url: item.trace.source_revision_url,
-                  license_label: "CC BY-SA 4.0",
-                  safe_to_publish: true,
-                  reviewed_at: new Date().toISOString(),
-                }, { onConflict: "trace_id" });
-              if (excError) throw excError;
-
-              // 2. Update revision_traces
-              const { error: rtUpdateError } = await supabase
-                .from("revision_traces")
-                .update({
-                  public_status: res.public_status,
-                  change_kind: res.change_kind,
-                  ingest_status: "published_evidence",
-                })
-                .eq("id", traceId);
-              if (rtUpdateError) throw rtUpdateError;
-
-              // 3. Save AI Analysis run cost
-              const { error: runError } = await supabase
-                .from("ai_analysis_runs")
-                .insert({
-                  task_type: "automatic_ingest_analysis",
-                  provider: aiRes.provider,
-                  model_name: aiRes.modelName,
-                  prompt_version: "v2.0",
-                  output_json: res,
-                  estimated_cost_eur: aiRes.costEur,
-                });
-              if (runError) throw runError;
-
-              console.log(`[AI] ✅ Publication automatique réussie pour ${traceId} ! (Coût: ${aiRes.costEur} €, Provider: ${aiRes.provider})`);
-            }
-          } catch (aiErr) {
-            console.error(`[AI] ❌ Échec de l'analyse automatique de la trace ${traceId} :`, aiErr);
-          }
-        }
+        // 2026-05-27 — Auto-publish IA boucle retirée ici. L'analyse passe
+        // désormais par le service analyzer/ séparé, qui lit revision_traces
+        // où ingest_status='observed' et produit des trace_propositions
+        // normalisées. La publication finale est strictement contrôlée par
+        // le pattern matcher + templates + safety filters (Jalons B/C).
       }
 
       const last = batch.at(-1);

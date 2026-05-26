@@ -20,10 +20,20 @@ export default function Home() {
         {home.status === "error" && <HomeError message={home.error.message} />}
         {home.status === "ready" && (
           <>
-            <HeroSection featuredStory={home.data.featuredStory} />
-            <FeaturedStoryCard featuredStory={home.data.featuredStory} />
-            <StoriesGrid latestStories={home.data.latestStories} />
-            <TrackedMatchPoster nextMatch={home.data.nextMatch} />
+            {home.data.featuredStory ? (
+              <>
+                <HeroSection featuredStory={home.data.featuredStory} />
+                <FeaturedStoryCard featuredStory={home.data.featuredStory} />
+              </>
+            ) : (
+              <HomeNoStoriesHero />
+            )}
+            {home.data.latestStories.length > 0 && (
+              <StoriesGrid latestStories={home.data.latestStories} />
+            )}
+            {home.data.nextMatch && (
+              <TrackedMatchPoster nextMatch={home.data.nextMatch} />
+            )}
             <HowItWorksSection />
             <ObservatoryTeaser observatoryData={home.data.observatoryData} />
             <TrustSection />
@@ -52,6 +62,35 @@ function HomeError({ message }: { message: string }) {
         Données indisponibles
       </div>
       <div className="font-sans text-base text-navy/70 max-w-md">{message}</div>
+    </section>
+  );
+}
+
+/**
+ * Empty state honnête : la DB ne contient aucune story publiée encore.
+ * Pas de fixture maquillée en réel — on annonce explicitement que le pipeline
+ * automatique n'a pas encore validé d'histoire publiable.
+ */
+function HomeNoStoriesHero() {
+  return (
+    <section className="relative min-h-[100svh] w-full flex flex-col justify-center overflow-hidden pt-24 pb-12 px-4 md:px-8 bg-navy text-cream">
+      <div className="relative z-10 w-full max-w-screen-2xl mx-auto flex flex-col gap-8 md:gap-12">
+        <p className="font-mono text-xs md:text-sm text-cream/70 uppercase tracking-widest">
+          WIKIMATCH · COUPE DU MONDE 2026 · MÉDIA DATA INDÉPENDANT
+        </p>
+        <h1 className="font-display text-[3.5rem] leading-[0.9] sm:text-[5rem] md:text-[6rem] lg:text-[7rem] xl:text-[8.5rem] uppercase tracking-wide">
+          <span className="block">Le match se joue</span>
+          <span className="block">sur le terrain.</span>
+          <span className="block text-blue-electric">Aucune histoire</span>
+          <span className="block text-blue-electric">publiée pour l'instant.</span>
+        </h1>
+        <p className="font-sans text-sm md:text-lg text-cream/80 leading-relaxed font-light max-w-xl">
+          Le pipeline observe les modifications Wikipédia sur les articles
+          suivis. Aucune histoire automatique n'a encore franchi les filtres
+          de publication. Elles apparaîtront ici dès qu'un récit vérifiable
+          sera disponible.
+        </p>
+      </div>
     </section>
   );
 }

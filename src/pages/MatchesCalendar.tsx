@@ -116,7 +116,7 @@ export default function MatchesCalendar() {
       <main className="relative pt-[72px]">
         <MatchesHero />
         <MatchesStatsStrip stats={matchesStats} />
-        <FeaturedMatchDossier match={featuredMatch} />
+        {featuredMatch && <FeaturedMatchDossier match={featuredMatch} />}
         <MatchTrackingStatesExplainer />
 
         <MatchesFilterToolbar
@@ -155,7 +155,7 @@ export default function MatchesCalendar() {
 
         <TrackedScopeSection />
         <RecentMatchDossiers />
-        <NoStoryExplanationSection baseMatch={featuredMatch} />
+        {featuredMatch && <NoStoryExplanationSection baseMatch={featuredMatch} />}
         <MatchesFinalCTA />
 
       </main>

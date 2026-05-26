@@ -1,5 +1,6 @@
-import { createServerSupabaseClient, readPublishedSnapshot } from "../../_lib/supabase.js";
+import { createServerSupabaseClient } from "../../_lib/supabase.js";
 import { setPublicCache, sendServerError, firstQueryValue, type ApiRequest, type ApiResponse } from "../../_lib/http.js";
+import { entityTypeLabel, storyTypeLabel } from "../../_lib/labels.js";
 
 export default async function handler(
   request: ApiRequest,
@@ -9,11 +10,11 @@ export default async function handler(
     const supabase = createServerSupabaseClient();
     const queryStr = firstQueryValue(request.query?.q)?.trim().toLowerCase() || "";
 
-    // 1. Fetch live stats for search header
+    // 1. Real stats for search header — pas de fallback
     const { count: storiesCount } = await supabase
       .from("published_stories")
       .select("*", { count: "exact", head: true })
-      .eq("publication_status", "published");
+      .in("publication_status", ["published", "corrected"]);
 
     const { count: matchesCount } = await supabase
       .from("matches")
@@ -24,15 +25,16 @@ export default async function handler(
       .select("*", { count: "exact", head: true });
 
     const { count: tracesCount } = await supabase
-      .from("revision_traces")
-      .select("*", { count: "exact", head: true });
+      .from("public_trace_excerpts")
+      .select("trace_id", { count: "exact", head: true })
+      .eq("safe_to_publish", true);
 
     const demoStats = {
       indexedStories: storiesCount ?? 0,
       indexedMatches: matchesCount ?? 0,
       indexedSubjects: entitiesCount ?? 0,
       indexedPublicTraces: tracesCount ?? 0,
-      isDemo: false
+      isDemo: false,
     };
 
     const suggestions = [
@@ -41,35 +43,33 @@ export default async function handler(
         label: "Joueurs & Clubs",
         query: "sélection",
         filter: "entity" as const,
-        description: "Rechercher parmi les entités suivies."
+        description: "Rechercher parmi les sujets suivis.",
       },
       {
         id: "suggest-live-stories",
-        label: "Histoires validées",
+        label: "Histoires publiées",
         query: "divergence",
         filter: "story" as const,
-        description: "Retrouver des analyses comparatives de l'IA."
-      }
+        description: "Parcourir les récits publiés par le pipeline automatique.",
+      },
     ];
 
-    // If query is empty, return suggestions and the pre-computed snapshot default results
+    // 2. Si la requête est vide, on renvoie un index neutre (suggestions +
+    // catalogue vide). Pas de fallback snapshot.
     if (!queryStr) {
-      const snapshot = await readPublishedSnapshot("search");
-      if (snapshot) {
-        setPublicCache(response, 30);
-        response.status(200).json({
-          demoStats,
-          suggestions: snapshot.suggestions || suggestions,
-          allResults: snapshot.allResults || []
-        });
-        return;
-      }
+      setPublicCache(response, 30);
+      response.status(200).json({
+        demoStats,
+        suggestions,
+        allResults: [],
+      });
+      return;
     }
 
-    // 2. Perform live queries on relational tables
+    // 3. Live queries on relational tables. allResults reste vide si rien
+    // ne matche — pas de fallback snapshot, pas de copy IA.
     const allResults: any[] = [];
 
-    // Search entities
     const { data: entities } = await supabase
       .from("entities")
       .select("id, slug, canonical_label, type, subject_geography_label")
@@ -78,22 +78,22 @@ export default async function handler(
 
     if (entities) {
       for (const ent of entities) {
+        const label = entityTypeLabel(ent.type);
         allResults.push({
           id: `entity-${ent.id}`,
           type: "entity",
           title: ent.canonical_label,
-          excerpt: `Fiche de suivi pour ${ent.canonical_label} (${ent.type === "player" ? "Joueur" : "Équipe"}).`,
-          metadataLabel: `DOSSIER ${ent.type === "player" ? "JOUEUR" : "ÉQUIPE"} · SUIVI LIVE`,
+          excerpt: `Sujet suivi : ${ent.canonical_label}.`,
+          metadataLabel: `DOSSIER ${label}`,
           publicStatusLabel: "SUIVI EN COURS",
-          keywords: [ent.canonical_label.toLowerCase(), ent.type, "fiche"],
+          keywords: [ent.canonical_label.toLowerCase(), ent.type, "sujet"],
           route: `/entity/${ent.slug}`,
           available: true,
-          isDemo: false
+          isDemo: false,
         });
       }
     }
 
-    // Search matches
     const { data: matches } = await supabase
       .from("matches")
       .select("id, slug, team_a_label, team_b_label, stage_label")
@@ -106,23 +106,22 @@ export default async function handler(
           id: `match-${m.id}`,
           type: "match",
           title: `${m.team_a_label} — ${m.team_b_label}`,
-          excerpt: `Dossier de match pour l'affiche ${m.team_a_label} contre ${m.team_b_label} (${m.stage_label || "Tournoi"}).`,
-          metadataLabel: "DOSSIER MATCH · SYNTHÈSE LIVE",
+          excerpt: `Dossier de match : ${m.team_a_label} contre ${m.team_b_label}${m.stage_label ? ` (${m.stage_label})` : ""}.`,
+          metadataLabel: "DOSSIER MATCH",
           publicStatusLabel: "DOSSIER DISPONIBLE",
           keywords: [m.team_a_label.toLowerCase(), m.team_b_label.toLowerCase(), "match", "dossier"],
           route: `/match/${m.slug}`,
           available: true,
-          isDemo: false
+          isDemo: false,
         });
       }
     }
 
-    // Search stories
     const { data: stories } = await supabase
       .from("published_stories")
-      .select("id, slug, title, excerpt, story_type, label, languages")
+      .select("id, slug, title, excerpt, story_type, languages")
       .or(`title.ilike.%${queryStr}%,excerpt.ilike.%${queryStr}%`)
-      .eq("publication_status", "published")
+      .in("publication_status", ["published", "corrected"])
       .limit(10);
 
     if (stories) {
@@ -133,27 +132,14 @@ export default async function handler(
           subtype: s.story_type || "language_divergence",
           title: s.title,
           excerpt: s.excerpt || "",
-          metadataLabel: "HISTOIRE PUBLIÉE · ANALYSE IA",
-          languages: s.languages || ["FR"],
-          publicStatusLabel: (s.label || "HISTOIRE").toUpperCase(),
+          metadataLabel: "HISTOIRE PUBLIÉE",
+          languages: s.languages || [],
+          publicStatusLabel: storyTypeLabel(s.story_type),
           keywords: [s.title.toLowerCase(), "story", "histoire"],
           route: `/story/${s.slug}`,
           available: true,
-          isDemo: false
+          isDemo: false,
         });
-      }
-    }
-
-    // If no dynamic matches found, mix in or fallback to snapshot results matching keyword
-    if (allResults.length === 0) {
-      const snapshot = await readPublishedSnapshot("search");
-      if (snapshot && snapshot.allResults) {
-        const filteredSnapshotResults = snapshot.allResults.filter((res: any) => 
-          res.title.toLowerCase().includes(queryStr) || 
-          res.excerpt.toLowerCase().includes(queryStr) ||
-          res.keywords.some((k: string) => k.toLowerCase().includes(queryStr))
-        );
-        allResults.push(...filteredSnapshotResults);
       }
     }
 
@@ -161,7 +147,7 @@ export default async function handler(
     response.status(200).json({
       demoStats,
       suggestions,
-      allResults
+      allResults,
     });
   } catch (error) {
     console.error("Search API failed:", error);

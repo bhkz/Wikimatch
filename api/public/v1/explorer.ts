@@ -1,18 +1,19 @@
-import { createServerSupabaseClient, readPublishedSnapshot } from "../../_lib/supabase.js";
+import { createServerSupabaseClient } from "../../_lib/supabase.js";
 import { setPublicCache, sendServerError, type ApiRequest, type ApiResponse } from "../../_lib/http.js";
+import { countDistinctMonitoredLanguages, storyTypeLabel } from "../../_lib/labels.js";
 
 export default async function handler(
-  request: ApiRequest,
+  _request: ApiRequest,
   response: ApiResponse,
 ) {
   try {
     const supabase = createServerSupabaseClient();
 
-    // 1. Fetch live stats
+    // 1. Real stats only — pas de fallback snapshot
     const { count: storiesCount } = await supabase
       .from("published_stories")
       .select("*", { count: "exact", head: true })
-      .eq("publication_status", "published");
+      .in("publication_status", ["published", "corrected"]);
 
     const { count: entitiesCount } = await supabase
       .from("entities")
@@ -22,29 +23,23 @@ export default async function handler(
       .from("matches")
       .select("*", { count: "exact", head: true });
 
-    // Fallback to snapshot if there are no published stories yet
-    if (!storiesCount || storiesCount === 0) {
-      const snapshot = await readPublishedSnapshot("explorer");
-      if (snapshot) {
-        setPublicCache(response, 60);
-        response.status(200).json(snapshot);
-        return;
-      }
-    }
+    const monitoredLanguages = await countDistinctMonitoredLanguages(supabase);
 
-    // 2. Fetch published stories to build matrix/timeline dynamically
+    // 2. Fetch published stories to build matrix/timeline dynamically.
+    // Si la DB est vide, on renvoie des tableaux vides — le frontend
+    // affiche un empty state au lieu d'un placeholder maquillé.
     const { data: stories } = await supabase
       .from("published_stories")
       .select("*")
-      .eq("publication_status", "published")
+      .in("publication_status", ["published", "corrected"])
       .order("published_at", { ascending: false });
 
     const stats = {
       publishedStories: storiesCount ?? 0,
       mappedSubjects: entitiesCount ?? 0,
-      comparedEditions: 8,
+      comparedEditions: monitoredLanguages,
       documentedMatches: matchesCount ?? 0,
-      isDemo: false
+      isDemo: false,
     };
 
     const legend = [
@@ -86,30 +81,30 @@ export default async function handler(
       }
     ];
 
-    // Build timeline and matrix elements from live stories
+    // Build timeline and matrix elements from live stories (vides si DB vide)
     const timelineEvents = (stories ?? []).map((s, index) => ({
       id: `timeline-${s.id}`,
-      dateLabel: s.published_at ? new Date(s.published_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }).toUpperCase() : "RÉCENT",
+      dateLabel: s.published_at ? new Date(s.published_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }).toUpperCase() : "",
       order: index + 1,
       type: s.story_type || "language_divergence",
-      categoryLabel: (s.label || "HISTOIRE").toUpperCase(),
+      categoryLabel: storyTypeLabel(s.story_type),
       title: s.title,
-      matchLabel: s.meta_match_label || "Tournoi",
-      languages: s.languages || ["FR"],
+      matchLabel: s.meta_match_label || "",
+      languages: s.languages || [],
       route: `/story/${s.slug}`,
-      isDemo: false
+      isDemo: false,
     }));
 
     const matrixRows = (stories ?? []).map((s) => ({
       id: `matrix-${s.id}`,
       storyId: s.id,
       topicLabel: s.title,
-      matchLabel: s.meta_match_label || "Tournoi",
+      matchLabel: s.meta_match_label || "",
       type: s.story_type || "language_divergence",
       languages: s.matrix_languages_payload || {},
       conclusion: s.excerpt || "",
       route: `/story/${s.slug}`,
-      isDemo: false
+      isDemo: false,
     }));
 
     const anchors = (stories ?? [])
@@ -117,28 +112,28 @@ export default async function handler(
       .map((s) => ({
         id: `anchor-${s.id}`,
         storyId: s.id,
-        subjectLabel: s.geo_subject_label || "Sujet",
+        subjectLabel: s.geo_subject_label || "",
         subjectType: s.geo_subject_type || "player",
-        geographyLabel: s.geo_label || "Localisation",
+        geographyLabel: s.geo_label || "",
         latitude: s.geo_latitude!,
         longitude: s.geo_longitude!,
         type: s.story_type || "language_divergence",
         title: s.title,
         excerpt: s.excerpt || "",
-        languages: s.languages || ["FR"],
+        languages: s.languages || [],
         route: `/story/${s.slug}`,
-        isDemo: false
+        isDemo: false,
       }));
 
     const unmapped = (stories ?? [])
       .filter((s) => s.geo_latitude === null || s.geo_longitude === null)
       .map((s) => ({
         id: s.id,
-        label: s.label || "HISTOIRE MULTI-SUJETS",
+        label: storyTypeLabel(s.story_type),
         title: s.title,
-        reason: "Cette histoire concerne plusieurs entités ou n'a pas d'ancrage géographique unique.",
+        reason: "Cette histoire concerne plusieurs sujets ou n'a pas d'ancrage géographique unique.",
         route: `/story/${s.slug}`,
-        isDemo: false
+        isDemo: false,
       }));
 
     setPublicCache(response, 60);

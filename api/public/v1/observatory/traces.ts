@@ -235,25 +235,18 @@ export default async function handler(
       };
     });
 
-    // 5. High-quality structured source chain description (as fallback/placeholder)
-    const featuredSourceChain = {
-      storyId: "demo-divergence-001",
-      storyTitle: "Un même carton rouge. Trois traitements Wikipédia.",
-      storyRoute: "/story/demo-divergence",
-      categoryLabel: "DIVERGENCE ENTRE ÉDITIONS",
-      traceIds: [],
-      observation: "L'Observatoire compare les révisions en direct. Les écarts constatés alimentent la rédaction de WikiMatch.",
-      limitation: "Cette analyse décrit les articles observés en temps réel et respecte la stricte neutralité de Wikipédia.",
-      isDemo: false
-    };
+    // 5. Source chain : pas de fallback hardcodé. La vraie sourceChain sera
+    // calculée par le pattern matcher quand au moins une story publiée
+    // référence plusieurs traces via story_evidence. En attendant : null
+    // → le frontend affiche un empty state honnête.
+    const sourceChain = null;
 
-    // Construct the complete ObservatoryPageData payload
     const pageData = {
       stats,
       pipelineSteps,
       trackedArticles,
       traces,
-      sourceChain: featuredSourceChain
+      sourceChain,
     };
 
     setPublicCache(response, 30);

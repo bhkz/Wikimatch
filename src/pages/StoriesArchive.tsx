@@ -75,7 +75,7 @@ export default function StoriesArchive() {
 
   // Filter out the featured story from the grid if it's the exact same object and we're showing "Toutes"
   const gridStories = filteredStories.filter(
-    (s) => activeFilterId !== "all" || s.id !== featuredStory.id,
+    (s) => activeFilterId !== "all" || (featuredStory ? s.id !== featuredStory.id : true),
   );
 
   return (
@@ -86,7 +86,7 @@ export default function StoriesArchive() {
         <StoriesArchiveHero />
         <ArchiveStatsStrip stats={archiveStats} />
 
-        {activeFilterId === "all" && !searchQuery && (
+        {activeFilterId === "all" && !searchQuery && featuredStory && (
           <FeaturedArchiveStory story={featuredStory} />
         )}
 
@@ -104,10 +104,12 @@ export default function StoriesArchive() {
           isFiltering={activeFilterId !== "all" || searchQuery.length > 0}
         />
 
-        <FeaturedCollectionSection
-          collection={featuredCollection}
-          archiveStories={archiveStories}
-        />
+        {featuredCollection && (
+          <FeaturedCollectionSection
+            collection={featuredCollection}
+            archiveStories={archiveStories}
+          />
+        )}
 
         <MatchRecapsSection />
 

@@ -55,9 +55,9 @@ export type PublicDataMode = "demo" | "live";
 // --- Home --------------------------------------------------------------------
 
 export type HomePageData = {
-  featuredStory: PublishedStory;
+  featuredStory: PublishedStory | null;
   latestStories: PublishedStory[];
-  nextMatch: TrackedMatch;
+  nextMatch: TrackedMatch | null;
   observatoryData: ObservatoryTeaserType;
 };
 
@@ -94,7 +94,7 @@ export type EntityDetailPageData = {
 
 export type MatchesCalendarPageData = {
   stats: MatchesArchiveStats;
-  featured: TrackedMatchCard;
+  featured: TrackedMatchCard | null;
   allGroups: MatchDayGroup[];
 };
 
@@ -102,10 +102,10 @@ export type MatchesCalendarPageData = {
 
 export type StoriesArchivePageData = {
   stats: StoriesArchiveStats;
-  featured: StoryArchiveItem;
+  featured: StoryArchiveItem | null;
   filters: StoryArchiveFilter[];
   stories: StoryArchiveItem[];
-  collection: FeaturedCollection;
+  collection: FeaturedCollection | null;
 };
 
 // --- Explorer ----------------------------------------------------------------
@@ -135,7 +135,7 @@ export type ObservatoryPageData = {
   pipelineSteps: ObservatoryPipelineStep[];
   trackedArticles: ObservatoryTrackedArticle[];
   traces: ObservatoryTrace[];
-  sourceChain: ObservatoryStorySourceChain;
+  sourceChain: ObservatoryStorySourceChain | null;
 };
 
 // --- Methodology -------------------------------------------------------------
