@@ -1,0 +1,107 @@
+{
+  "entities": [
+    {
+      "slug": "2026-fifa-world-cup",
+      "type": "tournament",
+      "canonical_label": "2026 FIFA World Cup",
+      "wikidata_qid": "Q284163",
+      "subject_geography_label": "North America",
+      "subject_latitude": 39.8283,
+      "subject_longitude": -98.5795
+    },
+    {
+      "slug": "france-national-football-team",
+      "type": "team",
+      "canonical_label": "France national football team",
+      "wikidata_qid": null,
+      "subject_geography_label": "France",
+      "subject_latitude": 46.2276,
+      "subject_longitude": 2.2137
+    },
+    {
+      "slug": "belgium-national-football-team",
+      "type": "team",
+      "canonical_label": "Belgium national football team",
+      "wikidata_qid": null,
+      "subject_geography_label": "Belgium",
+      "subject_latitude": 50.5039,
+      "subject_longitude": 4.4699
+    },
+    {
+      "slug": "japan-national-football-team",
+      "type": "team",
+      "canonical_label": "Japan national football team",
+      "wikidata_qid": null,
+      "subject_geography_label": "Japan",
+      "subject_latitude": 36.2048,
+      "subject_longitude": 138.2529
+    },
+    {
+      "slug": "ren-ito-demo-goalkeeper",
+      "type": "player",
+      "canonical_label": "Ren Ito (demo goalkeeper)",
+      "wikidata_qid": null,
+      "subject_geography_label": "Japan",
+      "subject_latitude": 36.2048,
+      "subject_longitude": 138.2529
+    }
+  ],
+  "articles": [
+    {
+      "entity_slug": "2026-fifa-world-cup",
+      "wiki_code": "enwiki",
+      "language_code": "en",
+      "page_title": "2026 FIFA World Cup",
+      "canonical_url": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup",
+      "article_type": "tournament"
+    },
+    {
+      "entity_slug": "2026-fifa-world-cup",
+      "wiki_code": "frwiki",
+      "language_code": "fr",
+      "page_title": "Coupe du monde de football 2026",
+      "canonical_url": "https://fr.wikipedia.org/wiki/Coupe_du_monde_de_football_2026",
+      "article_type": "tournament"
+    },
+    {
+      "entity_slug": "france-national-football-team",
+      "wiki_code": "enwiki",
+      "language_code": "en",
+      "page_title": "France national football team",
+      "canonical_url": "https://en.wikipedia.org/wiki/France_national_football_team",
+      "article_type": "team"
+    },
+    {
+      "entity_slug": "france-national-football-team",
+      "wiki_code": "frwiki",
+      "language_code": "fr",
+      "page_title": "Équipe de France de football",
+      "canonical_url": "https://fr.wikipedia.org/wiki/%C3%89quipe_de_France_de_football",
+      "article_type": "team"
+    },
+    {
+      "entity_slug": "belgium-national-football-team",
+      "wiki_code": "enwiki",
+      "language_code": "en",
+      "page_title": "Belgium national football team",
+      "canonical_url": "https://en.wikipedia.org/wiki/Belgium_national_football_team",
+      "article_type": "team"
+    },
+    {
+      "entity_slug": "japan-national-football-team",
+      "wiki_code": "enwiki",
+      "language_code": "en",
+      "page_title": "Japan national football team",
+      "canonical_url": "https://en.wikipedia.org/wiki/Japan_national_football_team",
+      "article_type": "team"
+    },
+    {
+      "entity_slug": "japan-national-football-team",
+      "wiki_code": "frwiki",
+      "language_code": "fr",
+      "page_title": "Équipe du Japon de football",
+      "canonical_url": "https://fr.wikipedia.org/wiki/%C3%89quipe_du_Japon_de_football",
+      "article_type": "team"
+    }
+  ]
+}

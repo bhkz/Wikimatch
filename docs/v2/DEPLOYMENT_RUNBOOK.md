@@ -111,24 +111,41 @@ Correction recommandée sur un projet dédié V2 ou après backup :
 
 ## 4. Render
 
-Ne pas reconnecter Render tout de suite.
+Le worker V2 existe maintenant dans `worker/`.
 
-Raison : le repo V2 contient pour l'instant le frontend, l'API publique Vercel et les migrations Supabase. Le worker Render refactoré n'existe pas encore dans ce repo.
+Avant de connecter Render :
 
-Étapes plus tard, Phase 3 :
+```bash
+npm run seed:watchlist
+```
 
-1. Ajouter un dossier `worker/`.
-2. Porter le legacy `revision90-worker/src/ingest.ts` vers le schéma V2.
-3. Ajouter Dockerfile / start command Render.
-4. Connecter Render à `bhkz/Wikimatch`.
-5. Variables Render :
+Puis tester localement en dry-run :
+
+```bash
+npm run worker:dev
+```
+
+Render peut ensuite être connecté à `bhkz/Wikimatch` comme Background Worker.
+
+Configuration :
+
+```bash
+Build Command: npm install
+Start Command: npm run worker:start
+```
+
+Variables Render :
 
 ```bash
 SUPABASE_URL=...
 SUPABASE_SERVICE_KEY=...
 WIKIMEDIA_USER_AGENT=WikiMatch/2.0 (<contact>) Node
+WORKER_DRY_RUN=true
+WORKER_FETCH_DIFF=true
 LOG_LEVEL=info
 ```
+
+Passer `WORKER_DRY_RUN=false` seulement après lecture des premiers logs.
 
 ## 5. Ordre Exact
 
@@ -137,12 +154,12 @@ LOG_LEVEL=info
 3. Supabase : backup, migrations, seed snapshots.
 4. Vercel : passer `VITE_DATA_MODE=live` + ajouter `SUPABASE_URL` / `SUPABASE_SERVICE_KEY`.
 5. Smoke test public : `/`, `/stories`, `/story/demo-divergence`, `/matches`, `/match/demo-france-belgique`, `/entity/demo-japan-goalkeeper`, `/explorer`, `/observatoire`, `/methodology`, `/search`.
-6. Render : attendre Phase 3 worker.
+6. Render : connecter le Background Worker en `WORKER_DRY_RUN=true`, puis passer à `false` après validation des logs.
 
 ## 6. Ce Qu'il Ne Faut Pas Faire
 
 - Ne pas supprimer le projet Supabase sans backup.
 - Ne pas mettre `SUPABASE_SERVICE_KEY` dans une variable `VITE_*`.
-- Ne pas reconnecter Render avant que le worker V2 existe.
+- Ne pas passer Render en `WORKER_DRY_RUN=false` avant d'avoir seedé `wiki_articles` et inspecté les logs.
 - Ne pas écraser `bhkz/Revision90`.
 - Ne pas connecter le mode live Vercel avant d'avoir appliqué les migrations et seedé `public_page_snapshots`.
