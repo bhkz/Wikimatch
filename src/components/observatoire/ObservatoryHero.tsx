@@ -12,18 +12,18 @@ export default function ObservatoryHero() {
   };
 
   return (
-    <section className="relative min-h-[82svh] md:min-h-screen w-full flex flex-col justify-end overflow-hidden pt-32 pb-16 px-4 md:px-8 bg-cream text-navy border-b border-navy/10 scroll-m-20">
+    <section className="relative w-full flex flex-col justify-center overflow-hidden pt-20 pb-20 md:pt-24 md:pb-24 px-4 md:px-8 bg-cream text-navy border-b border-navy/10 scroll-m-20">
       
       {/* Background Graphic */}
       <motion.div 
          initial={{ opacity: 0 }}
          animate={{ opacity: 1 }}
          transition={{ duration: 1.5 }}
-         className="absolute inset-0 z-0 bg-cream flex items-center justify-center opacity-30 select-none pointer-events-none"
+         className="absolute inset-0 z-0 bg-cream flex items-center justify-end opacity-20 select-none pointer-events-none"
       >
          <div className="absolute inset-0 bg-gradient-to-t from-cream via-transparent to-transparent z-10" />
          
-         <div className="w-full max-w-7xl font-mono text-[8px] md:text-[10px] text-navy/20 leading-relaxed translate-x-4 md:translate-x-12 translate-y-12">
+         <div className="w-full max-w-xl font-mono text-[8px] md:text-[10px] text-navy/20 leading-relaxed pr-8 md:pr-24 translate-y-12">
             <div>+ He was sent off after an altercation</div>
             <div>+ with an opponent in the final minutes.</div>
             <div className="my-2">- 23:06:21 · EN</div>
@@ -34,16 +34,16 @@ export default function ObservatoryHero() {
          </div>
       </motion.div>
 
-      <div className="relative z-10 w-full max-w-screen-2xl mx-auto flex flex-col gap-8 md:gap-16">
+      <div className="relative z-10 w-full max-w-screen-2xl mx-auto flex flex-col gap-4 md:gap-6">
         
-        <div className="flex flex-col items-start gap-4">
+        <div className="flex flex-col items-start gap-2">
           <DemoBadge text="DÉMONSTRATION D’INTERFACE · TRACES FICTIVES · AUCUNE DONNÉE RÉELLE" />
           <div className="font-mono text-[10px] sm:text-xs text-navy/60 uppercase tracking-widest font-bold">
             OBSERVATOIRE · SOURCES ET TRACES · WIKIMATCH
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-12 mt-8 md:mt-24">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-12 mt-4 md:mt-6">
           <div className="flex flex-col gap-6 md:w-2/3">
             <h1 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl uppercase tracking-wide leading-[0.85] text-navy">
                <span className="block overflow-hidden pb-1">

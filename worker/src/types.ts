@@ -22,6 +22,7 @@ export interface MonitoredArticle {
   languageCode: string;
   pageTitle: string;
   canonicalUrl: string;
+  articleType: string;
 }
 
 export interface RevisionTraceInsert {

@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from "motion/react";
 import { ObservatoryTrace, ObservatoryChangeStatus } from "../../types";
 import TraceInspectorDrawer from "./TraceInspectorDrawer";
 import { Link } from "react-router-dom";
+import { dataProvider } from "../../data";
 
 export default function ObservatoryTraceBrowser({ traces }: { traces: ObservatoryTrace[] }) {
   const [activeStatus, setActiveStatus] = useState<ObservatoryChangeStatus | "all">("all");
   const [selectedTrace, setSelectedTrace] = useState<ObservatoryTrace | null>(
-    traces.find(t => t.id === "trace-incident-en-added") || null
+    traces.find(t => t.id === "trace-incident-en-added") || traces[0] || null
   );
 
   const filteredTraces = activeStatus === "all"
@@ -19,9 +20,16 @@ export default function ObservatoryTraceBrowser({ traces }: { traces: Observator
       <div className="w-full max-w-screen-2xl mx-auto flex flex-col gap-12">
         
         <div className="flex flex-col gap-4">
-          <div className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-widest text-[#e63946] bg-navy/5 px-4 py-2 border border-[#e63946]/20 w-fit mb-4">
-             REJEU FICTIF · AUCUN FLUX WIKIPÉDIA CONNECTÉ
-          </div>
+          {dataProvider.mode === "live" ? (
+            <div className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-widest text-[#2a9d8f] bg-navy/5 px-4 py-2 border border-[#2a9d8f]/20 w-fit mb-4">
+               ● FLUX TEMPS RÉEL ACTIF · WIKIPÉDIA CONNECTÉ
+            </div>
+          ) : (
+            <div className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-widest text-[#e63946] bg-navy/5 px-4 py-2 border border-[#e63946]/20 w-fit mb-4">
+               REJEU FICTIF · AUCUN FLUX WIKIPÉDIA CONNECTÉ
+            </div>
+          )}
+
           <h2 className="font-display text-5xl md:text-7xl uppercase tracking-wide text-navy">
             EXPLORER<br/><span className="text-navy/40">LES TRACES OBSERVÉES</span>
           </h2>

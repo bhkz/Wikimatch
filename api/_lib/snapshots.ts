@@ -5,8 +5,8 @@ import {
   setPublicCache,
   type ApiRequest,
   type ApiResponse,
-} from "./http";
-import { readPublishedSnapshot } from "./supabase";
+} from "./http.js";
+import { readPublishedSnapshot } from "./supabase.js";
 
 export async function sendSnapshot(
   request: ApiRequest,

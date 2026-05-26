@@ -17,6 +17,7 @@ import { isRevertComment } from "./revert";
 import { fetchDiff, diffUrl, revisionUrl } from "./wiki-diff";
 import { startHealthServer, updateHealthSnapshot } from "./health-server";
 import { supabase } from "./supabase";
+import { runAutomatedAIAnalysis } from "./ai.js";
 import type {
   MonitoredArticle,
   PrivateContentInsert,
@@ -63,6 +64,9 @@ interface TraceQueueItem {
   receivedAt: Date;
   trace: RevisionTraceInsert | null;
   privateDiff: Omit<PrivateContentInsert, "trace_id"> | null;
+  articleTitle?: string;
+  languageCode?: string;
+  articleType?: string;
 }
 
 class WikiMatchWorker {
@@ -183,7 +187,7 @@ class WikiMatchWorker {
 
   private async buildTrace(
     data: WikimediaRecentChange,
-  ): Promise<Pick<TraceQueueItem, "trace" | "privateDiff"> | null> {
+  ): Promise<Omit<TraceQueueItem, "eventId" | "receivedAt"> | null> {
     const pre = preFilter(data);
     if (!pre.kept || !data.wiki || !data.title) return null;
 
@@ -236,7 +240,13 @@ class WikiMatchWorker {
       `[ingest] matched ${article.wikiCode} ${article.pageTitle} ${diffStr} chars${revert ? " [revert]" : ""}`,
     );
 
-    return { trace, privateDiff };
+    return {
+      trace,
+      privateDiff,
+      articleTitle: article.pageTitle,
+      languageCode: article.languageCode,
+      articleType: article.articleType,
+    };
   }
 
   private enqueue(item: TraceQueueItem): void {
@@ -283,6 +293,73 @@ class WikiMatchWorker {
         }
 
         this.stats.inserted += traces.length;
+
+        // Loop through the batch to automatically run AI Analysis and publish
+        for (const item of batch) {
+          if (!item.trace || !item.privateDiff) continue;
+
+          const traceId = traceIdsByEvent.get(item.trace.wikimedia_event_id);
+          if (!traceId) continue;
+
+          const added = item.privateDiff.raw_added_text;
+          const removed = item.privateDiff.raw_removed_text;
+          const title = item.articleTitle || "";
+          const lang = item.languageCode || "";
+          const type = item.articleType || "";
+
+          console.log(`[AI] Analyse automatique démarrée pour la trace ${traceId} (${title})...`);
+
+          try {
+            const aiRes = await runAutomatedAIAnalysis(title, lang, type, added, removed);
+            if (aiRes.allowed && aiRes.result) {
+              const res = aiRes.result;
+
+              // 1. Insert in public_trace_excerpts
+              const { error: excError } = await supabase
+                .from("public_trace_excerpts")
+                .upsert({
+                  trace_id: traceId,
+                  public_added_excerpt: res.translated_excerpt ? added : null,
+                  public_removed_excerpt: null,
+                  translated_excerpt: res.translated_excerpt,
+                  source_attribution_label: `Wikipedia (${lang}) — révision ${item.trace.revision_id}`,
+                  source_revision_url: item.trace.source_revision_url,
+                  license_label: "CC BY-SA 4.0",
+                  safe_to_publish: true,
+                  reviewed_at: new Date().toISOString(),
+                }, { onConflict: "trace_id" });
+              if (excError) throw excError;
+
+              // 2. Update revision_traces
+              const { error: rtUpdateError } = await supabase
+                .from("revision_traces")
+                .update({
+                  public_status: res.public_status,
+                  change_kind: res.change_kind,
+                  ingest_status: "published_evidence",
+                })
+                .eq("id", traceId);
+              if (rtUpdateError) throw rtUpdateError;
+
+              // 3. Save AI Analysis run cost
+              const { error: runError } = await supabase
+                .from("ai_analysis_runs")
+                .insert({
+                  task_type: "automatic_ingest_analysis",
+                  provider: aiRes.provider,
+                  model_name: aiRes.modelName,
+                  prompt_version: "v2.0",
+                  output_json: res,
+                  estimated_cost_eur: aiRes.costEur,
+                });
+              if (runError) throw runError;
+
+              console.log(`[AI] ✅ Publication automatique réussie pour ${traceId} ! (Coût: ${aiRes.costEur} €, Provider: ${aiRes.provider})`);
+            }
+          } catch (aiErr) {
+            console.error(`[AI] ❌ Échec de l'analyse automatique de la trace ${traceId} :`, aiErr);
+          }
+        }
       }
 
       const last = batch.at(-1);

@@ -15,7 +15,7 @@ export async function loadIndex(): Promise<LoadedIndex> {
   while (true) {
     const { data, error } = await supabase
       .from("wiki_articles")
-      .select("id, entity_id, wiki_code, language_code, page_title, canonical_url")
+      .select("id, entity_id, wiki_code, language_code, page_title, canonical_url, article_type")
       .eq("monitoring_enabled", true)
       .range(from, from + pageSize - 1);
 
@@ -30,6 +30,7 @@ export async function loadIndex(): Promise<LoadedIndex> {
         languageCode: row.language_code,
         pageTitle: row.page_title,
         canonicalUrl: row.canonical_url,
+        articleType: row.article_type,
       });
     }
 
