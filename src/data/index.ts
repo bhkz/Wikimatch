@@ -14,10 +14,12 @@ function readMode(): PublicDataMode {
   return raw === "live" ? "live" : "demo";
 }
 
+export const publicDataMode: PublicDataMode = readMode();
+export const isDemoMode = publicDataMode === "demo";
+export const isLiveMode = publicDataMode === "live";
+
 export const dataProvider: PublicDataProvider =
-  readMode() === "live"
-    ? new LivePublicDataProvider()
-    : new DemoPublicDataProvider();
+  isLiveMode ? new LivePublicDataProvider() : new DemoPublicDataProvider();
 
 export type {
   EntityDetailPageData,

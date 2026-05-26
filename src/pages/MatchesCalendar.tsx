@@ -12,7 +12,7 @@ import NoStoryExplanationSection from "../components/matches/NoStoryExplanationS
 import MatchesFinalCTA from "../components/matches/MatchesFinalCTA";
 import MatchDaySection from "../components/matches/MatchDaySection";
 import { MatchesFilterState } from "../types";
-import { dataProvider, useAsyncData } from "../data";
+import { dataProvider, isDemoMode, isLiveMode, useAsyncData } from "../data";
 
 export default function MatchesCalendar() {
   const [filters, setFilters] = useState<MatchesFilterState>({
@@ -134,7 +134,7 @@ export default function MatchesCalendar() {
                   AUCUN MATCH DANS CETTE SÉLECTION
                 </div>
                 <p className="font-sans text-lg text-navy/60 font-light max-w-md leading-relaxed">
-                  Essayez un autre filtre ou revenez à l'ensemble des rencontres fictives suivies.
+Aucun match réel n'a encore été importé ou ne correspond aux filtres sélectionnés.
                 </p>
                 <button
                   onClick={() =>
@@ -154,8 +154,17 @@ export default function MatchesCalendar() {
         </div>
 
         <TrackedScopeSection />
-        <RecentMatchDossiers />
-        {featuredMatch && <NoStoryExplanationSection baseMatch={featuredMatch} />}
+        {isDemoMode ? (
+          <RecentMatchDossiers />
+        ) : (
+          <section className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10">
+            <div className="w-full max-w-screen-2xl mx-auto flex flex-col gap-4">
+              <div className="font-mono text-xs uppercase font-bold tracking-widest text-navy/40">DOSSIERS PUBLIÉS</div>
+              <p className="font-sans text-lg text-navy/60 font-light max-w-2xl">Aucun dossier publié pour le moment. Les dossiers apparaîtront uniquement à partir d'observations réellement produites par le pipeline.</p>
+            </div>
+          </section>
+        )}
+        {isDemoMode && featuredMatch && <NoStoryExplanationSection baseMatch={featuredMatch} />}
         <MatchesFinalCTA />
 
       </main>
