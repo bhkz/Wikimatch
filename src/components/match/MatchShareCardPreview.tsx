@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { isDemoMode } from "../../data";
 
 export default function MatchShareCardPreview() {
   return (
@@ -37,8 +38,8 @@ export default function MatchShareCardPreview() {
                <div className="font-display text-2xl tracking-wide uppercase text-cream/70 border-b border-cream/20 pb-4 w-full">
                  REVISION 90 · WIKIMATCH
                </div>
-               <div className="font-display text-5xl tracking-widest uppercase text-white leading-none mt-4">
-                 FRANCE <span className="text-blue-electric">—</span> BELGIQUE
+               <div className="font-display text-4xl tracking-widest uppercase text-white leading-none mt-4">
+                 APERÇU CARTE PARTAGE
                </div>
                <div className="font-mono text-[10px] font-bold tracking-widest uppercase text-blue-electric bg-blue-electric/10 px-4 py-2 border border-blue-electric/20 rounded">
                  LE MATCH VU DEPUIS WIKIPÉDIA
@@ -57,9 +58,11 @@ export default function MatchShareCardPreview() {
                 <span className="font-mono text-xs font-bold text-navy bg-cream px-2 py-1 rounded-sm">ES</span>
                 <span className="font-mono text-xs font-bold text-navy bg-cream px-2 py-1 rounded-sm">FR</span>
               </div>
+              {isDemoMode && (
               <div className="font-mono text-[8px] font-bold uppercase tracking-widest text-cream/40 px-2 py-1 border border-cream/10">
                 SCÉNARIO FICTIF · DÉMONSTRATION UI
               </div>
+              )}
             </div>
 
             {/* Hover indication */}

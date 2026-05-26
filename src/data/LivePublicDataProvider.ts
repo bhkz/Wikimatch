@@ -12,6 +12,7 @@ import type {
   StoriesArchivePageData,
   StoryDetailPageData,
 } from "./PublicDataProvider";
+import type { PublicSearchResult } from "../types";
 
 type RequestOptions = {
   notFoundReturnsNull?: boolean;
@@ -81,6 +82,24 @@ export class LivePublicDataProvider implements PublicDataProvider {
 
   async getSearchPageData(): Promise<SearchPageData> {
     return this.request<SearchPageData>("/search");
+  }
+
+  async searchPublicContent(
+    query: string,
+    filters?: { type?: string; language?: string | null },
+    signal?: AbortSignal,
+  ): Promise<PublicSearchResult[]> {
+    const params = new URLSearchParams();
+    params.set("q", query);
+    if (filters?.type && filters.type !== "all") params.set("type", filters.type);
+    if (filters?.language) params.set("language", filters.language);
+    const res = await fetch(`${this.baseUrl}/search?${params.toString()}`, {
+      headers: { Accept: "application/json" },
+      signal,
+    });
+    if (!res.ok) throw new Error(`API publique indisponible (${res.status}) pour /search`);
+    const body = await res.json();
+    return Array.isArray(body?.allResults) ? body.allResults : [];
   }
 
   private async request<T>(

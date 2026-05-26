@@ -8,13 +8,15 @@ export default function FeaturedCollectionSection({ collection, archiveStories }
     .map(id => archiveStories.find(s => s.id === id))
     .filter((s): s is StoryArchiveItem => s !== undefined);
 
+  if (stories.length === 0) return null;
+
   return (
     <section className="py-24 px-4 md:px-8 bg-navy text-cream border-b border-navy/10 overflow-hidden relative bg-grid-pattern">
       <div className="w-full max-w-screen-2xl mx-auto flex flex-col gap-16">
         
         <div className="flex flex-col gap-6 md:w-2/3 lg:w-1/2">
           <div className="font-mono text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-blue-electric/20 text-blue-electric border border-blue-electric/30 w-fit rounded-sm shadow-[0_0_10px_rgba(0,85,255,0.2)]">
-            {collection.label} · {collection.isDemo ? "CAS FICTIFS" : ""}
+            {collection.label}
           </div>
           <h2 className="font-display text-5xl md:text-6xl lg:text-7xl uppercase text-white leading-none">
             {collection.title}
@@ -65,7 +67,7 @@ export default function FeaturedCollectionSection({ collection, archiveStories }
         </div>
 
         <div className="flex justify-center lg:justify-start lg:pl-[104px] mt-8">
-           {/* For frontend demo, simply links to the story diverence or top of page */}
+           {/* Scroll back to top of archive */}
            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="border border-cream/20 text-cream px-8 py-4 font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-cream hover:text-navy transition-colors text-center shadow-lg">
              Explorer cette collection
            </button>

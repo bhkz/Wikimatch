@@ -42,9 +42,6 @@ export default function SearchHero() {
               </button>
             )}
           </div>
-          <div className="hidden md:block font-mono text-[10px] uppercase font-bold tracking-widest text-[#e63946] border border-[#e63946]/30 px-3 py-1 bg-[#e63946]/5">
-            DÉMONSTRATION D’INTERFACE · RECHERCHE SUR CONTENUS FICTIFS
-          </div>
         </div>
       </section>
     );
@@ -103,15 +100,6 @@ export default function SearchHero() {
               </button>
             ))}
           </div>
-        </div>
-
-        <div className="mt-8 p-4 border-l-2 border-[#e63946] bg-[#e63946]/5 font-sans text-sm text-white/80">
-          <strong className="text-[#e63946] font-mono text-[10px] uppercase tracking-widest block mb-1">
-            DÉMONSTRATION D’INTERFACE · RECHERCHE SUR CONTENUS FICTIFS ET
-            PUBLICS
-          </strong>
-          La recherche publique n’affiche que des contenus documentés ou des
-          traces déjà exposables dans l’Observatoire.
         </div>
       </div>
     </section>

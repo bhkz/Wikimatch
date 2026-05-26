@@ -193,6 +193,11 @@ export interface PublicDataProvider {
   getObservatoryPageData(): Promise<ObservatoryPageData>;
   getMethodologyPageData(): Promise<MethodologyPageData>;
   getSearchPageData(): Promise<SearchPageData>;
+  searchPublicContent(
+    query: string,
+    filters?: { type?: string; language?: string | null },
+    signal?: AbortSignal,
+  ): Promise<PublicSearchResult[]>;
 }
 
 export class NotImplementedError extends Error {

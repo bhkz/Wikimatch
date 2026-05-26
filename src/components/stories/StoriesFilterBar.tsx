@@ -37,7 +37,7 @@ export default function StoriesFilterBar({ filters, activeFilterId, onSelectFilt
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy/40" />
             <input 
               type="text"
-              placeholder="Rechercher dans les histoires fictives..."
+              placeholder="Rechercher dans les histoires publiées..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="w-full bg-white border border-navy/10 pl-10 pr-4 py-2 font-mono text-[10px] uppercase font-bold tracking-widest placeholder:text-navy/40 text-navy focus:outline-none focus:border-blue-electric transition-colors"
@@ -66,7 +66,7 @@ export default function StoriesFilterBar({ filters, activeFilterId, onSelectFilt
          </p>
       </div>
       
-      {/* Fake Advanced Filters Bottom Sheet / Dropdown */}
+      {/* Advanced Filters Bottom Sheet / Dropdown */}
       {showAdvanced && (
          <div className="w-full max-w-screen-2xl mx-auto mt-4 pt-4 border-t border-navy/10 font-mono text-[10px] uppercase tracking-widest bg-white p-6 shadow-xl relative z-40">
             <button onClick={() => setShowAdvanced(false)} className="absolute top-4 right-4 text-navy/40 hover:text-navy">
@@ -76,10 +76,10 @@ export default function StoriesFilterBar({ filters, activeFilterId, onSelectFilt
                <div className="flex flex-col gap-3">
                  <span className="font-bold text-navy border-b border-navy/5 pb-2">Match</span>
                  <button className="text-left text-navy/50 hover:text-blue-electric transition-colors">Tous les matchs</button>
-                 <button className="text-left text-navy">France — Belgique</button>
-                 <button className="text-left text-navy/50 hover:text-blue-electric transition-colors">Maroc — Croatie</button>
-                 <button className="text-left text-navy/50 hover:text-blue-electric transition-colors">Japon — Sénégal</button>
-                 <button className="text-left text-navy/50 hover:text-blue-electric transition-colors">Portugal — Uruguay</button>
+                 <button className="text-left text-navy">Match précis</button>
+                 <button className="text-left text-navy/50 hover:text-blue-electric transition-colors">Divergence</button>
+                 <button className="text-left text-navy/50 hover:text-blue-electric transition-colors">Sous le radar</button>
+                 <button className="text-left text-navy/50 hover:text-blue-electric transition-colors">Article instable</button>
                </div>
                <div className="flex flex-col gap-3">
                  <span className="font-bold text-navy border-b border-navy/5 pb-2">Édition linguistique</span>
