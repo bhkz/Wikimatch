@@ -81,6 +81,7 @@ import type {
   StoriesArchivePageData,
   StoryDetailPageData,
 } from "./PublicDataProvider";
+import type { PublicSearchResult } from "../types";
 
 /**
  * Implémentation "demo" du contrat PublicDataProvider.
@@ -192,6 +193,25 @@ export class DemoPublicDataProvider implements PublicDataProvider {
       faq: methodologyFaq,
       versions: methodologyVersions,
     };
+  }
+
+
+  async searchPublicContent(
+    query: string,
+    filters?: { type?: string; language?: string | null },
+  ): Promise<PublicSearchResult[]> {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    const base = publicSearchResults.filter((r) =>
+      r.title.toLowerCase().includes(q) ||
+      r.excerpt.toLowerCase().includes(q) ||
+      r.keywords.some((k) => k.toLowerCase().includes(q)),
+    );
+    return base.filter((r) => {
+      if (filters?.type && filters.type !== "all" && r.type !== filters.type) return false;
+      if (filters?.language && (!r.languages || !r.languages.includes(filters.language as any))) return false;
+      return true;
+    });
   }
 
   async getSearchPageData(): Promise<SearchPageData> {

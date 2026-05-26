@@ -20,7 +20,7 @@ export default function StoriesEditorialGrid({ stories, activeFilter, isFilterin
   }
 
   // To create a magazine layout, we will randomly or deterministically make some cards large
-  // For demo logic, we'll make the first one large if it's the "all" view.
+  // Layout rule: emphasize selected cards on larger breakpoints.
   
   return (
     <section className="py-16 px-4 md:px-8 bg-cream border-b border-navy/10 relative">

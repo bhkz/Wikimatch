@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import DemoBadge from "../DemoBadge";
+import { isDemoMode } from "../../data";
 import { Link } from "react-router-dom";
 
 export default function MatchesHero() {
@@ -34,7 +35,7 @@ export default function MatchesHero() {
       <div className="relative z-10 w-full max-w-screen-2xl mx-auto flex flex-col gap-8 md:gap-16">
         
         <div className="flex flex-col items-start gap-4">
-          <DemoBadge text="DÉMONSTRATION D’INTERFACE · CALENDRIER FICTIF · AUCUNE DONNÉE RÉELLE" />
+          {isDemoMode && <DemoBadge text="DÉMONSTRATION D’INTERFACE · CALENDRIER FICTIF · AUCUNE DONNÉE RÉELLE" />}
           <div className="font-mono text-[10px] sm:text-xs text-blue-electric uppercase tracking-widest font-bold">
             MATCHS SUIVIS · WIKIMATCH · WC26
           </div>
@@ -78,9 +79,11 @@ export default function MatchesHero() {
              <button className="bg-blue-electric text-white px-8 py-4 font-bold uppercase font-mono tracking-widest text-[10px] hover:bg-white hover:text-blue-electric transition-colors w-full md:w-auto text-center" onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
                Voir les matchs suivis
              </button>
+             {isDemoMode && (
              <Link to="/match/demo-france-belgique" className="border border-cream/20 bg-cream/5 text-cream px-8 py-4 font-bold uppercase font-mono tracking-widest text-[10px] hover:bg-cream/10 transition-colors w-full md:w-auto text-center">
                Découvrir un dossier publié
              </Link>
+             )}
           </motion.div>
         </div>
 

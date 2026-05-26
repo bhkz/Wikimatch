@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
-import DemoStateSwitcher from "../components/match/DemoStateSwitcher";
 import MatchHero from "../components/match/MatchHero";
 import MatchEditorialRecap from "../components/match/MatchEditorialRecap";
 import MatchStoriesGrid from "../components/match/MatchStoriesGrid";
@@ -15,11 +14,10 @@ import MatchSourcesSection from "../components/match/MatchSourcesSection";
 import MatchShareCardPreview from "../components/match/MatchShareCardPreview";
 import MatchFinalCTA from "../components/match/MatchFinalCTA";
 import { MatchPageState } from "../types";
-import { dataProvider, useAsyncData } from "../data";
+import { dataProvider, isDemoMode, useAsyncData } from "../data";
 
 export default function MatchDetail() {
   const { slug } = useParams();
-  const [matchState, setMatchState] = useState<MatchPageState>("post_match");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -43,39 +41,40 @@ export default function MatchDetail() {
   }
 
   if (state.status === "error" || state.data === null) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/matches" replace />;
+  }
+
+  if (!isDemoMode && (slug ?? "").startsWith("demo-")) {
+    return <Navigate to="/matches" replace />;
   }
 
   const {
-    match: demoMatch,
-    recap: demoRecap,
+    match,
+    recap,
     stories: matchStories,
     timeline: matchTimeline,
     comparison: matchComparison,
-    instability: demoInstability,
+    instability,
     trackedSubjects,
   } = state.data;
 
   // Create a copy of the match object with the current state applied
-  const currentMatch = { ...demoMatch, state: matchState };
+  const matchState = (match.state as MatchPageState) ?? "pre_match";
 
   return (
     <div className="min-h-screen bg-cream selection:bg-blue-electric selection:text-white pb-32 md:pb-0">
       <SiteHeader />
 
-      {/* State Switcher for Demo Purposes */}
-      <DemoStateSwitcher activeState={matchState} onChange={setMatchState} />
-
       <main className="relative pt-[124px] md:pt-[72px]">
-        <MatchHero match={currentMatch} />
+        <MatchHero match={match} />
 
         {matchState === "post_match" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <MatchEditorialRecap recap={demoRecap} />
+            <MatchEditorialRecap recap={recap} />
             <MatchStoriesGrid stories={matchStories} />
             <MatchNarrativeTimeline timeline={matchTimeline} />
             <MatchComparisonPreview comparison={matchComparison} />
-            <ArticleInstabilityFeature data={demoInstability} />
+            <ArticleInstabilityFeature data={instability} />
             <StabilizedFactsSection />
             <TrackedSubjectsSection subjects={trackedSubjects} />
             <MatchSourcesSection />
