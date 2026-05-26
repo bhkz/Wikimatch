@@ -216,15 +216,24 @@ Voir [[SECURITY_PRIVACY_RULES]] pour le détail. Résumé :
 - Extraits publics : `public_trace_excerpts` lisibles publiquement **seulement si** `safe_to_publish=true`.
 - User-Agent Wikimedia : email de contact réel et maintenu, conformément à la politique Wikimedia.
 
-## 9. Déploiement recommandé
+## 9. Déploiement (confirmé 2026-05-26)
 
-| Composant | Cible recommandée | Variables d'env requises |
-| --------- | ----------------- | ------------------------ |
-| Frontend V2 (Vite SPA) | Vercel (gratuit Pro), CDN devant | `VITE_DATA_MODE` (`demo`/`live`), `VITE_PUBLIC_API_BASE` |
-| API publique | Supabase Edge Functions **ou** Vercel Functions (TS) | clé Supabase **anon** ou service-role côté Function |
-| Base Postgres | Supabase project dédié V2 (séparé du legacy) | URL + service-role côté worker + auth pour le Desk |
-| Worker | Railway / Render Background Worker (legacy déjà documenté pour) | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `WIKIMEDIA_USER_AGENT`, `LOG_LEVEL` |
-| Desk privé (P5) | Sous-domaine séparé + auth Supabase | TBD |
+| Composant | Cible | Statut | Variables d'env requises |
+| --------- | ----- | ------ | ------------------------ |
+| Frontend V2 (Vite SPA) | **Vercel** + CDN | ✅ confirmé | `VITE_DATA_MODE` (`demo`/`live`), `VITE_PUBLIC_API_BASE`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
+| API publique | **Supabase Edge Functions** (reco) — Vercel Functions en seconde intention | ✅ confirmé (provider), 🟡 forme à arbitrer P2 | clé Supabase service-role côté Function uniquement, jamais côté client |
+| Base Postgres | **Supabase** (3 projets : dev/staging/prod, séparés du legacy) | ✅ confirmé | URL + service-role côté worker + auth pour le Desk |
+| Worker | **Render Background Worker** (`Dockerfile` legacy réutilisable) | ✅ confirmé | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `WIKIMEDIA_USER_AGENT`, `LOG_LEVEL` |
+| Desk privé (P5) | Vercel (sous-domaine `desk.…`) + auth Supabase | 🟡 à confirmer P5 | TBD |
+| Provider IA Desk (P5) | **OpenAI gpt-4o-mini primaire**, **Gemini fallback** | ✅ confirmé | `OPENAI_API_KEY`, `GEMINI_API_KEY`, `AI_DAILY_EUR_CAP=6.5` |
+
+**Configuration Vercel SPA** : `vercel.json` doit contenir une rewrite SPA pour `react-router-dom` BrowserRouter :
+
+```json
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
+```
 
 ## 10. Risques d'architecture identifiés
 

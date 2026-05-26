@@ -180,7 +180,8 @@ Plan par phases. Chaque phase a un périmètre, une définition de terminé (DoD
 - UI : liste candidats, détail candidat (diff privé, suggestions IA), action approve/reject.
 - Backend : endpoints `/api/desk/*` ([[PUBLIC_API_PROPOSAL]] §12).
 - IA isolée : `ai_analysis_runs` populated **uniquement** par actions Desk explicites. Pas d'IA dans le worker.
-- L'`interpret.ts` du legacy peut renaître ici, isolé, avec garde-fous (budget USD, cache, vocabulaire banni).
+- L'`interpret.ts` du legacy peut renaître ici, isolé, avec garde-fous (budget EUR, cache, vocabulaire banni).
+- **Provider IA confirmé (2026-05-26)** : **OpenAI `gpt-4o-mini`** primaire (réutilise le legacy `interpret.ts` quasi tel quel), **Gemini** en fallback automatique (`@google/genai` déjà dans `package.json`). Cap journalier `AI_DAILY_EUR_CAP=6.5` pour rester sous €200/mois all-in. Comptabilité par provider dans `ai_analysis_runs.metadata`.
 
 **Risques :**
 - IA qui publie automatiquement → contrôle d'accès strict : `editorial_reviews.decision='convert_to_story'` est l'unique chemin de publication.
@@ -223,19 +224,20 @@ Plan par phases. Chaque phase a un périmètre, une définition de terminé (DoD
 
 ## Blocages et décisions attendues
 
-| # | Sujet | Décision attendue avant |
-| - | ----- | ----------------------- |
-| 1 | Initialiser un Git dans le dossier V2 actuel ? (recommandé) | Phase 1 |
-| 2 | Conserver Supabase comme base V2 ? | Phase 2 |
-| 3 | API publique : Edge Functions Supabase vs Vercel Functions vs PostgREST ? | Phase 2 |
-| 4 | Conserver le worker legacy (refactor) ou repartir from-scratch ? Reco : **refactor** (cf. [[LEGACY_SALVAGE_AUDIT]] §3) | Phase 3 |
-| 5 | Source sportive officielle : laquelle ? Budget ? | Phase 6 |
-| 6 | Domaine de production / sous-domaine du Desk | Phase 5 |
-| 7 | Authentification du Desk : Supabase Auth (email OTP) suffisant ? | Phase 5 |
-| 8 | Modèle IA pour le Desk : `gpt-4o-mini` (legacy), Gemini (déjà SDK), Claude, autre ? Cap budget ? | Phase 5 |
-| 9 | Code-splitting frontend par route — accepter `React.lazy` (suspense) ? | Phase 1 ou 6 |
-| 10 | Tests : `vitest` + `@testing-library/react` + `playwright` ? | Phase 1 / 6 |
-| 11 | Retirer `@google/genai` et `express` du frontend V2 si non utilisés en prod ? | Phase 1 |
+| # | Sujet | Statut |
+| - | ----- | ------ |
+| 1 | Initialiser un Git dans le dossier V2 actuel ? (recommandé) | ✅ fait (branche `v2/audit-and-architecture`) |
+| 2 | Conserver Supabase comme base V2 ? | ✅ confirmé |
+| 3 | API publique : Edge Functions Supabase vs Vercel Functions vs PostgREST ? | 🟡 reco Supabase Edge Functions, à arbitrer en début P2 |
+| 4 | Conserver le worker legacy (refactor) ou repartir from-scratch ? | ✅ refactor confirmé (cf. [[LEGACY_SALVAGE_AUDIT]] §3) |
+| 5 | Source sportive officielle | 🟡 ouvert ; Wikipedia (page WC2026) en bootstrap P3 (cf. [[DATA_MODEL_PROPOSAL]] §4) |
+| 6 | Domaine de production / sous-domaine du Desk | 🟡 ouvert P5 |
+| 7 | Authentification du Desk | 🟡 reco Supabase Auth email OTP, à confirmer P5 |
+| 8 | Provider IA Desk + cap budget | ✅ confirmé : OpenAI `gpt-4o-mini` primaire + Gemini fallback, cap €200/mois (`AI_DAILY_EUR_CAP=6.5`) |
+| 9 | Hébergement (frontend, API, worker) | ✅ confirmé : Vercel + Supabase + Render |
+| 10 | Code-splitting frontend par route — `React.lazy` (suspense) ? | 🟡 reporté P6 (warning Vite déjà documenté) |
+| 11 | Tests : `vitest` + `@testing-library/react` + `playwright` ? | 🟡 ouvert (reco : socle minimal début P2) |
+| 12 | Retirer `@google/genai` et `express` du frontend V2 si non utilisés en prod ? | 🟡 **À NE PAS retirer** : `@google/genai` sera utilisé en fallback IA depuis le Desk P5 (cf. décision #8). `express` peut être retiré en P2 si non nécessaire au runtime AI Studio. |
 
 ---
 

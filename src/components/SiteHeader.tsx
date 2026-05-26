@@ -22,7 +22,7 @@ export default function SiteHeader() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-cream/80 backdrop-blur-md border-b-[0.5px] border-navy/10 transition-colors duration-300">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-cream/80 backdrop-blur-md border-b-[0.5px] border-navy/10 transition-colors duration-300 text-navy">
         <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-8 py-3 md:py-4 flex items-center justify-between">
           
           <div className="flex items-baseline gap-4">

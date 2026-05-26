@@ -28,13 +28,15 @@ export default function HeroSection({
         <div className="absolute inset-0 bg-grid-pattern-light opacity-10" />
       </motion.div>
 
-      {/* Floating Abstract Metadata (Decorative) */}
-      <div className="absolute top-1/3 right-1/4 hidden lg:flex flex-col gap-2 font-mono text-[10px] text-cream/40 items-end">
+      {/* Floating Abstract Metadata (Decorative) — anchored to the top of the
+          hero, well above the headline block which sits at the bottom via
+          justify-end. Hidden on small screens where the layout is single-column. */}
+      <div className="absolute top-24 right-8 xl:right-16 hidden lg:flex flex-col gap-2 font-mono text-[10px] text-cream/40 items-end z-0 pointer-events-none">
         <span>FR ................. [ 292 EDITS ]</span>
         <span>EN ................. [ 1.2K EDITS ]</span>
         <span>ES ................. [ 543 EDITS ]</span>
       </div>
-      <div className="absolute top-1/4 left-8 hidden lg:flex flex-col gap-2 font-mono text-[10px] text-cream/40">
+      <div className="absolute top-24 left-8 xl:left-16 hidden lg:flex flex-col gap-2 font-mono text-[10px] text-cream/40 z-0 pointer-events-none">
         <span>ARTICLE COMPARÉ</span>
         <span>VERSION OBSERVÉE</span>
         <span>SOURCES DISPONIBLES</span>
@@ -43,7 +45,7 @@ export default function HeroSection({
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-screen-2xl mx-auto flex flex-col gap-8 md:gap-12">
         <div className="flex flex-col gap-4">
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
@@ -51,8 +53,8 @@ export default function HeroSection({
           >
             WIKIMATCH · COUPE DU MONDE 2026 · MÉDIA DATA INDÉPENDANT
           </motion.p>
-          
-          <h1 className="font-display text-[4rem] leading-[0.9] sm:text-[6rem] md:text-[8rem] lg:text-[10vw] uppercase tracking-wide">
+
+          <h1 className="font-display text-[3.5rem] leading-[0.9] sm:text-[5rem] md:text-[6rem] lg:text-[7rem] xl:text-[8.5rem] 2xl:text-[10rem] uppercase tracking-wide">
             <span className="block overflow-hidden">
               <motion.span initial={{ y: "100%" }} animate={{ y: "0%" }} transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }} className="block">Le match se joue</motion.span>
             </span>
