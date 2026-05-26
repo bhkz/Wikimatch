@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useMemo, ReactNode, useEffect } from "react";
+import { dataProvider, isLiveMode } from "../../data";
 import type {
   PublicSearchResult,
   SearchFilterType,
@@ -45,8 +46,25 @@ export function CustomSearchProvider({
       ? "results"
       : "idle";
 
+  const [liveResults, setLiveResults] = useState<PublicSearchResult[]>([]);
+
+  useEffect(() => {
+    if (!isLiveMode || searchState === "idle") return;
+    const ctrl = new AbortController();
+    dataProvider
+      .searchPublicContent(
+        debouncedQuery,
+        { type: activeFilter, language: activeLang },
+        ctrl.signal,
+      )
+      .then(setLiveResults)
+      .catch(() => setLiveResults([]));
+    return () => ctrl.abort();
+  }, [debouncedQuery, activeFilter, activeLang, searchState]);
+
   const results = useMemo(() => {
     if (searchState === "idle") return [];
+    if (isLiveMode) return liveResults;
 
     const lowerQuery = debouncedQuery.toLowerCase();
 
@@ -64,7 +82,7 @@ export function CustomSearchProvider({
 
       return true;
     });
-  }, [debouncedQuery, activeFilter, activeLang, searchState, allResults]);
+  }, [debouncedQuery, activeFilter, activeLang, searchState, allResults, liveResults]);
 
   const clearSearch = () => {
     setQuery("");
