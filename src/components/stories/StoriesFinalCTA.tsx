@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 
-export default function StoriesFinalCTA() {
+export default function StoriesFinalCTA({ nextMatchRoute }: { nextMatchRoute?: string }) {
   return (
     <section className="relative min-h-[70vh] flex flex-col items-center justify-center py-32 px-4 md:px-8 text-cream overflow-hidden">
       
@@ -31,9 +31,11 @@ export default function StoriesFinalCTA() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full sm:w-auto">
-          <Link to="/match/demo-france-belgique" className="bg-blue-electric text-white px-8 py-4 font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-blue-electric transition-colors w-full sm:w-auto text-center shadow-lg">
-            Voir le prochain match suivi
+          {nextMatchRoute && (
+          <Link to={nextMatchRoute} className="bg-blue-electric text-white px-8 py-4 font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-blue-electric transition-colors w-full sm:w-auto text-center shadow-lg">
+            Voir un match suivi
           </Link>
+          )}
           <button className="bg-transparent border border-cream/20 text-cream px-8 py-4 font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-cream/10 transition-colors w-full sm:w-auto text-center cursor-not-allowed hidden md:block">
             Être averti des prochaines histoires
           </button>

@@ -27,9 +27,6 @@ export default function FeaturedArchiveStory({ story }: { story: StoryArchiveIte
             />
             <div className="absolute inset-0 bg-gradient-to-t from-navy via-transparent to-transparent opacity-80" />
             
-            <div className="absolute bottom-6 left-6 font-mono text-[10px] font-bold text-cream uppercase tracking-widest bg-navy/80 px-2 py-1">
-              CAS FICTIF · DÉMONSTRATION UI
-            </div>
           </div>
 
           {/* Right: Content */}
@@ -46,21 +43,6 @@ export default function FeaturedArchiveStory({ story }: { story: StoryArchiveIte
               </p>
             </div>
 
-            {/* Visual comparison preview */}
-            <div className="mt-12 mb-12 flex flex-col gap-3 font-mono text-xs uppercase tracking-widest text-navy border-l-2 border-blue-electric/30 pl-4 w-full md:w-fit">
-               <div className="flex justify-between md:justify-start items-center gap-8">
-                 <span className="font-bold w-6">EN</span>
-                 <span className="text-navy/60">Altercation + sanction</span>
-               </div>
-               <div className="flex justify-between md:justify-start items-center gap-8">
-                 <span className="font-bold w-6">ES</span>
-                 <span className="text-navy/60 pl-0 md:pl-[3px]">Sanction uniquement</span>
-               </div>
-               <div className="flex justify-between md:justify-start items-center gap-8">
-                 <span className="font-bold w-6">FR</span>
-                 <span className="text-navy/40 pl-0 md:pl-[8px]">Aucune mention équivalente</span>
-               </div>
-            </div>
 
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mt-auto pt-8 border-t border-navy/10">
                <div className="flex flex-col gap-2 font-mono text-[10px] uppercase font-bold tracking-widest text-navy/50">
