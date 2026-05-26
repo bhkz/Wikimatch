@@ -1,5 +1,4 @@
 import { motion } from "motion/react";
-import DemoBadge from "../DemoBadge";
 
 export default function StoriesArchiveHero() {
   const titleLines = ["LES HISTOIRES", "QUE LE MATCH", "LAISSE DANS", "WIKIPÉDIA."];
@@ -34,7 +33,6 @@ export default function StoriesArchiveHero() {
       <div className="relative z-10 w-full max-w-screen-2xl mx-auto flex flex-col gap-8 md:gap-16">
         
         <div className="flex flex-col items-start gap-4">
-          <DemoBadge text="DÉMONSTRATION D’INTERFACE · HISTOIRES FICTIVES · AUCUNE DONNÉE RÉELLE" />
           <div className="font-mono text-[10px] sm:text-xs text-blue-electric uppercase tracking-widest font-bold">
             ARCHIVES ÉDITORIALES · WIKIMATCH · WC26
           </div>

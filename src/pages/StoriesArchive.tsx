@@ -78,6 +78,8 @@ export default function StoriesArchive() {
     (s) => activeFilterId !== "all" || (featuredStory ? s.id !== featuredStory.id : true),
   );
 
+  const nextMatchRoute = archiveStories.find((s) => s.type === "match_recap")?.availableDetailRoute;
+
   return (
     <div className="min-h-screen bg-cream selection:bg-blue-electric selection:text-white">
       <SiteHeader />
@@ -111,11 +113,11 @@ export default function StoriesArchive() {
           />
         )}
 
-        <MatchRecapsSection />
+        <MatchRecapsSection stories={archiveStories} />
 
         <ArchiveMethodologyBlock />
 
-        <StoriesFinalCTA />
+        <StoriesFinalCTA nextMatchRoute={nextMatchRoute} />
       </main>
 
       <SiteFooter />

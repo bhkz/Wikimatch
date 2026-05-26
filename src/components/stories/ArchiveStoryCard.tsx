@@ -31,10 +31,7 @@ export default function ArchiveStoryCard({ story, isLarge = false }: { story: St
            <span className="font-mono text-[10px] uppercase font-bold tracking-widest px-2 py-1 bg-white text-navy border border-navy/10">
              {story.categoryLabel}
            </span>
-           <span className={`font-mono text-[8px] uppercase font-bold tracking-widest ${isRecap ? 'text-white/50' : 'text-navy/40'} border ${isRecap ? 'border-white/20' : 'border-navy/10'} px-2 py-1`}>
-             DÉMO
-           </span>
-        </div>
+       </div>
 
         {/* Content Body */}
         <div className="p-6 md:p-8 flex flex-col gap-4 flex-grow relative overflow-hidden">
@@ -78,7 +75,7 @@ export default function ArchiveStoryCard({ story, isLarge = false }: { story: St
         {/* Bottom Bar */}
         <div className={`px-6 md:px-8 py-4 border-t border-navy/10 flex justify-between items-center font-mono text-[10px] uppercase font-bold tracking-widest text-navy transition-colors ${destination === "#" ? "hover:bg-red-signal/5 hover:text-red-signal cursor-not-allowed" : "hover:bg-navy/5"}`}>
           <span>
-            {destination === "#" ? "Page détail non construite (démo)" : "Lire l'histoire"}
+            {destination === "#" ? "Page détail indisponible" : "Lire l'histoire"}
           </span>
           <span className="text-sm">→</span>
         </div>
