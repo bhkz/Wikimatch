@@ -2,6 +2,19 @@
 
 Plan par phases. Chaque phase a un périmètre, une définition de terminé (DoD), des risques et des tests.
 
+## État global au 2026-05-27
+
+| Phase | Statut | Lien |
+| ----- | ------ | ---- |
+| Phase 0 — Audit V2 + legacy + docs | ✅ Livré | §Phase 0 |
+| Phase 1 — Data layer demo/live | ✅ Livré | §Phase 1 |
+| Phase 2 — Backend public + Supabase schema | ✅ Schéma livré ; endpoints API en place et purgés du fallback démo (cf. [[CORRECTIVE_AUDIT_2026-05-27]]) | §Phase 2 |
+| Phase 3 — Worker ingestion Wikimedia | ✅ Livré (worker fait collecte uniquement après corrective Jalon A) | §Phase 3 |
+| **Corrective Audit 2026-05-27** | ✅ Livré (4 jalons A→D) | [[CORRECTIVE_AUDIT_2026-05-27]] |
+| Phase 4 — Observatoire sur données contrôlées | 🟡 Dépend de la prod du pipeline auto contraint | §Phase 4 |
+| Phase 5 — Desk privé (modèle initial) | ❌ Remplacé par "automatique contraint" + kill switch admin (Corrective Jalon D) | — |
+| Phase 6 — Données réelles & lancement | 🟡 Reste à câbler les données sportives officielles | §Phase 6 |
+
 ## Phase 0 — Audit (CETTE PHASE, en cours / livré)
 
 **Périmètre :**
