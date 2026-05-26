@@ -12,6 +12,8 @@
     "seed:snapshots": "tsx scripts/seed-public-page-snapshots.ts",
     "seed:watchlist": "tsx scripts/seed-worker-watchlist.ts",
     "trace:promote": "tsx scripts/promote-trace.ts",
+    "start": "tsx runtime/src/index.ts",
+    "runtime:dev": "tsx runtime/src/index.ts",
     "worker:dev": "tsx worker/src/ingest.ts",
     "worker:start": "tsx worker/src/ingest.ts",
     "analyzer:dev": "tsx watch analyzer/src/index.ts",

@@ -75,48 +75,35 @@ Ajoute (en `Production`, `Preview` et `Development`) :
 
 Garde ce token de côté : il sert à appeler `POST /api/admin/retract`.
 
-### A.4 — Configurer les 3 workers Render (≈10 min)
+### A.4 — Configurer le service Render unique (≈5 min)
 
-Va dans https://render.com → **New → Background Worker** (ou utilise le `render.yaml` du repo via **Blueprint**).
+Un seul service Render (`revision90`) lance les 3 jobs dans le même process Node via [runtime/src/index.ts](../../runtime/src/index.ts) — chaque job tourne en sous-process tsx, mais Render ne voit qu'un service. Le `render.yaml` à la racine est le blueprint.
 
-Le fichier [`render.yaml`](../../render.yaml) à la racine du repo définit déjà les 3 services :
+**Variables à poser dans Render → Settings → Environment :**
 
-#### `wikimatch-worker` (collecte SSE Wikimedia)
+| Catégorie | Variable | Valeur |
+| --------- | -------- | ------ |
+| Supabase | `SUPABASE_URL` | `https://<projet>.supabase.co` |
+| Supabase | `SUPABASE_SERVICE_KEY` | `eyJ...` (service_role) |
+| Worker SSE | `WIKIMEDIA_USER_AGENT` | `WikiMatch/2.0 (thomas.david9492@gmail.com) Node` |
+| Worker SSE | `WORKER_DRY_RUN` | `true` ← bascule en `false` après vérif |
+| Worker SSE | `WORKER_FETCH_DIFF` | `true` |
+| Analyzer | `OPENAI_API_KEY` | `sk-...` |
+| Analyzer | `GEMINI_API_KEY` | `AIza...` |
+| Analyzer | `AI_DAILY_EUR_CAP` | `6.50` |
+| Analyzer | `ANALYZER_DRY_RUN` | `true` ← bascule en `false` après le worker |
+| Analyzer | `ANALYZER_POLL_INTERVAL_MS` | `10000` |
+| Analyzer | `ANALYZER_BATCH_SIZE` | `5` |
+| Patterns | `PATTERNS_DRY_RUN` | `true` ← bascule en `false` en dernier |
+| Patterns | `PATTERNS_POLL_INTERVAL_MS` | `30000` |
+| Commun | `LOG_LEVEL` | `info` |
 
-| Variable | Valeur |
-| -------- | ------ |
-| `SUPABASE_URL` | (même qu'au-dessus) |
-| `SUPABASE_SERVICE_KEY` | (même) |
-| `WIKIMEDIA_USER_AGENT` | `WikiMatch/2.0 (thomas.david9492@gmail.com) Node` |
-| `WORKER_DRY_RUN` | `false` ← **à basculer après vérification** ; laisse `true` d'abord |
-| `WORKER_FETCH_DIFF` | `true` |
-| `LOG_LEVEL` | `info` |
+**Vars à supprimer si présentes** (leftover) :
+- `AI_DAILY_USD_CAP` (n'existe nulle part dans le code)
 
-#### `wikimatch-analyzer` (extracteur de propositions)
+**Start command Render** : `npm start` (déjà déclaré dans `render.yaml`). Si ton service existant a une vieille `startCommand` du type `npm run worker:start`, change-la en `npm start`.
 
-| Variable | Valeur |
-| -------- | ------ |
-| `SUPABASE_URL` | (même) |
-| `SUPABASE_SERVICE_KEY` | (même) |
-| `OPENAI_API_KEY` | `sk-...` (la clé que tu as) |
-| `GEMINI_API_KEY` | `AIza...` (la clé que tu as) |
-| `AI_DAILY_EUR_CAP` | `6.50` |
-| `ANALYZER_DRY_RUN` | `true` ← **commence en dry run** |
-| `ANALYZER_POLL_INTERVAL_MS` | `10000` |
-| `ANALYZER_BATCH_SIZE` | `5` |
-| `LOG_LEVEL` | `info` |
-
-#### `wikimatch-patterns` (pattern matcher + templates + safety)
-
-| Variable | Valeur |
-| -------- | ------ |
-| `SUPABASE_URL` | (même) |
-| `SUPABASE_SERVICE_KEY` | (même) |
-| `PATTERNS_DRY_RUN` | `true` ← **commence en dry run** |
-| `PATTERNS_POLL_INTERVAL_MS` | `30000` |
-| `LOG_LEVEL` | `info` |
-
-Tu peux aussi laisser les 3 `DRY_RUN=true` par défaut (déjà dans `render.yaml`) ; Render synchronise les valeurs sauf si tu les définis manuellement.
+**Optionnel — désactiver un job** : ajoute `RUNTIME_RUN_WORKER=false`, `RUNTIME_RUN_ANALYZER=false` ou `RUNTIME_RUN_PATTERNS=false` selon ce que tu veux couper temporairement.
 
 ### A.5 — Déployer (≈5 min)
 
@@ -138,11 +125,12 @@ Tous les services tournent avec écriture désactivée :
 - `wikimatch-analyzer` en `ANALYZER_DRY_RUN=true` → log les propositions qu'il extrairait, **n'écrit pas**.
 - `wikimatch-patterns` en `PATTERNS_DRY_RUN=true` → log les patterns détectés et leur résultat safety, **ne publie pas**.
 
-Pendant cette période, tu surveilles **les logs Render** des 3 services :
+Pendant cette période, tu surveilles **les logs Render** du service unique. Les 3 jobs préfixent leurs lignes :
 
-- Worker : `[ingest] matched <wiki> <title> +123 chars` — tu dois voir des matches sur des articles de ta watchlist.
-- Analyzer : `[stats] {"processed":N,"noise":..,"ai_calls":..,"regex_calls":..}` (toutes les 60s).
-- Patterns : `[publisher] DRY_RUN — pattern=article_instability safety=OK title="..."` — tu vois les stories que le pipeline veut publier.
+- `[runtime] starting <name>` / `[runtime] ❌ <name> exited unexpectedly` — supervisor.
+- `[ingest] matched <wiki> <title> +123 chars` — worker : matches sur ta watchlist.
+- `[stats] {"processed":N,"noise":..,"ai_calls":..,"regex_calls":..}` — analyzer toutes les 60s.
+- `[publisher] DRY_RUN — pattern=article_instability safety=OK title="..."` — patterns : stories que le pipeline veut publier.
 
 **Critères pour basculer en live :**
 
