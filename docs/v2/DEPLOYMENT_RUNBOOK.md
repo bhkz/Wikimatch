@@ -93,6 +93,22 @@ SUPABASE_SERVICE_KEY=...
 
 Ce seed publie les 10 contrats de pages V2 dans `public_page_snapshots`. Il ne branche pas encore Wikimedia.
 
+### Erreur `column "wikidata_qid" does not exist`
+
+Cette erreur signifie que le projet Supabase n'est pas vide et contient déjà
+une ancienne table `public.entities`. Comme la migration utilise
+`create table if not exists`, Postgres garde l'ancienne table au lieu de créer
+la table V2.
+
+Correction recommandée sur un projet dédié V2 ou après backup :
+
+1. Ouvrir `supabase/RESET_PUBLIC_SCHEMA_FOR_V2.sql`.
+2. L'exécuter dans Supabase SQL Editor.
+3. Relancer ensuite, dans l'ordre :
+   - `202605260001_v2_core_schema.sql`
+   - `202605260002_public_page_snapshots.sql`
+4. Lancer `npm run seed:snapshots`.
+
 ## 4. Render
 
 Ne pas reconnecter Render tout de suite.
