@@ -1,4 +1,5 @@
-import { createContext, useState, useContext, useMemo, ReactNode } from "react";
+import { createContext, useState, useContext, useMemo, ReactNode, useEffect } from "react";
+import { dataProvider, isLiveMode } from "../../data";
 import type {
   PublicSearchResult,
   SearchFilterType,
@@ -15,9 +16,7 @@ interface SearchContextType {
   results: PublicSearchResult[];
   searchState: "idle" | "results";
   clearSearch: () => void;
-  /** All public results available in the current data mode. Read-only. */
   allResults: PublicSearchResult[];
-  /** Query suggestions surfaced in the Hero / EmptyState. Read-only. */
   suggestions: SearchSuggestion[];
 }
 
@@ -33,21 +32,43 @@ export function CustomSearchProvider({
   suggestions: SearchSuggestion[];
 }) {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<SearchFilterType>("all");
   const [activeLang, setActiveLang] = useState<string | null>(null);
 
+  useEffect(() => {
+    const t = window.setTimeout(() => setDebouncedQuery(query), 300);
+    return () => window.clearTimeout(t);
+  }, [query]);
+
   const searchState =
-    query.trim() !== "" || activeFilter !== "all" || activeLang !== null
+    debouncedQuery.trim() !== "" || activeFilter !== "all" || activeLang !== null
       ? "results"
       : "idle";
 
+  const [liveResults, setLiveResults] = useState<PublicSearchResult[]>([]);
+
+  useEffect(() => {
+    if (!isLiveMode || searchState === "idle") return;
+    const ctrl = new AbortController();
+    dataProvider
+      .searchPublicContent(
+        debouncedQuery,
+        { type: activeFilter, language: activeLang },
+        ctrl.signal,
+      )
+      .then(setLiveResults)
+      .catch(() => setLiveResults([]));
+    return () => ctrl.abort();
+  }, [debouncedQuery, activeFilter, activeLang, searchState]);
+
   const results = useMemo(() => {
     if (searchState === "idle") return [];
+    if (isLiveMode) return liveResults;
 
-    const lowerQuery = query.toLowerCase();
+    const lowerQuery = debouncedQuery.toLowerCase();
 
     return allResults.filter((res) => {
-      // 1. Text match
       const textMatch =
         res.title.toLowerCase().includes(lowerQuery) ||
         res.excerpt.toLowerCase().includes(lowerQuery) ||
@@ -55,25 +76,17 @@ export function CustomSearchProvider({
         (res.matchLabel && res.matchLabel.toLowerCase().includes(lowerQuery)) ||
         (res.entityLabel && res.entityLabel.toLowerCase().includes(lowerQuery));
 
-      if (!textMatch && query.trim() !== "") return false;
-
-      // 2. Type filter
+      if (!textMatch && debouncedQuery.trim() !== "") return false;
       if (activeFilter !== "all" && res.type !== activeFilter) return false;
-
-      // 3. Lang filter
-      if (
-        activeLang &&
-        (!res.languages || !res.languages.includes(activeLang as any))
-      ) {
-        return false;
-      }
+      if (activeLang && (!res.languages || !res.languages.includes(activeLang as any))) return false;
 
       return true;
     });
-  }, [query, activeFilter, activeLang, searchState, allResults]);
+  }, [debouncedQuery, activeFilter, activeLang, searchState, allResults, liveResults]);
 
   const clearSearch = () => {
     setQuery("");
+    setDebouncedQuery("");
     setActiveFilter("all");
     setActiveLang(null);
   };

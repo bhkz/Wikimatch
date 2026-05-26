@@ -20,15 +20,15 @@ export default function SearchContentTypesSection() {
     {
       title: "DOSSIER MATCH",
       desc: "Les histoires validées issues d’une même rencontre.",
-      example: "France — Belgique.",
-      query: "France Belgique",
+      example: "Un match suivi dans l’archive.",
+      query: "match",
       filter: "match",
     },
     {
       title: "SUJET DOCUMENTÉ",
       desc: "Un joueur ou une équipe ayant fait l’objet d’un dossier public.",
-      example: "Ren Ito · personnage fictif.",
-      query: "Ren Ito",
+      example: "Un joueur documenté dans plusieurs éditions.",
+      query: "joueur",
       filter: "entity",
     },
     {
