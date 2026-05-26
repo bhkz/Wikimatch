@@ -2,15 +2,13 @@ import { motion } from "motion/react";
 import { StoriesArchiveStats } from "../../types";
 
 export default function ArchiveStatsStrip({ stats }: { stats: StoriesArchiveStats }) {
+  const total = stats.storyCount + stats.matchCount + stats.languageCount + stats.sourceCount;
+  if (total === 0) return null;
+
   return (
     <section className="bg-cream border-b border-navy/10 relative z-20 py-8 px-4 md:px-8">
       <div className="w-full max-w-screen-2xl mx-auto flex flex-col gap-6">
         
-        <div className="flex justify-between items-center">
-          <div className="font-mono text-[10px] sm:text-xs font-bold uppercase tracking-widest text-navy/40 px-2 py-1 border border-navy/10 rounded-sm">
-            EXEMPLE D’INTERFACE · DONNÉES FICTIVES
-          </div>
-        </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 relative text-navy border-t border-navy/10 pt-6">
           <StatBlock label="histoires publiées" value={stats.storyCount} delay={0.1} />
