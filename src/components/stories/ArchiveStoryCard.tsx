@@ -5,7 +5,7 @@ import { StoryArchiveItem } from "../../types";
 export default function ArchiveStoryCard({ story, isLarge = false }: { story: StoryArchiveItem, isLarge?: boolean }) {
   
   // Decide target route
-  // For demo, only specific stories have routes built
+  // Use available route when present, otherwise keep card non-navigable
   let destination = "#";
   if (story.availableDetailRoute) {
     destination = story.availableDetailRoute;

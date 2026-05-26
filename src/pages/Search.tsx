@@ -8,8 +8,6 @@ import SearchResultsList from "../components/search/SearchResultsList";
 import SearchEmptyState from "../components/search/SearchEmptyState";
 import SearchPublicIndexScopeSection from "../components/search/SearchPublicIndexScopeSection";
 import SearchFinalNavigation from "../components/search/SearchFinalNavigation";
-import SearchRenItoDemoJourney from "../components/search/SearchRenItoDemoJourney";
-import SearchRedCardDemoJourney from "../components/search/SearchRedCardDemoJourney";
 import SearchRecommendedEntries from "../components/search/SearchRecommendedEntries";
 import {
   CustomSearchProvider,
@@ -46,28 +44,10 @@ function SearchContent() {
               <div className="flex-1 w-full lg:max-w-2xl">
                 <SearchResultsList />
               </div>
-
-              <div className="hidden lg:block w-full lg:w-[400px] xl:w-[480px] shrink-0 sticky top-48 self-start">
-                {query.toLowerCase().includes("ren ito") && (
-                  <SearchRenItoDemoJourney />
-                )}
-                {query.toLowerCase().includes("carton rouge") && (
-                  <SearchRedCardDemoJourney />
-                )}
-              </div>
             </div>
           ) : (
             <SearchEmptyState />
           )}
-
-          <div className="lg:hidden mt-16 border-t border-white/10 pt-12">
-            {query.toLowerCase().includes("ren ito") && (
-              <SearchRenItoDemoJourney />
-            )}
-            {query.toLowerCase().includes("carton rouge") && (
-              <SearchRedCardDemoJourney />
-            )}
-          </div>
 
           <div className="mt-32">
             <SearchPublicIndexScopeSection />
