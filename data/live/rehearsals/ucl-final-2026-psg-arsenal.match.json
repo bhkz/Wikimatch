@@ -1,0 +1,31 @@
+{
+  "_comment": "UCL Final 2025-26 rehearsal match definition. Verified 2026-05-27. Home/away order: UEFA has not officially designated home/away for the final (neutral venue). PSG is listed as home for technical watchlist mapping only.",
+  "source": {
+    "name": "UEFA",
+    "url": "https://www.uefa.com/uefachampionsleague/news/02a5-2092f53360cc-8ee51562d99f-1000--when-is-the-champions-league-final-where-you-are-what-time-i/",
+    "verified_at": "2026-05-27T00:00:00+02:00"
+  },
+  "match": {
+    "slug": "2026-ucl-final-psg-arsenal",
+    "competitionLabel": "UEFA Champions League 2025/26",
+    "stageLabel": "Finale",
+    "groupLabel": null,
+    "scheduledAt": "2026-05-30T18:00:00+02:00",
+    "venue": "Puskás Aréna, Budapest, Hungary",
+    "homeTeam": {
+      "slug": "paris-saint-germain",
+      "label": "Paris Saint-Germain",
+      "wikidataQid": "Q483020"
+    },
+    "awayTeam": {
+      "slug": "arsenal",
+      "label": "Arsenal",
+      "wikidataQid": "Q9617"
+    },
+    "officialSourceName": "UEFA",
+    "officialSourceUrl": "https://www.uefa.com/uefachampionsleague/news/02a5-2092f53360cc-8ee51562d99f-1000--when-is-the-champions-league-final-where-you-are-what-time-i/"
+  },
+  "_uncertainties": {
+    "homeAway": "UEFA Champions League finals are played at a neutral venue. The home/away designation is determined by UEFA draw. PSG is listed as home for technical watchlist mapping only and may not reflect the official draw order. Verify with UEFA official match sheet before the match."
+  }
+}

@@ -23,7 +23,10 @@
     "import:wc26:schedule": "tsx scripts/import-wc26-schedule.ts",
     "resolve:wc26:articles": "tsx scripts/resolve-wc26-wiki-articles.ts",
     "build:wc26:watchlists": "tsx scripts/build-wc26-match-watchlists.ts",
-    "verify:wc26:coverage": "tsx scripts/verify-wc26-live-coverage.ts"
+    "verify:wc26:coverage": "tsx scripts/verify-wc26-live-coverage.ts",
+    "import:rehearsal:match": "tsx scripts/import-rehearsal-match.ts",
+    "seed:rehearsal:watchlist": "tsx scripts/seed-worker-watchlist.ts --file worker/seeds/ucl-final-2026-rehearsal.watchlist.json",
+    "build:rehearsal:watchlist": "tsx scripts/build-rehearsal-match-watchlist.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

@@ -1,0 +1,58 @@
+{
+  "_comment": "Rehearsal watchlist for UCL Final 2025-26: PSG vs Arsenal, 30 May 2026, Budapest. All article titles verified via Wikipedia API on 2026-05-27. Limited to en/fr/es for controlled rehearsal scope. No players included — to be added later based on match events.",
+  "entities": [
+    {
+      "slug": "2026-ucl-final-psg-arsenal",
+      "type": "match",
+      "canonical_label": "Paris Saint-Germain — Arsenal · Finale UEFA Champions League 2026",
+      "wikidata_qid": null,
+      "subject_geography_label": "Budapest, Hungary",
+      "subject_latitude": null,
+      "subject_longitude": null
+    },
+    {
+      "slug": "paris-saint-germain",
+      "type": "team",
+      "canonical_label": "Paris Saint-Germain FC",
+      "wikidata_qid": "Q483020",
+      "subject_geography_label": "Paris, France",
+      "subject_latitude": null,
+      "subject_longitude": null
+    },
+    {
+      "slug": "arsenal",
+      "type": "team",
+      "canonical_label": "Arsenal F.C.",
+      "wikidata_qid": "Q9617",
+      "subject_geography_label": "London, England",
+      "subject_latitude": null,
+      "subject_longitude": null
+    },
+    {
+      "slug": "ucl-2025-26",
+      "type": "tournament",
+      "canonical_label": "UEFA Champions League 2025–26",
+      "wikidata_qid": null,
+      "subject_geography_label": "Europe",
+      "subject_latitude": null,
+      "subject_longitude": null
+    }
+  ],
+  "articles": [
+    { "entity_slug": "2026-ucl-final-psg-arsenal", "wiki_code": "enwiki", "language_code": "en", "page_title": "2026 UEFA Champions League final", "canonical_url": "https://en.wikipedia.org/wiki/2026_UEFA_Champions_League_final", "article_type": "match" },
+    { "entity_slug": "2026-ucl-final-psg-arsenal", "wiki_code": "frwiki", "language_code": "fr", "page_title": "Finale de la Ligue des champions de l'UEFA 2025-2026", "canonical_url": "https://fr.wikipedia.org/wiki/Finale_de_la_Ligue_des_champions_de_l%27UEFA_2025-2026", "article_type": "match" },
+    { "entity_slug": "2026-ucl-final-psg-arsenal", "wiki_code": "eswiki", "language_code": "es", "page_title": "Final de la Liga de Campeones de la UEFA 2025-26", "canonical_url": "https://es.wikipedia.org/wiki/Final_de_la_Liga_de_Campeones_de_la_UEFA_2025-26", "article_type": "match" },
+
+    { "entity_slug": "paris-saint-germain", "wiki_code": "enwiki", "language_code": "en", "page_title": "Paris Saint-Germain FC", "canonical_url": "https://en.wikipedia.org/wiki/Paris_Saint-Germain_FC", "article_type": "team" },
+    { "entity_slug": "paris-saint-germain", "wiki_code": "frwiki", "language_code": "fr", "page_title": "Paris Saint-Germain Football Club", "canonical_url": "https://fr.wikipedia.org/wiki/Paris_Saint-Germain_Football_Club", "article_type": "team" },
+    { "entity_slug": "paris-saint-germain", "wiki_code": "eswiki", "language_code": "es", "page_title": "Paris Saint-Germain Football Club", "canonical_url": "https://es.wikipedia.org/wiki/Paris_Saint-Germain_Football_Club", "article_type": "team" },
+
+    { "entity_slug": "arsenal", "wiki_code": "enwiki", "language_code": "en", "page_title": "Arsenal F.C.", "canonical_url": "https://en.wikipedia.org/wiki/Arsenal_F.C.", "article_type": "team" },
+    { "entity_slug": "arsenal", "wiki_code": "frwiki", "language_code": "fr", "page_title": "Arsenal Football Club", "canonical_url": "https://fr.wikipedia.org/wiki/Arsenal_Football_Club", "article_type": "team" },
+    { "entity_slug": "arsenal", "wiki_code": "eswiki", "language_code": "es", "page_title": "Arsenal Football Club", "canonical_url": "https://es.wikipedia.org/wiki/Arsenal_Football_Club", "article_type": "team" },
+
+    { "entity_slug": "ucl-2025-26", "wiki_code": "enwiki", "language_code": "en", "page_title": "2025–26 UEFA Champions League", "canonical_url": "https://en.wikipedia.org/wiki/2025%E2%80%9326_UEFA_Champions_League", "article_type": "tournament" },
+    { "entity_slug": "ucl-2025-26", "wiki_code": "frwiki", "language_code": "fr", "page_title": "Ligue des champions de l'UEFA 2025-2026", "canonical_url": "https://fr.wikipedia.org/wiki/Ligue_des_champions_de_l%27UEFA_2025-2026", "article_type": "tournament" },
+    { "entity_slug": "ucl-2025-26", "wiki_code": "eswiki", "language_code": "es", "page_title": "Liga de Campeones de la UEFA 2025-26", "canonical_url": "https://es.wikipedia.org/wiki/Liga_de_Campeones_de_la_UEFA_2025-26", "article_type": "tournament" }
+  ]
+}
