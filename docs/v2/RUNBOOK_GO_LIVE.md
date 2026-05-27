@@ -141,9 +141,10 @@ Ce protocole ultra-conservateur sert uniquement à vérifier que les services d�
 Ce mode est le plus riche pour la préparation. Il permet de collecter les vraies modifications Wikipédia et de voir précisément ce que le pipeline IA aurait publié, sans que rien n'apparaisse publiquement sur ton site Vercel.
 * `WORKER_DRY_RUN=false` → **Le worker écrit les traces réelles** de la watchlist dans `revision_traces` et `trace_private_content`.
 * `ANALYZER_DRY_RUN=false` → **L'analyzer écrit les propositions réelles** de modifications dans `trace_propositions` et `ai_analysis_runs`.
-* `PATTERNS_DRY_RUN=true` → **Le pattern matcher tourne en mode simulation (Dry-Run)**. Il examine les propositions réelles et logue en détails les résultats :
-  `[publisher] DRY_RUN — pattern=article_instability safety=OK title="..."`
-  Cela te permet d'inspecter les titres générés, les extraits de sources et la qualité rédactionnelle directement dans les logs de Render.
+* `PATTERNS_DRY_RUN=true` → **Le pattern matcher tourne en mode simulation (Dry-Run)**. Il examine les propositions réelles et logue en détails les candidats détectés sous forme de structure JSON complète :
+  `[publisher] DRY_RUN_CANDIDATE {"pattern_type":..., "safety_passed":..., "title":..., "excerpt":..., "observation_text":..., "interpretation_text":..., "limitation_text":..., "languages":..., "source_count":...}`
+  Cela te permet d'inspecter l'intégralité de la copy éditoriale générée par les templates de stories (titre, observation, interprétation, limitation, langues, sources) directement dans les logs de Render, sans qu'aucun diff brut privé de contributeurs ne soit exposé.
+  *Note de confort :* Les candidats identiques sont dédupliqués en mémoire pendant la durée de vie du processus Render afin d'éviter de polluer tes logs à chaque cycle de polling ; un redémarrage du service Render peut toutefois produire de nouveaux logs pour un même candidat.
 * `AUTO_PUBLICATION_ENABLED=false` → **Verrou de sécurité absolu.** Même si une erreur de manipulation passait `PATTERNS_DRY_RUN` à `false` sur Render, le verrou de sécurité intercepterait la publication automatique et bloquerait toute insertion en DB de story publique, renvoyant un statut `PUBLICATION DISABLED`.
 
 ---
@@ -155,8 +156,13 @@ Configure tes variables Render selon le **Protocole 2 (Recommandé)** ci-dessus.
 
 #### Étape 2 : Analyse post-match (Après le match)
 1. Va dans ton éditeur SQL Supabase et examine les traces et les propositions réelles recueillies pour voir la réactivité du worker.
-2. Ouvre les logs Render du service `wikimatch-patterns` et recherche les lignes préfixées par `[publisher] DRY_RUN`.
-3. Analyse les candidats détectés : Est-ce qu'il y a eu des faux positifs ? Les titres et observations étaient-ils fidèles à la réalité ? La safety a-t-elle bloqué des candidats suspects ?
+2. Ouvre les logs Render du service `wikimatch-patterns` et recherche les lignes préfixées par `[publisher] DRY_RUN_CANDIDATE`.
+3. Analyse en détail la copy narrative générée :
+   * La pertinence et la fidélité des observations rédigées ;
+   * La prudence et la nuance apportées par l'interprétation ;
+   * L'honnêteté et la clarté de la limitation ;
+   * La validité des filtres de safety (si un candidat est marqué `safety_passed: false`, tu pourras voir son `safety_reason` associé).
+4. Tu peux également suivre l'évolution des déduplications via les statistiques régulières `[stats]` du service contenant le compteur `dry_run_duplicates_skipped`.
 
 #### Étape 3 : Bascule progressive vers le Live Public
 Une fois que tu as validé manuellement la pertinence des logs observés pendant le match de test :

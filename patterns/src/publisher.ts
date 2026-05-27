@@ -42,11 +42,18 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
 
   // Dry-run : expose dans les logs ce que le moteur aurait tenté de publier, sans aucune écriture en base.
   if (PATTERNS_DRY_RUN) {
-    console.log(
-      `[publisher] DRY_RUN — pattern=${pattern.pattern_type} ` +
-        `safety=${safety.passed ? "OK" : safety.reason} ` +
-        `title="${tmpl.title}"`,
-    );
+    console.log(`[publisher] DRY_RUN_CANDIDATE ${JSON.stringify({
+      pattern_type: pattern.pattern_type,
+      safety_passed: safety.passed,
+      safety_reason: safety.reason ?? null,
+      title: tmpl.title,
+      excerpt: tmpl.excerpt,
+      observation_text: tmpl.observation_text,
+      interpretation_text: tmpl.interpretation_text,
+      limitation_text: tmpl.limitation_text,
+      languages: tmpl.languages,
+      source_count: tmpl.source_count,
+    })}`);
     return { status: "dry_run", reason: safety.passed ? undefined : safety.reason };
   }
 
