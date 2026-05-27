@@ -13,63 +13,9 @@ export default async function handler(
   }
 
   try {
-    const supabase = createServerSupabaseClient();
-
-    const { data: story } = await supabase
-      .from("published_stories")
-      .select("*")
-      .eq("slug", slug)
-      .in("publication_status", ["published", "corrected"])
-      .is("retracted_at", null)
-      .not("slug", "like", "demo-%")
-      .maybeSingle();
-
-    if (!story) {
-      // Pas de fallback snapshot.
-      sendNotFound(response);
-      return;
-    }
-
-    const { data: relatedStories } = await supabase
-      .from("published_stories")
-      .select("slug")
-      .eq("story_type", story.story_type)
-      .in("publication_status", ["published", "corrected"])
-      .is("retracted_at", null)
-      .not("slug", "like", "demo-%")
-      .neq("id", story.id)
-      .order("published_at", { ascending: false })
-      .limit(3);
-
-    const relatedStoryIds = (relatedStories ?? []).map((s: any) => s.slug);
-
-    const responsePayload = {
-      story: {
-        id: story.id,
-        slug: story.slug,
-        type: story.story_type || "language_divergence",
-        categoryLabel: storyTypeLabel(story.story_type),
-        title: story.title,
-        subtitle: story.excerpt || "",
-        publishedAt: story.published_at
-          ? new Date(story.published_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
-          : "",
-        matchLabel: story.meta_match_label || "",
-        matchStage: story.meta_match_stage || "",
-        eventLabel: story.geo_subject_label || "",
-        languages: [],
-        isDemo: false,
-        observedSummary: story.observation_text || "",
-        interpretationSummary: story.interpretation_text || "",
-        limitationSummary: story.limitation_text || "",
-        languageStates: story.detail_language_states_payload || [],
-        timeline: story.detail_timeline_payload || [],
-        relatedStoryIds,
-      },
-    };
-
-    setPublicCache(response, 30);
-    response.status(200).json(responsePayload);
+    // Strictly disabled for now
+    sendNotFound(response);
+    return;
   } catch (error) {
     console.error("Story Detail API failed:", error);
     sendServerError(response);

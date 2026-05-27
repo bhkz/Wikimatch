@@ -9,16 +9,8 @@ export default async function handler(
   try {
     const supabase = createServerSupabaseClient();
 
-    // 1. Fetch live stories. Pas de fallback snapshot.
-    const { data: storiesData } = await supabase
-      .from("published_stories")
-      .select("*")
-      .in("publication_status", ["published", "corrected"])
-      .is("retracted_at", null)
-      .not("slug", "like", "demo-%")
-      .order("published_at", { ascending: false });
-
-    const rawStories = storiesData ?? [];
+    // 1. Fetch live stories (strictly disabled for now)
+    const rawStories: any[] = [];
 
     // 2. Real counts only
     const { count: matchesCount } = await supabase
@@ -27,12 +19,11 @@ export default async function handler(
 
     const monitoredLanguages = await countDistinctMonitoredLanguages(supabase);
 
-    const totalSources = rawStories.reduce((acc, s) => acc + (s.source_count ?? 1), 0);
     const stats = {
-      storyCount: rawStories.length,
+      storyCount: 0,
       matchCount: matchesCount ?? 0,
       languageCount: monitoredLanguages,
-      sourceCount: totalSources,
+      sourceCount: 0,
       isDemo: false,
     };
 

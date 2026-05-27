@@ -7,13 +7,19 @@ export default function StoriesEditorialGrid({ stories, activeFilter, isFilterin
   if (stories.length === 0) {
     return (
       <section className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10 min-h-[50vh] flex items-center justify-center text-center">
-        <div className="flex flex-col gap-4 items-center">
-          <div className="font-mono text-xs uppercase font-bold tracking-widest text-navy/40 mb-4 px-4 py-2 border border-navy/10 inline-block">
-            AUCUNE HISTOIRE DANS CETTE SÉLECTION
+        <div className="flex flex-col gap-6 items-center max-w-xl">
+          <div className="font-mono text-xs uppercase font-bold tracking-widest text-navy/40 px-4 py-2 border border-navy/10 inline-block">
+            Aucune histoire documentée publiée pour le moment
           </div>
-          <p className="font-sans text-lg text-navy/60 font-light max-w-md leading-relaxed">
-            Dans la version réelle, WikiMatch n'affichera ici que les histoires effectivement vérifiées et publiées.
+          <p className="font-sans text-base md:text-lg text-navy/70 leading-relaxed font-light">
+            WikiMatch observe comment les grands matchs sont documentés dans plusieurs éditions de Wikipédia. Les premiers récits seront affichés uniquement lorsqu'ils pourront être reliés à un match réel et vérifiés dans les modifications sources.
           </p>
+          <a
+            href="/matches"
+            className="font-mono text-xs uppercase tracking-widest px-6 py-3 border border-navy/20 text-navy hover:bg-navy hover:text-cream transition-all duration-300 inline-block"
+          >
+            Voir les matchs observés
+          </a>
         </div>
       </section>
     );

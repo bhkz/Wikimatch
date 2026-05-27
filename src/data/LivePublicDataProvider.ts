@@ -36,28 +36,40 @@ export class LivePublicDataProvider implements PublicDataProvider {
     "/api/public/v1";
 
   async getHomePageData(): Promise<HomePageData> {
-    return this.request<HomePageData>("/home");
+    const data = await this.request<HomePageData>("/home");
+    return {
+      ...data,
+      featuredStory: null,
+      latestStories: [],
+    };
   }
 
   async getStoryBySlug(slug: string): Promise<StoryDetailPageData | null> {
-    return this.request<StoryDetailPageData>(
-      `/stories/${encodeURIComponent(slug)}`,
-      { notFoundReturnsNull: true },
-    );
+    return null;
   }
 
   async getMatchBySlug(slug: string): Promise<MatchDetailPageData | null> {
-    return this.request<MatchDetailPageData>(
+    const data = await this.request<MatchDetailPageData>(
       `/matches/${encodeURIComponent(slug)}`,
       { notFoundReturnsNull: true },
     );
+    if (!data) return null;
+    return {
+      ...data,
+      stories: [],
+    };
   }
 
   async getEntityBySlug(slug: string): Promise<EntityDetailPageData | null> {
-    return this.request<EntityDetailPageData>(
+    const data = await this.request<EntityDetailPageData>(
       `/entities/${encodeURIComponent(slug)}`,
       { notFoundReturnsNull: true },
     );
+    if (!data) return null;
+    return {
+      ...data,
+      featuredStory: null,
+    };
   }
 
   async getMatchesCalendarPageData(): Promise<MatchesCalendarPageData> {
@@ -65,11 +77,33 @@ export class LivePublicDataProvider implements PublicDataProvider {
   }
 
   async getStoriesArchivePageData(): Promise<StoriesArchivePageData> {
-    return this.request<StoriesArchivePageData>("/stories");
+    const data = await this.request<StoriesArchivePageData>("/stories");
+    return {
+      ...data,
+      stats: {
+        ...data.stats,
+        storyCount: 0,
+        sourceCount: 0,
+      },
+      featured: null,
+      stories: [],
+      collection: null,
+    };
   }
 
   async getExplorerPageData(): Promise<ExplorerPageData> {
-    return this.request<ExplorerPageData>("/explorer");
+    const data = await this.request<ExplorerPageData>("/explorer");
+    return {
+      ...data,
+      stats: {
+        ...data.stats,
+        publishedStories: 0,
+      },
+      anchors: [],
+      unmapped: [],
+      matrixRows: [],
+      timelineEvents: [],
+    };
   }
 
   async getObservatoryPageData(): Promise<ObservatoryPageData> {

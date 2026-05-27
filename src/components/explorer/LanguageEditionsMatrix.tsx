@@ -40,10 +40,12 @@ export default function LanguageEditionsMatrix({ rows }: { rows: ExplorerMatrixR
         </div>
 
         {rows.length === 0 ? (
-          <div className="bg-white border border-navy/10 p-12 text-center">
-            <div className="font-display text-3xl uppercase text-navy/40 mb-4">AUCUNE COMPARAISON PUBLIEE</div>
+          <div className="bg-white border border-navy/10 p-12 text-center max-w-xl mx-auto shadow-sm">
+            <div className="font-mono text-xs uppercase font-bold tracking-widest text-[#e63946] mb-4">
+              Aucune observation vérifiée disponible dans l'explorateur pour le moment.
+            </div>
             <p className="font-sans text-sm text-navy/60 font-light">
-              La matrice se remplira automatiquement quand le pipeline publiera des comparaisons entre editions.
+              La matrice se remplira automatiquement lorsque le pipeline d'observation publiera des analyses de modifications sources validées.
             </p>
           </div>
         ) : (

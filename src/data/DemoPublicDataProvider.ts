@@ -96,17 +96,14 @@ export class DemoPublicDataProvider implements PublicDataProvider {
 
   async getHomePageData(): Promise<HomePageData> {
     return {
-      featuredStory: homeFeaturedStory,
-      latestStories,
+      featuredStory: null,
+      latestStories: [],
       nextMatch,
       observatoryData,
     };
   }
 
   async getStoryBySlug(slug: string): Promise<StoryDetailPageData | null> {
-    if (slug === demoDivergenceStory.slug) {
-      return { story: demoDivergenceStory };
-    }
     return null;
   }
 
@@ -151,22 +148,34 @@ export class DemoPublicDataProvider implements PublicDataProvider {
 
   async getStoriesArchivePageData(): Promise<StoriesArchivePageData> {
     return {
-      stats: archiveStats,
-      featured: archiveFeaturedStory,
+      stats: {
+        storyCount: 0,
+        matchCount: archiveStats.matchCount,
+        languageCount: archiveStats.languageCount,
+        sourceCount: 0,
+        isDemo: true,
+      },
+      featured: null,
       filters: archiveFilters,
-      stories: archiveStories,
-      collection: featuredCollection,
+      stories: [],
+      collection: null,
     };
   }
 
   async getExplorerPageData(): Promise<ExplorerPageData> {
     return {
-      stats: explorerStats,
+      stats: {
+        publishedStories: 0,
+        mappedSubjects: explorerStats.mappedSubjects,
+        comparedEditions: explorerStats.comparedEditions,
+        documentedMatches: explorerStats.documentedMatches,
+        isDemo: true,
+      },
       legend: explorerLegend,
-      anchors: storyGeoAnchors,
-      unmapped: unmappedStories,
-      matrixRows: explorerMatrixRows,
-      timelineEvents: explorerTimelineEvents,
+      anchors: [],
+      unmapped: [],
+      matrixRows: [],
+      timelineEvents: [],
     };
   }
 
