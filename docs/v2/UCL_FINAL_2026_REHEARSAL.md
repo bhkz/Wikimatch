@@ -76,6 +76,17 @@ Tous les titres ont été **vérifiés via l'API Wikipedia** le 2026-05-27.
 
 > [!CAUTION]
 > **Ne pas exécuter ces commandes avant que la branche soit mergée dans `main` et que les migrations SQL nécessaires aient été appliquées dans Supabase.**
+>
+> Les commandes sans `--apply` sont des vérifications. Les commandes avec `--apply` effectuent les écritures nécessaires.
+>
+> ```bash
+> npm run import:rehearsal:match
+> npm run seed:rehearsal:watchlist
+> npm run build:rehearsal:watchlist
+> npm run import:rehearsal:match -- --apply
+> npm run seed:rehearsal:watchlist -- --apply
+> npm run build:rehearsal:watchlist -- --apply
+> ```
 
 ### Étape 1 — Vérifier le match en dry-run
 
@@ -93,19 +104,26 @@ npm run import:rehearsal:match -- --apply
 
 Upsert les deux équipes dans `entities` et le match dans `matches`.
 
-### Étape 3 — Seed la watchlist Wikipedia
+### Étape 3 — Vérifier la watchlist Wikipédia en dry-run
 
 ```bash
 npm run seed:rehearsal:watchlist
 ```
 
-> [!WARNING]
-> Le script `seed-worker-watchlist.ts` **écrit directement en base** et ne possède pas de mode dry-run. Ne l'exécuter qu'après :
-> - avoir validé le contenu du fichier `worker/seeds/ucl-final-2026-rehearsal.watchlist.json`
-> - avoir explicitement accepté l'écriture en base
-> - toutes les insertions sont des upserts idempotents : relancer est safe
+- Valide les 4 entités et les 12 articles de `worker/seeds/ucl-final-2026-rehearsal.watchlist.json`.
+- N'utilise pas Supabase.
+- N'écrit rien en base.
 
-### Étape 4 — Rattacher les articles au match en dry-run
+### Étape 4 — Seeder la watchlist Wikipédia après validation explicite
+
+```bash
+npm run seed:rehearsal:watchlist -- --apply
+```
+
+- Écrit les entités et articles dans Supabase.
+- Ne s'exécute qu'après revue du dry-run et accord explicite de Thomas.
+
+### Étape 5 — Rattacher les articles au match en dry-run
 
 ```bash
 npm run build:rehearsal:watchlist

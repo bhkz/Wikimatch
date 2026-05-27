@@ -2,15 +2,15 @@
  * Seed wiki_articles + entities depuis un JSON.
  *
  * Usage :
- *   npm run seed:watchlist                          # seed demo (5 entités, 7 articles)
- *   npm run seed:watchlist -- --live                # seed live (16 entités, ~50 articles)
- *   npm run seed:watchlist -- --file <path>         # JSON personnalisé
+ *   npm run seed:watchlist -- --live             # dry-run watchlist live
+ *   npm run seed:watchlist -- --live --apply     # write live watchlist to Supabase
+ *   npm run seed:watchlist -- --file <path>      # dry-run custom JSON
+ *   npm run seed:watchlist -- --file <path> --apply
  *
  * Le format JSON est documenté dans worker/seeds/wc26-watchlist.live.json.
  * Toutes les insertions sont des upserts idempotents : safe à relancer.
  */
 
-import "dotenv/config";
 import { readFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
 
@@ -38,8 +38,9 @@ type SeedFile = {
   articles: SeedArticle[];
 };
 
-function parseArgs(argv: string[]): { filePath: string } {
+function parseArgs(argv: string[]): { filePath: string; apply: boolean } {
   let filePath = "worker/seeds/wc26-watchlist.live.json";
+  let apply = false;
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--live") {
@@ -47,32 +48,115 @@ function parseArgs(argv: string[]): { filePath: string } {
     } else if (arg === "--file") {
       filePath = argv[i + 1] ?? filePath;
       i += 1;
+    } else if (arg === "--apply") {
+      apply = true;
     }
   }
-  return { filePath };
+  return { filePath, apply };
 }
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+function validateSeed(seed: SeedFile): void {
+  if (!Array.isArray(seed.entities) || seed.entities.length === 0) {
+    throw new Error("Seed must contain at least one entity");
+  }
+  if (!Array.isArray(seed.articles) || seed.articles.length === 0) {
+    throw new Error("Seed must contain at least one article");
+  }
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-  throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_KEY");
+  const entitySlugs = new Set<string>();
+  for (const entity of seed.entities) {
+    if (!entity.slug || typeof entity.slug !== "string") {
+      throw new Error("Each entity must have a non-empty slug");
+    }
+    if (entitySlugs.has(entity.slug)) {
+      throw new Error(`Duplicate entity.slug detected: ${entity.slug}`);
+    }
+    entitySlugs.add(entity.slug);
+  }
+
+  const articleKeys = new Set<string>();
+  for (const article of seed.articles) {
+    if (!article.entity_slug || typeof article.entity_slug !== "string") {
+      throw new Error("Each article must have a non-empty entity_slug");
+    }
+    if (!entitySlugs.has(article.entity_slug)) {
+      throw new Error(`Article references unknown entity_slug: ${article.entity_slug}`);
+    }
+    if (!article.wiki_code || typeof article.wiki_code !== "string") {
+      throw new Error("Each article must have a non-empty wiki_code");
+    }
+    if (!article.language_code || typeof article.language_code !== "string") {
+      throw new Error("Each article must have a non-empty language_code");
+    }
+    if (!article.page_title || typeof article.page_title !== "string") {
+      throw new Error("Each article must have a non-empty page_title");
+    }
+    if (!article.canonical_url || typeof article.canonical_url !== "string") {
+      throw new Error("Each article must have a canonical_url");
+    }
+    if (!article.canonical_url.startsWith("https://")) {
+      throw new Error(`Article canonical_url must start with https://: ${article.canonical_url}`);
+    }
+    if (!article.article_type || typeof article.article_type !== "string") {
+      throw new Error("Each article must have a non-empty article_type");
+    }
+
+    const key = `${article.wiki_code}::${article.page_title}`;
+    if (articleKeys.has(key)) {
+      throw new Error(`Duplicate article wiki_code+page_title detected: ${key}`);
+    }
+    articleKeys.add(key);
+  }
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-});
+function summarizeEntity(entity: SeedEntity): string {
+  return `[seed:watchlist] entity slug=${entity.slug} type=${entity.type}`;
+}
+
+function summarizeArticle(article: SeedArticle): string {
+  return `[seed:watchlist] article wiki_code=${article.wiki_code} page_title=${article.page_title} entity_slug=${article.entity_slug}`;
+}
+
+function createSupabaseClient() {
+  const SUPABASE_URL = process.env.SUPABASE_URL;
+  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    throw new Error("--apply requires SUPABASE_URL and SUPABASE_SERVICE_KEY to be set");
+  }
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
 
 async function main() {
-  const { filePath } = parseArgs(process.argv.slice(2));
-  console.log(`[seed:watchlist] loading ${filePath}`);
+  const { filePath, apply } = parseArgs(process.argv.slice(2));
+  console.log(`[seed:watchlist] file=${filePath}`);
 
   const seedPath = new URL(`../${filePath}`, import.meta.url);
   const seedRaw = JSON.parse(await readFile(seedPath, "utf8")) as SeedFile & { _comment?: string };
   const seed: SeedFile = { entities: seedRaw.entities, articles: seedRaw.articles };
+
+  validateSeed(seed);
+
+  console.log(`[seed:watchlist] entities=${seed.entities.length}`);
+  console.log(`[seed:watchlist] articles=${seed.articles.length}`);
+  console.log(`[seed:watchlist] mode=${apply ? "APPLY" : "DRY_RUN"}`);
+
+  if (!apply) {
+    for (const entity of seed.entities) {
+      console.log(summarizeEntity(entity));
+    }
+    for (const article of seed.articles) {
+      console.log(summarizeArticle(article));
+    }
+    console.log("[seed:watchlist] DRY-RUN complete. Use --apply to write to Supabase.");
+    return;
+  }
+
+  const supabase = createSupabaseClient();
 
   const { data: entities, error: entityError } = await supabase
     .from("entities")
@@ -102,6 +186,7 @@ async function main() {
     .upsert(articleRows, { onConflict: "wiki_code,page_title" });
   if (articleError) throw articleError;
 
+  console.log(`[seed:watchlist] mode=APPLY`);
   console.log(`[seed:watchlist] ✅ ${seed.entities.length} entities upserted`);
   console.log(`[seed:watchlist] ✅ ${seed.articles.length} monitored wiki articles upserted`);
 }
