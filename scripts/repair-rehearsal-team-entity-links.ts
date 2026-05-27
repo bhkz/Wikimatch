@@ -3,6 +3,9 @@
  * rehearsal entities (paris-saint-germain, arsenal) back to the canonical
  * historical team entities (paris-saint-germain-fc, arsenal-fc).
  *
+ * It also safely audits and repairs incorrect metadata (wikidata_qid) on the
+ * canonical Arsenal team entity if it matches the observed incorrect QID.
+ *
  * Usage:
  *   npm run repair:rehearsal:entities               # dry-run (default)
  *   npm run repair:rehearsal:entities -- --apply    # perform the write operations
@@ -22,6 +25,15 @@ const CANONICAL_TEAM_SLUGS = {
 const DUPLICATE_REHEARSAL_SLUGS = {
   home: 'paris-saint-germain',
   away: 'arsenal',
+};
+
+const EXPECTED_TEAM_QIDS = {
+  home: 'Q483020',
+  away: 'Q9617',
+};
+
+const OBSERVED_INCORRECT_CANONICAL_QIDS = {
+  away: 'Q9610',
 };
 
 const dryRun = !process.argv.includes('--apply');
@@ -68,7 +80,7 @@ async function main() {
 
   const { data: entities, error: entityErr } = await supabase
     .from('entities')
-    .select('id, slug, type, canonical_label')
+    .select('id, slug, type, canonical_label, wikidata_qid')
     .in('slug', targetSlugs);
   if (entityErr) throw entityErr;
 
@@ -93,7 +105,26 @@ async function main() {
     throw new Error(`Duplicate rehearsal away entity ${DUPLICATE_REHEARSAL_SLUGS.away} not found`);
   }
 
-  // 4. Fetch 12 expected articles from seed JSON
+  // 4. Verify QID for PSG
+  if (canonicalHome.wikidata_qid !== EXPECTED_TEAM_QIDS.home) {
+    throw new Error(
+      `Canonical PSG entity has unexpected Wikidata QID: ${canonicalHome.wikidata_qid ?? 'null'}`
+    );
+  }
+
+  // 5. Verify QID for Arsenal
+  const canonicalAwayNeedsQidRepair = canonicalAway.wikidata_qid === OBSERVED_INCORRECT_CANONICAL_QIDS.away;
+  if (!canonicalAwayNeedsQidRepair && canonicalAway.wikidata_qid !== EXPECTED_TEAM_QIDS.away) {
+    throw new Error(
+      `Canonical Arsenal entity has completely unexpected Wikidata QID in database: ${canonicalAway.wikidata_qid ?? 'null'}. ` +
+      `Aborting automatic repair.`
+    );
+  }
+
+  console.log(`[repair:rehearsal:entities] canonical_home_qid current=${canonicalHome.wikidata_qid} expected=${EXPECTED_TEAM_QIDS.home}`);
+  console.log(`[repair:rehearsal:entities] canonical_away_qid current=${canonicalAway.wikidata_qid} expected=${EXPECTED_TEAM_QIDS.away} repair_required=${canonicalAwayNeedsQidRepair}`);
+
+  // 6. Fetch 12 expected articles from seed JSON
   const seedPath = new URL('../worker/seeds/ucl-final-2026-rehearsal.watchlist.json', import.meta.url);
   const seed = JSON.parse(await readFile(seedPath, 'utf8')) as SeedFile;
   const expectedArticles = seed.articles;
@@ -111,7 +142,7 @@ async function main() {
   const articleKey = (a: { wiki_code: string; page_title: string }) => `${a.wiki_code}::${a.page_title}`;
   const articleMap = new Map(articles?.map(a => [articleKey(a), a]) ?? []);
 
-  // 5. Determine required changes
+  // 7. Determine required match & article changes
   let homeTeamSlugCurrent = 'UNKNOWN';
   if (matchRow.home_team_entity_id === canonicalHome.id) homeTeamSlugCurrent = canonicalHome.slug;
   if (matchRow.home_team_entity_id === duplicateHome.id) homeTeamSlugCurrent = duplicateHome.slug;
@@ -173,13 +204,53 @@ async function main() {
     console.log(`[repair:rehearsal:entities] ${update.key} current_entity=${update.current_slug} target_entity=${update.target_slug}`);
   }
 
+  if (canonicalAwayNeedsQidRepair) {
+    console.log(`[repair:rehearsal:entities] entity_metadata_update ${CANONICAL_TEAM_SLUGS.away}.wikidata_qid current=${OBSERVED_INCORRECT_CANONICAL_QIDS.away} target=${EXPECTED_TEAM_QIDS.away}`);
+  }
+
   if (dryRun) {
     console.log('[repair:rehearsal:entities] DRY-RUN complete. Use --apply to perform updates.');
     return;
   }
 
-  // 6. Perform Supabase updates in APPLY mode
-  // A. Update match if necessary
+  // 8. Perform Supabase updates in APPLY mode
+  // A. Repair Arsenal QID first if necessary
+  if (canonicalAwayNeedsQidRepair) {
+    const { data: currentDbAway, error: fetchAwayErr } = await supabase
+      .from('entities')
+      .select('wikidata_qid')
+      .eq('id', canonicalAway.id)
+      .single();
+    if (fetchAwayErr) throw fetchAwayErr;
+
+    if (currentDbAway.wikidata_qid !== OBSERVED_INCORRECT_CANONICAL_QIDS.away) {
+      throw new Error(`Concurrency error: Arsenal QID in DB has changed to ${currentDbAway.wikidata_qid ?? 'null'}. Aborting repair.`);
+    }
+
+    const { error: qidUpdateErr } = await supabase
+      .from('entities')
+      .update({ wikidata_qid: EXPECTED_TEAM_QIDS.away })
+      .eq('id', canonicalAway.id)
+      .eq('wikidata_qid', OBSERVED_INCORRECT_CANONICAL_QIDS.away);
+
+    if (qidUpdateErr) throw qidUpdateErr;
+
+    // Verify QID was successfully updated
+    const { data: verifiedAway, error: verifyAwayErr } = await supabase
+      .from('entities')
+      .select('wikidata_qid')
+      .eq('id', canonicalAway.id)
+      .single();
+    if (verifyAwayErr) throw verifyAwayErr;
+
+    if (verifiedAway.wikidata_qid !== EXPECTED_TEAM_QIDS.away) {
+      throw new Error('Verification failed: Arsenal QID was not successfully updated to ' + EXPECTED_TEAM_QIDS.away);
+    }
+
+    console.log(`[repair:rehearsal:entities] ✅ Canonical Arsenal QID successfully repaired to ${EXPECTED_TEAM_QIDS.away}`);
+  }
+
+  // B. Update match if necessary
   if (matchRow.home_team_entity_id !== canonicalHome.id || matchRow.away_team_entity_id !== canonicalAway.id) {
     const { error: updateMatchErr } = await supabase
       .from('matches')
@@ -194,7 +265,7 @@ async function main() {
     console.log('[repair:rehearsal:entities] Match already linked to canonical entities');
   }
 
-  // B. Update articles if necessary
+  // C. Update articles if necessary
   for (const update of articleUpdates) {
     const { error: updateArtErr } = await supabase
       .from('wiki_articles')
@@ -204,7 +275,7 @@ async function main() {
     console.log(`[repair:rehearsal:entities] ✅ Relinked ${update.key} to ${update.target_slug}`);
   }
 
-  // 7. Verify after apply
+  // 9. Verify after apply
   const { data: verifiedMatch } = await supabase
     .from('matches')
     .select('home_team_entity_id, away_team_entity_id')
@@ -231,7 +302,17 @@ async function main() {
     }
   }
 
-  console.log('[repair:rehearsal:entities] ✅ All verifications PASSED. Relinking successful!');
+  const { data: finalAway, error: finalAwayErr } = await supabase
+    .from('entities')
+    .select('wikidata_qid')
+    .eq('id', canonicalAway.id)
+    .single();
+  if (finalAwayErr) throw finalAwayErr;
+  if (finalAway.wikidata_qid !== EXPECTED_TEAM_QIDS.away) {
+    throw new Error('Verification failed: Final canonical Arsenal QID is not ' + EXPECTED_TEAM_QIDS.away);
+  }
+
+  console.log('[repair:rehearsal:entities] ✅ All verifications PASSED. Relinking and QID repair successful!');
 }
 
 main().catch((e) => {

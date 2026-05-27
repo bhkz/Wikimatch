@@ -145,25 +145,32 @@ npm run seed:rehearsal:watchlist -- --apply
 - Si le worker est déjà actif ou redémarre avant l'activation complète, ces cinq articles peuvent déjà produire des traces ; la préparation ne désactive pas cette couverture préexistante.
 - Ne s'exécute qu'après revue du dry-run et accord explicite de Thomas.
 
-### Étape 5 — Réparer les références d'entités doublonnées (PSG / Arsenal)
+### Étape 5 — Réparer les références d'entités doublonnées (PSG / Arsenal) et le QID d'Arsenal
 
 L'audit pré-rattachement a révélé que les cinq articles historiques existants étaient déjà associés aux entités canoniques `paris-saint-germain-fc` et `arsenal-fc`. Afin de ne pas dupliquer ces entités et fragmenter les données analytiques, les entités de répétition `paris-saint-germain` et `arsenal` créées lors du premier seed ne doivent plus être utilisées.
 
-Une étape de réparation contrôlée est nécessaire pour réorienter le match PSG–Arsenal et l'article PSG en anglais (`enwiki:Paris Saint-Germain FC`) vers ces entités canoniques de référence.
+**Incohérence de Métadonnée détectée (Arsenal QID)** :
+L'audit a également mis en lumière que l'entité historique `arsenal-fc` porte actuellement le QID erroné `Q9610` (qui correspond à la langue bengalie / Bangla sur Wikidata), alors que la page officielle anglaise `Arsenal F.C.` est rattachée au QID `Q9617`.
 
-1. Vérifier les changements de réalignement prévus en dry-run :
+Une étape de réparation contrôlée est donc nécessaire pour :
+* réorienter le match PSG–Arsenal et l'article PSG en anglais (`enwiki:Paris Saint-Germain FC`) vers les entités canoniques historiques `paris-saint-germain-fc` et `arsenal-fc` ;
+* corriger de manière sécurisée la métadonnée `wikidata_qid` de `arsenal-fc` de `Q9610` à `Q9617` dans la table `entities`.
+
+Les entités doublonnées `paris-saint-germain` et `arsenal` ne seront pas supprimées de la base lors de cette étape de réparation pour permettre tout audit historique ultérieur.
+
+1. Vérifier les changements de réalignement et de correction de métadonnée prévus en dry-run :
 ```bash
 npm run repair:rehearsal:entities
 ```
 
-Le script de réparation valide l'existence des entités canoniques, compare l'état actuel et l'état cible pour le match et les 12 articles, puis affiche le diagnostic détaillé sans écrire en base.
+Le script de réparation valide l'existence des entités canoniques, compare l'état actuel et l'état cible pour le match (les 2 équipes), le QID d'Arsenal et les 12 articles, puis affiche le diagnostic détaillé sans écrire en base.
 
 2. Appliquer la réparation (après validation de Thomas) :
 ```bash
 npm run repair:rehearsal:entities -- --apply
 ```
 
-Cette commande met à jour les liaisons du match dans la table `matches` ainsi que les articles concernés dans `wiki_articles` pour réutiliser les entités canoniques historiques. Les entités doublonnées restent en base mais ne sont plus référencées par le dispositif.
+Cette commande met à jour de façon atomique et contrôlée le QID d'Arsenal dans la table `entities`, puis les liaisons du match dans la table `matches` ainsi que les articles concernés dans `wiki_articles` pour réutiliser les entités canoniques historiques. Une assertion vérifie le bon déroulement de l'opération après coup.
 
 ### Étape 6 — Rattacher les articles au match en dry-run
 
