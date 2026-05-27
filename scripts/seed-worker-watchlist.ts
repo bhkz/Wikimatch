@@ -10,7 +10,8 @@
  *   npm run seed:watchlist -- --file <path> --monitoring-disabled --apply
  *
  * Le format JSON est documenté dans worker/seeds/wc26-watchlist.live.json.
- * Toutes les insertions sont des upserts idempotents : safe à relancer.
+ * En mode générique actif, l'application utilise des upserts idempotents.
+ * En mode `--monitoring-disabled`, l'application n'insère que les entités et articles absents afin de préserver toute couverture existante.
  */
 
 import { readFile } from "node:fs/promises";

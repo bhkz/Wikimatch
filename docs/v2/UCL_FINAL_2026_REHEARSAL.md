@@ -84,7 +84,7 @@ Tous les titres ont été **vérifiés via l'API Wikipedia** le 2026-05-27.
 > npm run import:rehearsal:match
 > npm run seed:rehearsal:watchlist
 >
-> # 2. Écritures de préparation, surveillance encore désactivée
+> # 2. Écritures de préparation, sans activation implicite des nouveaux articles
 > npm run import:rehearsal:match -- --apply
 > npm run seed:rehearsal:watchlist -- --apply
 >
@@ -130,15 +130,15 @@ npm run seed:rehearsal:watchlist -- --apply
 ```
 
 - Écrit les entités et les articles manquants dans Supabase.
-- Les nouveaux articles sont insérés avec `monitoring_enabled=false` afin de préparer la base sans armer la surveillance.
+- Les nouveaux articles sont insérés avec `monitoring_enabled=false` afin que les sept nouveaux articles n'activent pas la surveillance implicitement.
 - Les entités et articles déjà existants ne sont pas modifiés par ce seed.
-- Cela garantit seulement qu'aucun nouvel article n'est activé implicitement ; des articles existants peuvent rester actifs.
-- Le dry-run a déjà montré que cinq articles de la répétition existaient déjà en base et étaient actifs :
-  - `frwiki:Paris Saint-Germain Football Club`
-  - `eswiki:Paris Saint-Germain Football Club`
-  - `enwiki:Arsenal F.C.`
-  - `frwiki:Arsenal Football Club`
-  - `eswiki:Arsenal Football Club`
+- **Important** : Le dry-run a montré que cinq articles de la répétition existaient déjà en base et étaient actifs avant préparation :
+  - `frwiki:Paris Saint-Germain Football Club` active
+  - `eswiki:Paris Saint-Germain Football Club` active
+  - `enwiki:Arsenal F.C.` active
+  - `frwiki:Arsenal Football Club` active
+  - `eswiki:Arsenal Football Club` active
+- Si le worker est déjà actif ou redémarre avant l'activation complète, ces cinq articles peuvent déjà produire des traces ; la préparation ne désactive pas cette couverture préexistante.
 - Ne s'exécute qu'après revue du dry-run et accord explicite de Thomas.
 
 ### Étape 5 — Rattacher les articles au match en dry-run
@@ -167,28 +167,53 @@ PATTERNS_DRY_RUN=true
 AUTO_PUBLICATION_ENABLED=false
 ```
 
+### Vérifier avant activation
+
 ```bash
 npm run monitor:rehearsal:watchlist -- --enable
 ```
+
+- Dry-run de lecture seule ; affiche l'état courant des 12 articles.
+- Indique que `--enable --apply` capturera un snapshot local de l'état initial avant activation.
+
+### Activer et capturer le snapshot
 
 ```bash
 npm run monitor:rehearsal:watchlist -- --enable --apply
 ```
 
-- Le script vérifie en lecture que les 12 articles attendus existent.
-- Il n'écrit rien sans `--apply`.
+- Capture un snapshot local (ignoré par Git) de l'état `monitoring_enabled` actuel de chaque article.
+- Active les 12 articles une fois le snapshot sauvegardé.
+- Refuse de continuer si un snapshot existe déjà (protection contre écrasement accidentel).
 - Après activation, démarrer ou redémarrer le worker pour qu'il recharge l'index des articles surveillés.
 
-## 6. Arrêt après test
+## 6. Arrêt et restauration après test
+
+### Arrêter immédiatement la collecte
+
+Arrêter le worker Render.
+
+### Vérifier la restauration prévue de l'état initial
 
 ```bash
 npm run monitor:rehearsal:watchlist -- --disable
 ```
 
-- `--disable --apply` est volontairement bloqué tant qu'une restauration de l'état initial des articles n'est pas définie.
-- Après le test, arrêter ou redémarrer le worker suffit pour arrêter la collecte en mémoire.
-- Ne pas désactiver automatiquement les 12 articles en base, car certains étaient déjà actifs avant la répétition.
-- Cette opération ne supprime pas les traces déjà collectées.
+- Dry-run de lecture seule ; exige le snapshot capturé lors de l'activation.
+- Affiche pour chaque article l'état actuel et l'état cible de restauration enregistré.
+- Ne modifie rien en base.
+
+### Restaurer l'état initial en base
+
+```bash
+npm run monitor:rehearsal:watchlist -- --disable --apply
+```
+
+- Restaure exactement les états `monitoring_enabled` du snapshot :
+  - Les cinq articles initialement actifs repassent à `true` ;
+  - Les sept articles initialement inactifs repassent à `false`.
+- Supprime le snapshot local uniquement après restauration réussie.
+- Après restauration, ne redémarrer le worker que si l'on souhaite reprendre la surveillance correspondant à l'état restauré.
 
 ## 7. Variables Render pendant le test
 
@@ -201,28 +226,7 @@ npm run monitor:rehearsal:watchlist -- --disable
 
 ---
 
-### Avant d'activer les articles
-
-Avant `--enable --apply`, vérifier que `PATTERNS_DRY_RUN=true` et `AUTO_PUBLICATION_ENABLED=false` sont bien configurés sur Render. Sans cette vérification, ne pas armer la surveillance.
-
----
-
-> Le reste de cette documentation conserve les règles de preuve et le périmètre de la répétition.
-
----
-
-## 5. Variables Render pendant le match
-
-| Variable | Valeur | Effet |
-|----------|--------|-------|
-| `WORKER_DRY_RUN` | `false` | Le worker collecte les traces réelles |
-| `ANALYZER_DRY_RUN` | `false` | L'analyzer écrit les propositions réelles |
-| `PATTERNS_DRY_RUN` | `true` | Le pattern matcher simule et logue les candidats |
-| `AUTO_PUBLICATION_ENABLED` | `false` | **Verrou absolu** — aucune publication publique |
-
----
-
-## 6. Critères de succès
+## 8. Critères de succès
 
 - [ ] Traces reçues sur au moins un article surveillé (`revision_traces`)
 - [ ] Propositions analysées par l'IA (`trace_propositions`)
@@ -260,8 +264,6 @@ Les règles suivantes s'appliquent durant la répétition :
 - Remarque : le résultat brut d'un match (`match_result`) n'est **pas** utilisé pour une convergence automatiquement éligible dans cette version, car le payload ne prouve pas encore un ordre d'équipes comparable entre éditions.
 - Remarque : les minutes de temps additionnel sont conservées distinctement (par ex. `90+1` ≠ `90+3`) pour éviter de rapprocher deux événements différents.
 
-
-## 7. Fichiers du dispositif
 
 | Fichier | Rôle |
 |---------|------|
