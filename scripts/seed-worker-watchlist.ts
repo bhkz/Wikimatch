@@ -6,6 +6,8 @@
  *   npm run seed:watchlist -- --live --apply     # write live watchlist to Supabase
  *   npm run seed:watchlist -- --file <path>      # dry-run custom JSON
  *   npm run seed:watchlist -- --file <path> --apply
+ *   npm run seed:watchlist -- --file <path> --monitoring-disabled
+ *   npm run seed:watchlist -- --file <path> --monitoring-disabled --apply
  *
  * Le format JSON est documenté dans worker/seeds/wc26-watchlist.live.json.
  * Toutes les insertions sont des upserts idempotents : safe à relancer.
@@ -38,9 +40,10 @@ type SeedFile = {
   articles: SeedArticle[];
 };
 
-function parseArgs(argv: string[]): { filePath: string; apply: boolean } {
+function parseArgs(argv: string[]): { filePath: string; apply: boolean; monitoringEnabled: boolean } {
   let filePath = "worker/seeds/wc26-watchlist.live.json";
   let apply = false;
+  let monitoringEnabled = true;
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--live") {
@@ -50,9 +53,11 @@ function parseArgs(argv: string[]): { filePath: string; apply: boolean } {
       i += 1;
     } else if (arg === "--apply") {
       apply = true;
+    } else if (arg === "--monitoring-disabled") {
+      monitoringEnabled = false;
     }
   }
-  return { filePath, apply };
+  return { filePath, apply, monitoringEnabled };
 }
 
 function validateSeed(seed: SeedFile): void {
@@ -132,7 +137,7 @@ function createSupabaseClient() {
 }
 
 async function main() {
-  const { filePath, apply } = parseArgs(process.argv.slice(2));
+  const { filePath, apply, monitoringEnabled } = parseArgs(process.argv.slice(2));
   console.log(`[seed:watchlist] file=${filePath}`);
 
   const seedPath = new URL(`../${filePath}`, import.meta.url);
@@ -144,6 +149,7 @@ async function main() {
   console.log(`[seed:watchlist] entities=${seed.entities.length}`);
   console.log(`[seed:watchlist] articles=${seed.articles.length}`);
   console.log(`[seed:watchlist] mode=${apply ? "APPLY" : "DRY_RUN"}`);
+  console.log(`[seed:watchlist] monitoring_enabled=${monitoringEnabled}`);
 
   if (!apply) {
     for (const entity of seed.entities) {
@@ -179,7 +185,7 @@ async function main() {
       page_title: article.page_title,
       canonical_url: article.canonical_url,
       article_type: article.article_type,
-      monitoring_enabled: true,
+      monitoring_enabled: monitoringEnabled,
     };
   });
 

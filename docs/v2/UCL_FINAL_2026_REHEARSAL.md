@@ -72,7 +72,7 @@ Tous les titres ont été **vérifiés via l'API Wikipedia** le 2026-05-27.
 
 ---
 
-## 4. Ordre d'exécution
+## 4. Préparer la base sans armer la surveillance
 
 > [!CAUTION]
 > **Ne pas exécuter ces commandes avant que la branche soit mergée dans `main` et que les migrations SQL nécessaires aient été appliquées dans Supabase.**
@@ -84,7 +84,7 @@ Tous les titres ont été **vérifiés via l'API Wikipedia** le 2026-05-27.
 > npm run import:rehearsal:match
 > npm run seed:rehearsal:watchlist
 >
-> # 2. Écritures contrôlées après validation des deux fichiers
+> # 2. Écritures de préparation, surveillance encore désactivée
 > npm run import:rehearsal:match -- --apply
 > npm run seed:rehearsal:watchlist -- --apply
 >
@@ -130,6 +130,7 @@ npm run seed:rehearsal:watchlist -- --apply
 ```
 
 - Écrit les entités et articles dans Supabase.
+- Les 12 articles sont créés avec `monitoring_enabled=false` afin de préparer la base sans armer la surveillance.
 - Ne s'exécute qu'après revue du dry-run et accord explicite de Thomas.
 
 ### Étape 5 — Rattacher les articles au match en dry-run
@@ -148,6 +149,56 @@ npm run build:rehearsal:watchlist
 ```bash
 npm run build:rehearsal:watchlist -- --apply
 ```
+
+## 5. Armer la surveillance au moment choisi
+
+Avant d'activer la surveillance, vérifier que les variables Render de sécurité sont en place :
+
+```bash
+PATTERNS_DRY_RUN=true
+AUTO_PUBLICATION_ENABLED=false
+```
+
+```bash
+npm run monitor:rehearsal:watchlist -- --enable
+```
+
+```bash
+npm run monitor:rehearsal:watchlist -- --enable --apply
+```
+
+- Le script vérifie en lecture que les 12 articles attendus existent.
+- Il n'écrit rien sans `--apply`.
+- Après activation, démarrer ou redémarrer le worker pour qu'il recharge l'index des articles surveillés.
+
+## 6. Désarmer après test ou en urgence
+
+```bash
+npm run monitor:rehearsal:watchlist -- --disable
+npm run monitor:rehearsal:watchlist -- --disable --apply
+```
+
+- Après désactivation, redémarrer le worker pour vider son index en mémoire des articles désormais inactifs.
+- Cette opération ne supprime pas les traces déjà collectées.
+
+## 7. Variables Render pendant le test
+
+| Variable | Valeur | Effet |
+|----------|--------|-------|
+| `WORKER_DRY_RUN` | `false` | Le worker collecte les traces réelles |
+| `ANALYZER_DRY_RUN` | `false` | L'analyzer écrit les propositions réelles |
+| `PATTERNS_DRY_RUN` | `true` | Le pattern matcher simule et logue les candidats |
+| `AUTO_PUBLICATION_ENABLED` | `false` | **Verrou absolu** — aucune publication publique |
+
+---
+
+### Avant d'activer les articles
+
+Avant `--enable --apply`, vérifier que `PATTERNS_DRY_RUN=true` et `AUTO_PUBLICATION_ENABLED=false` sont bien configurés sur Render. Sans cette vérification, ne pas armer la surveillance.
+
+---
+
+> Le reste de cette documentation conserve les règles de preuve et le périmètre de la répétition.
 
 ---
 
