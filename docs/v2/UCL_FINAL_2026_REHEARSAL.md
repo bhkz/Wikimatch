@@ -160,17 +160,6 @@ Dans les logs `[publisher] DRY_RUN_CANDIDATE`, vérifier que les candidats perti
 
 ---
 
-### Règles de preuve des patterns
-
-Les règles suivantes s'appliquent durant la répétition :
-
-- `language_convergence` n'est candidate automatiquement éligible que si une proposition structurée équivalente est détectée sur des pages de `article_type === "match"` dans au moins deux éditions et si elle est rattachée à un `match_id` unique.
-- Le même `proposition_type` seul ne suffit jamais pour établir une convergence publiable.
-- `article_instability` est affiché en dry-run comme une activité à vérifier — la détection automatique ne prouve pas une séquence ajout/retrait/restauration.
-- `under_radar` est affiché en dry-run comme un ajout isolé à vérifier — l'absence de nouvelle détection ne prouve pas l'absence du fait dans les autres articles.
-- `article_instability`, `under_radar` et toute `language_convergence` non rattachée à un `match_id` unique sont exclus de toute publication automatique tant qu'une validation manuelle plus forte n'est pas mise en place.
-
-
 ## 7. Fichiers du dispositif
 
 | Fichier | Rôle |
