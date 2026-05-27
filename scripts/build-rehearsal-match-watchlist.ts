@@ -90,15 +90,24 @@ async function main() {
     const role = entitySlug ? roleBySlug.get(entitySlug) : 'match';
     return {
       match_id: matchRow.id,
-      wiki_article_id: article.id,
+      article_id: article.id,
       role: role ?? 'match',
+      monitoring_reason: 'ucl_final_2026_rehearsal',
+      enabled: true,
     };
   });
+
+  if (watchlistRows.length !== 12) {
+    throw new Error(
+      `[build:rehearsal:watchlist] Expected exactly 12 watchlist rows, got ${watchlistRows.length}. ` +
+      'Ensure 4 entities × 3 languages are present before writing.'
+    );
+  }
 
   console.log('[build:rehearsal:watchlist] watchlist_rows_to_create=', watchlistRows.length);
 
   for (const row of watchlistRows) {
-    const article = (articles ?? []).find((a: any) => a.id === row.wiki_article_id);
+    const article = (articles ?? []).find((a: any) => a.id === row.article_id);
     console.log(`  ${row.role} → ${article?.wiki_code}:${article?.page_title}`);
   }
 
@@ -110,7 +119,7 @@ async function main() {
   // 5. Upsert match_watchlist
   const { error: wlErr } = await supabase
     .from('match_watchlist')
-    .upsert(watchlistRows, { onConflict: 'match_id,wiki_article_id' });
+    .upsert(watchlistRows, { onConflict: 'match_id,article_id,role' });
   if (wlErr) throw wlErr;
 
   console.log('[build:rehearsal:watchlist] ✅ match_watchlist upserted:', watchlistRows.length, 'rows');

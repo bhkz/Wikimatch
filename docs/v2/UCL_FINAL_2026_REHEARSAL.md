@@ -26,15 +26,15 @@ Le périmètre est volontairement **réduit et contrôlable** : 4 entités, 12 a
 | Équipe A | Paris Saint-Germain | UEFA |
 | Équipe B | Arsenal | UEFA |
 | Date | Samedi 30 mai 2026 | UEFA |
-| Heure | Non confirmée (18:00 ou 21:00 CEST) | Conflicting reports — à vérifier |
+| Heure | 18:00 CEST | UEFA officielle |
 | Lieu | Puskás Aréna, Budapest, Hongrie | UEFA |
-| Source officielle | [uefa.com/uefachampionsleague](https://www.uefa.com/uefachampionsleague/) | Vérifié le 2026-05-27 |
+| Source officielle | [https://www.uefa.com/uefachampionsleague/news/02a5-2092f53360cc-8ee51562d99f-1000--when-is-the-champions-league-final-where-you-are-what-time-i/](https://www.uefa.com/uefachampionsleague/news/02a5-2092f53360cc-8ee51562d99f-1000--when-is-the-champions-league-final-where-you-are-what-time-i/) | Vérifié le 2026-05-27 |
 
 > [!WARNING]
 > **Home/Away :** L'ordre home/away n'est pas officiellement confirmé pour une finale en terrain neutre. PSG est listé en premier par convention. À vérifier avec la feuille de match officielle UEFA.
 
 > [!WARNING]
-> **Heure de coup d'envoi :** Des sources conflictuelles indiquent 18:00 CEST et 21:00 CEST. Le fichier match (`scheduledAt`) est à `null` jusqu'à confirmation.
+> **Heure de coup d'envoi :** L'heure officielle est 18:00 CEST selon la page officielle UEFA. Le match est défini sur cette base dans le fichier de répétition.
 
 ---
 
@@ -113,6 +113,8 @@ npm run build:rehearsal:watchlist
 
 > [!NOTE]
 > Ce script **nécessite une connexion Supabase** même en dry-run (il lit `matches`, `entities` et `wiki_articles`). Sans variables d'environnement configurées, il échouera.
+>
+> Le script valide désormais qu'il trouve exactement 12 articles (4 entités × 3 langues) avant d'autoriser l'upsert.
 
 ### Étape 5 — Rattacher les articles au match (après validation)
 
