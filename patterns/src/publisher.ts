@@ -73,7 +73,7 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
       languages: tmpl.languages,
       source_count: tmpl.source_count,
       match_id: pattern.match_id,
-      automatic_publication_eligible: reviewReason === null,
+      automatic_publication_eligible: safety.passed && reviewReason === null,
       manual_review_reason: reviewReason,
     })}`);
     return { status: "dry_run", reason: safety.passed ? undefined : safety.reason };

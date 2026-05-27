@@ -170,6 +170,9 @@ Les règles suivantes s'appliquent durant la répétition :
 - `under_radar` est affiché en dry-run comme un ajout isolé à vérifier — l'absence de nouvelle détection ne prouve pas l'absence du fait dans les autres articles.
 - `article_instability`, `under_radar` et toute `language_convergence` non rattachée à un `match_id` unique sont exclus de toute publication automatique tant qu'une validation manuelle plus forte n'est pas mise en place.
 
+- Remarque : le résultat brut d'un match (`match_result`) n'est **pas** utilisé pour une convergence automatiquement éligible dans cette version, car le payload ne prouve pas encore un ordre d'équipes comparable entre éditions.
+- Remarque : les minutes de temps additionnel sont conservées distinctement (par ex. `90+1` ≠ `90+3`) pour éviter de rapprocher deux événements différents.
+
 
 ## 7. Fichiers du dispositif
 

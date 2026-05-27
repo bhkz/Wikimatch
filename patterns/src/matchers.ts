@@ -56,23 +56,32 @@ function normalizeClaimText(value: unknown): string | null {
 }
 
 function normalizeClaimMinute(value: unknown): string | null {
-  if (typeof value === "number" && Number.isFinite(value)) return String(Math.floor(value));
-  if (typeof value === "string") {
-    const s = value.trim();
-    if (!s) return null;
-    const n = parseInt(s, 10);
-    if (Number.isFinite(n)) return String(n);
+  if (typeof value === "number" && Number.isFinite(value) && Number.isInteger(value) && value >= 0) {
+    return String(value);
   }
-  return null;
+
+  if (typeof value !== "string") return null;
+
+  const compact = value
+    .trim()
+    .replace(/[’']/g, "")
+    .replace(/\s+/g, "");
+
+  // Accept either a plain integer minute (e.g. "90") or an added-time minute (e.g. "90+1").
+  // Reject ambiguous or partially-parsed strings like "90abc".
+  if (!/^\d{1,3}(?:\+\d{1,2})?$/.test(compact)) return null;
+
+  return compact;
 }
 
 function strictConvergenceClaimKey(p: PropositionRow): string | null {
   const payload = p.normalized_payload ?? {} as any;
   switch (p.proposition_type) {
     case "match_result": {
-      const hs = payload.home_score;
-      const as = payload.away_score;
-      if (typeof hs === "number" && typeof as === "number") return `match_result:${hs}:${as}`;
+      // Un score sans identité d'équipes ni ordre home/away vérifiable ne suffit
+      // pas à établir automatiquement une convergence entre éditions.
+      // Pour cette répétition, n'autorisons pas automatiquement la convergence
+      // sur `match_result`.
       return null;
     }
     case "goal_scored": {
