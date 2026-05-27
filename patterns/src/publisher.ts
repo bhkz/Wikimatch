@@ -53,6 +53,7 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
       limitation_text: tmpl.limitation_text,
       languages: tmpl.languages,
       source_count: tmpl.source_count,
+      match_id: pattern.match_id,
     })}`);
     return { status: "dry_run", reason: safety.passed ? undefined : safety.reason };
   }
