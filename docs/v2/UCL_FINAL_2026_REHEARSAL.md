@@ -88,14 +88,18 @@ Tous les titres ont été **vérifiés via l'API Wikipedia** le 2026-05-27.
 > npm run import:rehearsal:match -- --apply
 > npm run seed:rehearsal:watchlist -- --apply
 >
-> # 3. Vérification du rattachement, qui nécessite les données déjà présentes en base
+> # 3. Réparer les références d'entités doublonnées (PSG / Arsenal)
+> npm run repair:rehearsal:entities
+> npm run repair:rehearsal:entities -- --apply
+>
+> # 4. Vérification du rattachement strict aux 12 articles
 > npm run build:rehearsal:watchlist
 >
-> # 4. Écriture du rattachement après validation
+> # 5. Écriture du rattachement après validation
 > npm run build:rehearsal:watchlist -- --apply
 > ```
 >
-> Le dry-run de `build:rehearsal:watchlist` intervient après les deux premières écritures, car il vérifie en lecture les identifiants du match et des articles déjà créés dans Supabase ; il n'écrit toutefois rien sans `--apply`.
+> Le dry-run de `build:rehearsal:watchlist` intervient après les écritures et la réparation d'entités, car il valide la correspondance stricte des associations avec les entités canoniques ; il n'écrit rien sans `--apply`.
 
 ### Étape 1 — Vérifier le match en dry-run
 
@@ -141,7 +145,27 @@ npm run seed:rehearsal:watchlist -- --apply
 - Si le worker est déjà actif ou redémarre avant l'activation complète, ces cinq articles peuvent déjà produire des traces ; la préparation ne désactive pas cette couverture préexistante.
 - Ne s'exécute qu'après revue du dry-run et accord explicite de Thomas.
 
-### Étape 5 — Rattacher les articles au match en dry-run
+### Étape 5 — Réparer les références d'entités doublonnées (PSG / Arsenal)
+
+L'audit pré-rattachement a révélé que les cinq articles historiques existants étaient déjà associés aux entités canoniques `paris-saint-germain-fc` et `arsenal-fc`. Afin de ne pas dupliquer ces entités et fragmenter les données analytiques, les entités de répétition `paris-saint-germain` et `arsenal` créées lors du premier seed ne doivent plus être utilisées.
+
+Une étape de réparation contrôlée est nécessaire pour réorienter le match PSG–Arsenal et l'article PSG en anglais (`enwiki:Paris Saint-Germain FC`) vers ces entités canoniques de référence.
+
+1. Vérifier les changements de réalignement prévus en dry-run :
+```bash
+npm run repair:rehearsal:entities
+```
+
+Le script de réparation valide l'existence des entités canoniques, compare l'état actuel et l'état cible pour le match et les 12 articles, puis affiche le diagnostic détaillé sans écrire en base.
+
+2. Appliquer la réparation (après validation de Thomas) :
+```bash
+npm run repair:rehearsal:entities -- --apply
+```
+
+Cette commande met à jour les liaisons du match dans la table `matches` ainsi que les articles concernés dans `wiki_articles` pour réutiliser les entités canoniques historiques. Les entités doublonnées restent en base mais ne sont plus référencées par le dispositif.
+
+### Étape 6 — Rattacher les articles au match en dry-run
 
 ```bash
 npm run build:rehearsal:watchlist
@@ -150,9 +174,9 @@ npm run build:rehearsal:watchlist
 > [!NOTE]
 > Ce script **nécessite une connexion Supabase** même en dry-run (il lit `matches`, `entities` et `wiki_articles`). Sans variables d'environnement configurées, il échouera.
 >
-> Le script valide désormais qu'il trouve exactement 12 articles (4 entités × 3 langues) avant d'autoriser l'upsert.
+> Le script valide désormais qu'il trouve exactement 12 articles (4 entités × 3 langues) associés de façon rigoureuse aux entités canoniques attendues avant d'autoriser l'upsert.
 
-### Étape 6 — Rattacher les articles au match après validation
+### Étape 7 — Rattacher les articles au match après validation
 
 ```bash
 npm run build:rehearsal:watchlist -- --apply
@@ -272,4 +296,5 @@ Les règles suivantes s'appliquent durant la répétition :
 | [`ucl-final-2026-psg-arsenal.match.json`](../../data/live/rehearsals/ucl-final-2026-psg-arsenal.match.json) | Définition du match |
 | [`ucl-final-2026-rehearsal.watchlist.json`](../../worker/seeds/ucl-final-2026-rehearsal.watchlist.json) | Watchlist Wikipedia (4 entités, 12 articles) |
 | [`import-rehearsal-match.ts`](../../scripts/import-rehearsal-match.ts) | Import match + équipes |
+| [`repair-rehearsal-team-entity-links.ts`](../../scripts/repair-rehearsal-team-entity-links.ts) | Réalignement entités dupliquées → canoniques |
 | [`build-rehearsal-match-watchlist.ts`](../../scripts/build-rehearsal-match-watchlist.ts) | Rattachement articles ↔ match |
