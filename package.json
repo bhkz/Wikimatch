@@ -19,7 +19,11 @@
     "analyzer:dev": "tsx watch analyzer/src/index.ts",
     "analyzer:start": "tsx analyzer/src/index.ts",
     "patterns:dev": "tsx watch patterns/src/index.ts",
-    "patterns:start": "tsx patterns/src/index.ts"
+    "patterns:start": "tsx patterns/src/index.ts",
+    "import:wc26:schedule": "tsx scripts/import-wc26-schedule.ts",
+    "resolve:wc26:articles": "tsx scripts/resolve-wc26-wiki-articles.ts",
+    "build:wc26:watchlists": "tsx scripts/build-wc26-match-watchlists.ts",
+    "verify:wc26:coverage": "tsx scripts/verify-wc26-live-coverage.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
