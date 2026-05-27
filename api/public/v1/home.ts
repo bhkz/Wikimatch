@@ -9,30 +9,15 @@ export default async function handler(
   try {
     const supabase = createServerSupabaseClient();
 
-    // 1. Fetch live stories. Pas de fallback snapshot : si la DB est vide,
-    // on renvoie un payload honnête avec featuredStory:null / latestStories:[].
-    const { data: storiesData } = await supabase
-      .from("published_stories")
-      .select("*")
-      .eq("publication_status", "published")
-      .is("retracted_at", null)
-      .not("slug", "like", "demo-%")
-      .order("published_at", { ascending: false })
-      .limit(4);
-
-    const stories = storiesData ?? [];
+    // 1. Fetch live stories (strictly disabled for now)
+    const stories: any[] = [];
 
     // 2. Fetch counts for stats (toujours réels, jamais inventés)
     const { count: tracesCount } = await supabase
       .from("revision_traces")
       .select("*", { count: "exact", head: true });
 
-    const { count: storiesCount } = await supabase
-      .from("published_stories")
-      .select("*", { count: "exact", head: true })
-      .eq("publication_status", "published")
-      .is("retracted_at", null)
-      .not("slug", "like", "demo-%");
+    const storiesCount = 0;
 
     const monitoredLanguages = await countDistinctMonitoredLanguages(supabase);
 

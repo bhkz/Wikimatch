@@ -24,10 +24,12 @@ export default function TournamentEditorialTimeline({ events }: { events: Explor
         </div>
 
         {events.length === 0 ? (
-          <div className="bg-white border border-navy/10 p-12 text-center">
-            <div className="font-display text-3xl uppercase text-navy/40 mb-4">AUCUNE HISTOIRE PUBLIEE</div>
+          <div className="bg-white border border-navy/10 p-12 text-center max-w-xl mx-auto shadow-sm">
+            <div className="font-mono text-xs uppercase font-bold tracking-widest text-[#e63946] mb-4">
+              Aucune observation vérifiée disponible dans l'explorateur pour le moment.
+            </div>
             <p className="font-sans text-sm text-navy/60 font-light">
-              La chronologie se remplira automatiquement lorsque des histoires live seront publiees.
+              La chronologie se remplira automatiquement lorsque des histoires live seront publiées.
             </p>
           </div>
         ) : (

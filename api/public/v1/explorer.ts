@@ -10,10 +10,7 @@ export default async function handler(
     const supabase = createServerSupabaseClient();
 
     // 1. Real stats only — pas de fallback snapshot
-    const { count: storiesCount } = await supabase
-      .from("published_stories")
-      .select("*", { count: "exact", head: true })
-      .in("publication_status", ["published", "corrected"]);
+    const storiesCount = 0;
 
     const { count: entitiesCount } = await supabase
       .from("entities")
@@ -25,19 +22,11 @@ export default async function handler(
 
     const monitoredLanguages = await countDistinctMonitoredLanguages(supabase);
 
-    // 2. Fetch published stories to build matrix/timeline dynamically.
-    // Si la DB est vide, on renvoie des tableaux vides — le frontend
-    // affiche un empty state au lieu d'un placeholder maquillé.
-    const { data: stories } = await supabase
-      .from("published_stories")
-      .select("*")
-      .in("publication_status", ["published", "corrected"])
-      .is("retracted_at", null)
-      .not("slug", "like", "demo-%")
-      .order("published_at", { ascending: false });
+    // 2. Fetch published stories (strictly disabled for now)
+    const stories: any[] = [];
 
     const stats = {
-      publishedStories: storiesCount ?? 0,
+      publishedStories: 0,
       mappedSubjects: entitiesCount ?? 0,
       comparedEditions: monitoredLanguages,
       documentedMatches: matchesCount ?? 0,
