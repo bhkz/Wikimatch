@@ -15,7 +15,10 @@ alter table public.published_stories
 do $$
 begin
   if not exists (
-    select 1 from pg_constraint where conname = 'chk_published_stories_source_count'
+    select 1
+    from pg_constraint
+    where conname = 'chk_published_stories_source_count'
+      and conrelid = 'public.published_stories'::regclass
   ) then
     alter table public.published_stories
       add constraint chk_published_stories_source_count check (source_count >= 0);

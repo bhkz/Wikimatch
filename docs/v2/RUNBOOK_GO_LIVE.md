@@ -16,25 +16,47 @@ Ce runbook est divisé en deux blocs :
 
 ## §A — Actions à exécuter par toi
 
-### A.1 — Appliquer les 6 migrations dans Supabase prod (≈5 min)
+### A.1 — Appliquer les migrations dans Supabase prod
 
-1. Va dans https://app.supabase.com → ton projet V2 → **SQL Editor**.
-2. Pour chacun des 6 fichiers ci-dessous (dans l'**ordre chronologique exact**), ouvre-le, copie tout le contenu, colle dans l'éditeur, clique **Run** :
+> [!CAUTION]
+> **Ne copie-colle et n'exécute aucune migration dans Supabase tant que la pull request correspondante n'a pas été revue et mergée dans `main`.** Le SQL versionné dans les branches en cours de revue peut encore changer.
 
-   1. [`supabase/migrations/202605260001_v2_core_schema.sql`](../../supabase/migrations/202605260001_v2_core_schema.sql)
-   2. [`supabase/migrations/202605260002_public_page_snapshots.sql`](../../supabase/migrations/202605260002_public_page_snapshots.sql)
-   3. [`supabase/migrations/202605270001_propositions_patterns_retract.sql`](../../supabase/migrations/202605270001_propositions_patterns_retract.sql)
-   4. [`supabase/migrations/202605271200_live_contract_alignment.sql`](../../supabase/migrations/202605271200_live_contract_alignment.sql)
-   5. [`supabase/migrations/202605271330_disable_demo_public_content.sql`](../../supabase/migrations/202605271330_disable_demo_public_content.sql)
-   6. [`supabase/migrations/202605271400_minimal_live_contract_alignment.sql`](../../supabase/migrations/202605271400_minimal_live_contract_alignment.sql)  ← **Nouvelle (PR04)** : ajoute `matches.group_label`, `published_stories.languages` et `published_stories.source_count`, et met à jour la vue publique `v_public_stories`.
+> [!WARNING]
+> **Ne rejoue jamais aveuglément toutes les migrations historiques sur une base déjà utilisée.** Certaines migrations redéfinissent des vues ou des contraintes : les rejouer dans le désordre ou en doublon peut créer un état incohérent.
 
-3. Vérifie dans **Table Editor** que tu vois bien :
+#### Cas 1 — Installation sur une base Supabase neuve
+
+Si tu crées un nouveau projet Supabase (ou si ta base est entièrement vide), applique les six migrations **dans l'ordre chronologique exact** via **SQL Editor** :
+
+1. [`202605260001_v2_core_schema.sql`](../../supabase/migrations/202605260001_v2_core_schema.sql)
+2. [`202605260002_public_page_snapshots.sql`](../../supabase/migrations/202605260002_public_page_snapshots.sql)
+3. [`202605270001_propositions_patterns_retract.sql`](../../supabase/migrations/202605270001_propositions_patterns_retract.sql)
+4. [`202605271200_live_contract_alignment.sql`](../../supabase/migrations/202605271200_live_contract_alignment.sql)
+5. [`202605271330_disable_demo_public_content.sql`](../../supabase/migrations/202605271330_disable_demo_public_content.sql)
+6. [`202605271400_minimal_live_contract_alignment.sql`](../../supabase/migrations/202605271400_minimal_live_contract_alignment.sql) ← **PR04** : ajoute `matches.group_label`, `published_stories.languages`, `published_stories.source_count` et met à jour `v_public_stories`.
+
+#### Cas 2 — Mise à niveau d'une base déjà utilisée par WikiMatch
+
+Si ton projet Supabase contient déjà des tables (`matches`, `entities`, `published_stories`, etc.), ne rejoue pas toutes les migrations. Procède ainsi :
+
+1. **Vérifie quelles migrations ont déjà été appliquées.** Tu peux contrôler la présence des objets créés par chaque migration (tables, colonnes, vues, policies) dans **Table Editor** ou via une requête SQL rapide.
+2. **Applique uniquement les migrations manquantes**, dans l'ordre chronologique.
+3. Si les cinq premières migrations sont déjà appliquées (ou si les objets correspondants existent déjà), applique uniquement :
+   [`202605271400_minimal_live_contract_alignment.sql`](../../supabase/migrations/202605271400_minimal_live_contract_alignment.sql)
+4. **Avant application**, assure-toi de disposer d'un moyen de restauration (sauvegarde ou point de restauration Supabase).
+5. **Après application**, vérifie uniquement les nouveaux éléments ajoutés par la migration :
+   - Colonne `matches.group_label` (type `text`)
+   - Colonne `published_stories.languages` (type `text[]`, défaut `'{}'`)
+   - Colonne `published_stories.source_count` (type `integer`, défaut `0`, contrainte `>= 0`)
+   - Vue `v_public_stories` exposant `languages` et `source_count`, filtrant `publication_status in ('published', 'corrected')` et `retracted_at is null`
+
+#### Vérification post-migration (les deux cas)
+
+Dans **Table Editor**, vérifie que tu vois bien :
    - `entities`, `wiki_articles`, `matches`, `match_watchlist`
    - `revision_traces`, `trace_private_content`, `public_trace_excerpts`
    - `published_stories`, `story_evidence`, `story_corrections`
-   - **`trace_propositions`** (nouvelle)
-   - **`detected_patterns`** (nouvelle)
-   - **`admin_retract_log`** (nouvelle)
+   - `trace_propositions`, `detected_patterns`, `admin_retract_log`
    - `ai_analysis_runs`, `editorial_reviews`, `ingest_checkpoints`, `ingest_failures`
    - `methodology_versions`, `comparison_snapshots`, `comparison_snapshot_items`
    - `article_instability_cases`, `article_instability_evidence`
