@@ -21,6 +21,7 @@ const stats = {
   already_published: 0,
   template_missing: 0,
   dry_run: 0,
+  publication_disabled: 0,
   errors: 0,
 };
 
@@ -54,6 +55,9 @@ async function runOnce(): Promise<void> {
           break;
         case "dry_run":
           stats.dry_run += 1;
+          break;
+        case "publication_disabled":
+          stats.publication_disabled += 1;
           break;
         case "error":
           stats.errors += 1;

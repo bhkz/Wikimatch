@@ -101,6 +101,7 @@ Un seul service Render (`revision90`) lance les 3 jobs dans le même process Nod
 | Analyzer | `ANALYZER_BATCH_SIZE` | `5` |
 | Patterns | `PATTERNS_DRY_RUN` | `true` ← bascule en `false` en dernier |
 | Patterns | `PATTERNS_POLL_INTERVAL_MS` | `30000` |
+| Patterns | `AUTO_PUBLICATION_ENABLED` | `false` ← **Verrou absolu** (opt-in requis pour publier) |
 | Commun | `LOG_LEVEL` | `info` |
 
 > [!NOTE]
@@ -125,13 +126,16 @@ Un seul service Render (`revision90`) lance les 3 jobs dans le même process Nod
 - Si tu as déjà connecté le repo : **Blueprint Sync** dans le dashboard Render relit `render.yaml`.
 - Sinon : **New → Blueprint → Connect repo `bhkz/Wikimatch`**. Render lit `render.yaml` et te demande de remplir les variables `sync: false`.
 
-### A.6 — Période d'observation en DRY RUN (24-48h)
+### A.6 — Période d'observation en DRY RUN (24-48h) et Verrou de Répétition
 
-Tous les services tournent avec écriture désactivée :
+Pendant la répétition générale (par exemple pour le match test PSG — Arsenal), les services doivent pouvoir collecter et classifier les traces réelles sans jamais risquer de publier publiquement une story automatique erronée.
+
+Tous les services tournent avec écriture ou publication désactivée :
 
 - `wikimatch-worker` en `WORKER_DRY_RUN=true` → reçoit les events SSE et les filtre, **n'écrit pas en DB**.
 - `wikimatch-analyzer` en `ANALYZER_DRY_RUN=true` → log les propositions qu'il extrairait, **n'écrit pas**.
 - `wikimatch-patterns` en `PATTERNS_DRY_RUN=true` → log les patterns détectés et leur résultat safety, **ne publie pas**.
+- **Sécurité Répétition Générale :** La variable `AUTO_PUBLICATION_ENABLED` doit obligatoirement rester positionnée à `false` dans Render. Même si `PATTERNS_DRY_RUN` est configuré à `false` par erreur, le publisher refusera toute insertion dans la table `published_stories`, `detected_patterns` ou `story_evidence` et n'altérera pas les traces de la base de données.
 
 Pendant cette période, tu surveilles **les logs Render** du service unique. Les 3 jobs préfixent leurs lignes :
 
@@ -139,6 +143,7 @@ Pendant cette période, tu surveilles **les logs Render** du service unique. Les
 - `[ingest] matched <wiki> <title> +123 chars` — worker : matches sur ta watchlist.
 - `[stats] {"processed":N,"noise":..,"ai_calls":..,"regex_calls":..}` — analyzer toutes les 60s.
 - `[publisher] DRY_RUN — pattern=article_instability safety=OK title="..."` — patterns : stories que le pipeline veut publier.
+- `[publisher] PUBLICATION DISABLED — pattern detected but AUTO_PUBLICATION_ENABLED is not true` — patterns : stories interceptées par le verrou de sécurité.
 
 **Critères pour basculer en live :**
 
@@ -148,14 +153,18 @@ Pendant cette période, tu surveilles **les logs Render** du service unique. Les
 
 ### A.7 — Bascule live progressive
 
-Quand tu es prêt, dans Render → settings de chaque service :
+Quand tu es prêt à collecter activement les données tout en gardant le verrou de publication actif :
 
-1. D'abord `WORKER_DRY_RUN=false` (le worker commence à écrire dans `revision_traces` + `trace_private_content`).
+1. D'abord `WORKER_DRY_RUN=false` (le worker commence à écrire dans `revision_traces` + `trace_private_content` en base de données).
 2. Attendre **2-3h** que le worker accumule des traces réelles.
 3. `ANALYZER_DRY_RUN=false` (l'analyzer commence à insérer dans `trace_propositions` et `ai_analysis_runs`).
 4. Surveiller `ai_analysis_runs.estimated_cost_eur` cumulé dans Supabase ; vérifier que le cap journalier `AI_DAILY_EUR_CAP=6.50€` est respecté.
-5. Attendre **6-12h** que des propositions s'accumulent.
-6. `PATTERNS_DRY_RUN=false` (patterns matcher commence à insérer dans `detected_patterns` et `published_stories`).
+5. Attendre **6-12h** que des propositions de traces s'accumulent.
+6. `PATTERNS_DRY_RUN=false` (le pattern matcher s'exécute normalement, mais la publication automatique publique reste bloquée et produit des logs `PUBLICATION DISABLED` tant que `AUTO_PUBLICATION_ENABLED` est à `false`).
+
+> [!IMPORTANT]
+> **CRITÈRE D'ACTIVATION DU MODE LIVE PUBLIC (`AUTO_PUBLICATION_ENABLED=true`) :**
+> N'active `AUTO_PUBLICATION_ENABLED=true` dans l'environnement de Render qu'après une revue manuelle rigoureuse des logs du service. Tu dois t'assurer qu'aucun pattern trompeur, faux positif ou "sous le radar" linguistiquement faible n'aurait été publié. Une fois activée, les stories s'afficheront directement sur ta page d'accueil Vercel publique.
 
 À cette étape, ouvre ton URL Vercel : la home devrait afficher la première story réelle dès qu'un pattern passe.
 

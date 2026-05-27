@@ -5,6 +5,9 @@ export const PATTERNS_POLL_INTERVAL_MS = Number(
   process.env.PATTERNS_POLL_INTERVAL_MS ?? 30_000,
 );
 
+// Safety gate: automatic public story publication is opt-in only. It must stay false during rehearsal.
+export const AUTO_PUBLICATION_ENABLED = process.env.AUTO_PUBLICATION_ENABLED === "true";
+
 // Fenêtres temporelles (minutes) — bornées pour rester conservatrices.
 export const INSTABILITY_WINDOW_MIN = Number(
   process.env.PATTERNS_INSTABILITY_WINDOW_MIN ?? 30,

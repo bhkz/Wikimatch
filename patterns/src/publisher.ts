@@ -7,14 +7,14 @@
  * borné. La copy publique n'est jamais touchée par une IA.
  */
 
-import { PATTERNS_DRY_RUN, TEMPLATE_VERSION } from "./config.js";
+import { AUTO_PUBLICATION_ENABLED, PATTERNS_DRY_RUN, TEMPLATE_VERSION } from "./config.js";
 import { runSafetyChecks } from "./safety.js";
 import { supabase } from "./supabase.js";
 import { generate, methodologyVersion } from "./templates.js";
 import type { DetectedPattern } from "./types.js";
 
 interface PublishResult {
-  status: "published" | "blocked_safety" | "template_missing" | "dry_run" | "already_published" | "error";
+  status: "published" | "blocked_safety" | "template_missing" | "dry_run" | "already_published" | "error" | "publication_disabled";
   storyId?: string;
   reason?: string;
 }
@@ -48,6 +48,13 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
         `title="${tmpl.title}"`,
     );
     return { status: "dry_run", reason: safety.passed ? undefined : safety.reason };
+  }
+
+  if (!AUTO_PUBLICATION_ENABLED) {
+    console.log(
+      `[publisher] PUBLICATION DISABLED — pattern detected but AUTO_PUBLICATION_ENABLED is not true`
+    );
+    return { status: "publication_disabled", reason: "AUTO_PUBLICATION_ENABLED is not true" };
   }
 
   if (await isAlreadyPublished(pattern)) {
