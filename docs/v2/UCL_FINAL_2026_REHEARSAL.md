@@ -144,6 +144,20 @@ npm run build:rehearsal:watchlist -- --apply
 - [ ] Couverture multilingue : au moins 2 langues parmi en/fr/es avec des traces
 - [ ] Coût IA maîtrisé sous le cap journalier
 
+### Rattachement des candidats au match
+
+Un candidat n'est rattaché à PSG — Arsenal que si :
+
+- au moins un article du pattern appartient à la watchlist du match ;
+- les traces observées entrent dans une fenêtre de 6 heures avant à 48 heures après le coup d'envoi ;
+- un seul match reste plausible après filtrage.
+
+Ce rattachement est une association opérationnelle de contexte, pas une preuve que le match a causé la modification.
+
+Si plusieurs matchs surveillés sont compatibles, le système conserve `match_id: null` plutôt que de produire une association trompeuse.
+
+Dans les logs `[publisher] DRY_RUN_CANDIDATE`, vérifier que les candidats pertinents au match affichent le `match_id` correspondant une fois le match et la watchlist présents en base.
+
 ---
 
 ## 7. Fichiers du dispositif

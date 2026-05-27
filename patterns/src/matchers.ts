@@ -39,6 +39,80 @@ function isSubstantive(p: PropositionRow): boolean {
   return SUBSTANTIVE_TYPES.has(p.proposition_type) && (p.extraction_confidence ?? 0) >= 0.4;
 }
 
+const MATCH_LINK_WINDOW_BEFORE_HOURS = 6;
+const MATCH_LINK_WINDOW_AFTER_HOURS = 48;
+
+/**
+ * Cette fenêtre sert uniquement à relier prudemment une observation documentaire
+ * à un match surveillé. Elle ne prouve aucune causalité.
+ * En cas de plusieurs matchs possibles, aucun rattachement n'est effectué.
+ */
+async function resolveUniqueMatchIdForRows(rows: PropositionRow[]): Promise<string | null> {
+  const articleIds = [...new Set(rows.map((row) => row.trace.article_id))];
+  if (articleIds.length === 0) return null;
+
+  const observedTimestamps = rows
+    .map((row) => new Date(row.trace.observed_at).getTime())
+    .filter((timestamp) => !Number.isNaN(timestamp));
+  if (observedTimestamps.length === 0) return null;
+
+  const observedWindowStart = Math.min(...observedTimestamps);
+  const observedWindowEnd = Math.max(...observedTimestamps);
+
+  const { data: watchlistLinks, error: watchlistError } = await supabase
+    .from("match_watchlist")
+    .select("match_id,article_id")
+    .eq("enabled", true)
+    .in("article_id", articleIds);
+
+  if (watchlistError) {
+    console.error("[match-link] watchlist query failed:", watchlistError.message);
+    return null;
+  }
+  if (!watchlistLinks || watchlistLinks.length === 0) return null;
+
+  const candidateMatchIds = [...new Set(watchlistLinks.map((link: any) => link.match_id))];
+  if (candidateMatchIds.length === 0) return null;
+
+  const { data: matches, error: matchesError } = await supabase
+    .from("matches")
+    .select("id,slug,scheduled_at,status")
+    .in("id", candidateMatchIds)
+    .neq("status", "cancelled");
+
+  if (matchesError) {
+    console.error("[match-link] match query failed:", matchesError.message);
+    return null;
+  }
+  if (!matches || matches.length === 0) return null;
+
+  const candidates = matches
+    .filter((match: any) => match.scheduled_at)
+    .filter((match: any) => {
+      const scheduled = new Date(match.scheduled_at).getTime();
+      if (Number.isNaN(scheduled)) return false;
+      const windowStart = scheduled - MATCH_LINK_WINDOW_BEFORE_HOURS * 60 * 60_000;
+      const windowEnd = scheduled + MATCH_LINK_WINDOW_AFTER_HOURS * 60 * 60_000;
+      return observedWindowEnd >= windowStart && observedWindowStart <= windowEnd;
+    })
+    .reduce((acc: any[], match: any) => {
+      if (!acc.some((entry) => entry.id === match.id)) acc.push(match);
+      return acc;
+    }, [] as any[]);
+
+  if (candidates.length !== 1) {
+    if (candidates.length > 1) {
+      const articleIdsCsv = articleIds.join(",");
+      console.log(
+        `[match-link] ambiguous pattern association — ${candidates.length} eligible matches for articles=${articleIdsCsv}`
+      );
+    }
+    return null;
+  }
+
+  return candidates[0].id;
+}
+
 function summarizeProposition(p: PropositionRow): string {
   switch (p.proposition_type) {
     case "match_result": {
@@ -119,7 +193,7 @@ async function fetchRecentPropositions(windowMinutes: number): Promise<Propositi
  * article_instability : ≥3 traces sur le même article_id dans la fenêtre,
  * dont au moins 2 avec size_delta de signes opposés (ajout puis retrait).
  */
-function detectInstability(rows: PropositionRow[]): DetectedPattern[] {
+async function detectInstability(rows: PropositionRow[]): Promise<DetectedPattern[]> {
   const byArticle = new Map<string, PropositionRow[]>();
   for (const r of rows) {
     const id = r.trace.article_id;
@@ -135,12 +209,13 @@ function detectInstability(rows: PropositionRow[]): DetectedPattern[] {
     const article = group[0].trace.article;
     const first = group[0];
     const last = group[group.length - 1];
+    const matchId = await resolveUniqueMatchIdForRows(group);
     out.push({
       pattern_type: "article_instability",
       proposition_ids: group.map((g) => g.id),
       trace_ids: group.map((g) => g.trace.id),
       entity_id: article.entity_id,
-      match_id: null,
+      match_id: matchId,
       article_id: articleId,
       templateContext: {
         language_codes: [article.language_code],
@@ -164,7 +239,7 @@ function detectInstability(rows: PropositionRow[]): DetectedPattern[] {
  * language_convergence : pour chaque entity_id, ≥2 propositions du même
  * proposition_type substantif dans des language_code distincts.
  */
-function detectConvergence(rows: PropositionRow[]): DetectedPattern[] {
+async function detectConvergence(rows: PropositionRow[]): Promise<DetectedPattern[]> {
   const byEntityType = new Map<string, PropositionRow[]>();
   for (const r of rows) {
     if (!isSubstantive(r)) continue;
@@ -180,12 +255,13 @@ function detectConvergence(rows: PropositionRow[]): DetectedPattern[] {
     const article = group[0].trace.article;
     const first = group[0];
     const last = group[group.length - 1];
+    const matchId = await resolveUniqueMatchIdForRows(group);
     out.push({
       pattern_type: "language_convergence",
       proposition_ids: group.map((g) => g.id),
       trace_ids: group.map((g) => g.trace.id),
       entity_id: entityId,
-      match_id: null,
+      match_id: matchId,
       article_id: null,
       templateContext: {
         language_codes: Array.from(distinctLangs),
@@ -237,12 +313,13 @@ async function detectUnderRadar(rows: PropositionRow[]): Promise<DetectedPattern
     const article = group[0].trace.article;
     const first = group[0];
     const last = group[group.length - 1];
+    const matchId = await resolveUniqueMatchIdForRows(group);
     out.push({
       pattern_type: "under_radar",
       proposition_ids: group.map((g) => g.id),
       trace_ids: group.map((g) => g.trace.id),
       entity_id: entityId,
-      match_id: null,
+      match_id: matchId,
       article_id: article.id,
       templateContext: {
         language_codes: [presentLang, ...absentLangs],
@@ -283,8 +360,8 @@ export async function detectPatterns(): Promise<DetectedPattern[]> {
   });
 
   const detected = [
-    ...detectInstability(instabilityRows),
-    ...detectConvergence(convergenceRows),
+    ...(await detectInstability(instabilityRows)),
+    ...(await detectConvergence(convergenceRows)),
     ...(await detectUnderRadar(underRadarRows)),
   ];
 
