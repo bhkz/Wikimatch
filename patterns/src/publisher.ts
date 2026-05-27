@@ -40,7 +40,7 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
 
   const safety = runSafetyChecks(tmpl);
 
-  // Toujours enregistrer le pattern (même bloqué) pour audit.
+  // Dry-run : expose dans les logs ce que le moteur aurait tenté de publier, sans aucune écriture en base.
   if (PATTERNS_DRY_RUN) {
     console.log(
       `[publisher] DRY_RUN — pattern=${pattern.pattern_type} ` +
