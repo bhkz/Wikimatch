@@ -2,6 +2,11 @@
 
 État au 2026-05-27 après livraison des 4 jalons correctifs (cf. [[CORRECTIVE_AUDIT_2026-05-27]]).
 
+> [!WARNING]
+> **RÈGLE DE SÉCURITÉ CRITIQUE :** Ne jamais commiter ou exposer de token d'administration (`ADMIN_TOKEN`) ou de secret en clair dans le dépôt Git.
+> Tout secret ayant été exposé publiquement (comme dans les versions précédentes de ce runbook) doit être considéré comme **compromis** et immédiatement **révoqué** et **remplacé** sur les environnements de production et de staging (Vercel, Render).
+> Rappel : la suppression d'un fichier ou d'une ligne sensible dans un nouveau commit ne nettoie pas l'historique Git public. En cas d'exposition historique, il est obligatoire de faire une rotation immédiate du secret concerné.
+
 Ce runbook est divisé en deux blocs :
 
 - **§A — Actions que je (Claude) ne peux pas faire** : je les liste précisément ; à toi de les exécuter.
@@ -67,11 +72,11 @@ Ajoute (en `Production`, `Preview` et `Development`) :
 | `VITE_SUPABASE_ANON_KEY` | `eyJ...` (anon) | Côté frontend OK |
 | `VITE_DATA_MODE` | `live` | Le frontend appelle l'API Vercel |
 | `VITE_PUBLIC_API_BASE` | (vide) | Same-origin → `/api/public/v1` |
-| `ADMIN_TOKEN` | `OHQUbeewPLypiVj24AVBy6TvCZDgOz72` | **Token déjà généré pour toi ci-dessous, à régénérer si tu veux** |
+| `ADMIN_TOKEN` | `<GENERATE_A_NEW_RANDOM_ADMIN_TOKEN>` | **Token à générer de manière aléatoire (32+ caractères)** |
 
-> **ADMIN_TOKEN suggéré** (32 chars random) : `OHQUbeewPLypiVj24AVBy6TvCZDgOz72`
+> **ADMIN_TOKEN suggéré** : Générer un jeton aléatoire sécurisé et le stocker uniquement dans les variables d'environnement.
 >
-> Tu peux le régénérer côté toi avec PowerShell : `[Convert]::ToBase64String((1..24 | %{ Get-Random -Max 256 }))`.
+> Tu peux générer un token fort localement (ex. en PowerShell) : `[Convert]::ToBase64String((1..24 | %{ Get-Random -Max 256 }))`.
 
 Garde ce token de côté : il sert à appeler `POST /api/admin/retract`.
 
@@ -85,7 +90,7 @@ Un seul service Render (`revision90`) lance les 3 jobs dans le même process Nod
 | --------- | -------- | ------ |
 | Supabase | `SUPABASE_URL` | `https://<projet>.supabase.co` |
 | Supabase | `SUPABASE_SERVICE_KEY` | `eyJ...` (service_role) |
-| Worker SSE | `WIKIMEDIA_USER_AGENT` | `WikiMatch/2.0 (thomas.david9492@gmail.com) Node` |
+| Worker SSE | `WIKIMEDIA_USER_AGENT` | `WikiMatch/2.0 (<CONTACT_EMAIL_OR_PROJECT_URL>) Node` |
 | Worker SSE | `WORKER_DRY_RUN` | `true` ← bascule en `false` après vérif |
 | Worker SSE | `WORKER_FETCH_DIFF` | `true` |
 | Analyzer | `OPENAI_API_KEY` | `sk-...` |
@@ -97,6 +102,9 @@ Un seul service Render (`revision90`) lance les 3 jobs dans le même process Nod
 | Patterns | `PATTERNS_DRY_RUN` | `true` ← bascule en `false` en dernier |
 | Patterns | `PATTERNS_POLL_INTERVAL_MS` | `30000` |
 | Commun | `LOG_LEVEL` | `info` |
+
+> [!NOTE]
+> **RÈGLE SUR `WIKIMEDIA_USER_AGENT` :** La variable `WIKIMEDIA_USER_AGENT` doit obligatoirement être configurée avec un moyen de contact valide (email ou URL de projet) dans l'environnement Render pour respecter les règles d'accès de l'API Wikimedia, mais aucune adresse email personnelle réelle ne doit être commise dans ce dépôt public.
 
 **Vars à supprimer si présentes** (leftover) :
 - `AI_DAILY_USD_CAP` (n'existe nulle part dans le code)
@@ -168,7 +176,7 @@ Une fois qu'une story est publiée automatiquement :
 
 ```bash
 curl -X POST https://<ton-domaine-vercel>/api/admin/retract \
-  -H "Authorization: Bearer OHQUbeewPLypiVj24AVBy6TvCZDgOz72" \
+  -H "Authorization: Bearer <ADMIN_TOKEN_FROM_VERCEL_ENV>" \
   -H "Content-Type: application/json" \
   -d '{
     "target_table": "published_stories",
