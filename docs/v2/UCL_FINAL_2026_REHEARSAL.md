@@ -265,6 +265,8 @@ Les règles suivantes s'appliquent durant la répétition :
 - Remarque : les minutes de temps additionnel sont conservées distinctement (par ex. `90+1` ≠ `90+3`) pour éviter de rapprocher deux événements différents.
 
 
+## 9. Fichiers du dispositif
+
 | Fichier | Rôle |
 |---------|------|
 | [`ucl-final-2026-psg-arsenal.match.json`](../../data/live/rehearsals/ucl-final-2026-psg-arsenal.match.json) | Définition du match |

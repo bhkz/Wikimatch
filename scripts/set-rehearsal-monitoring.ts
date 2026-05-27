@@ -158,10 +158,12 @@ async function main() {
 
   const validatedArticles = matchingRows
     .map((row) => {
-      const idStr = typeof row.id === "string" ? row.id : String(row.id);
-      if (idStr.length === 0) throw new Error(`Invalid article ID for ${formatArticleKey(row)}`);
+      const id = row.id;
+      if (typeof id !== "string" || id.length === 0) {
+        throw new Error(`Invalid article ID for ${formatArticleKey(row)}`);
+      }
       return {
-        id: idStr,
+        id,
         wiki_code: row.wiki_code,
         page_title: row.page_title,
         monitoring_enabled: Boolean(row.monitoring_enabled),
