@@ -131,6 +131,7 @@ npm run seed:rehearsal:watchlist -- --apply
 
 - Écrit les entités et articles dans Supabase.
 - Les 12 articles sont créés avec `monitoring_enabled=false` afin de préparer la base sans armer la surveillance.
+- Si certains articles existent déjà dans Supabase, leur état actuel de `monitoring_enabled` est préservé par le seed.
 - Ne s'exécute qu'après revue du dry-run et accord explicite de Thomas.
 
 ### Étape 5 — Rattacher les articles au match en dry-run

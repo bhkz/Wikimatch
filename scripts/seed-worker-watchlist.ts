@@ -149,7 +149,12 @@ async function main() {
   console.log(`[seed:watchlist] entities=${seed.entities.length}`);
   console.log(`[seed:watchlist] articles=${seed.articles.length}`);
   console.log(`[seed:watchlist] mode=${apply ? "APPLY" : "DRY_RUN"}`);
-  console.log(`[seed:watchlist] monitoring_enabled=${monitoringEnabled}`);
+  if (monitoringEnabled) {
+    console.log("[seed:watchlist] monitoring_enabled=true");
+  } else {
+    console.log("[seed:watchlist] new_articles_monitoring_enabled=false");
+    console.log("[seed:watchlist] existing_articles_monitoring_policy=preserve_on_apply");
+  }
 
   if (!apply) {
     for (const entity of seed.entities) {
@@ -173,11 +178,34 @@ async function main() {
   if (entityError) throw entityError;
 
   const entityIdBySlug = new Map((entities ?? []).map((entity) => [entity.slug, entity.id]));
+
+  const articleKey = (article: { wiki_code: string; page_title: string }) => `${article.wiki_code}::${article.page_title}`;
+  const expectedArticleKeys = new Set(seed.articles.map(articleKey));
+  const existingMonitoring = new Map<string, boolean>();
+
+  if (!monitoringEnabled) {
+    const wikiCodes = Array.from(new Set(seed.articles.map((article) => article.wiki_code)));
+    const { data: existingArticles, error: existingArticlesError } = await supabase
+      .from("wiki_articles")
+      .select("wiki_code, page_title, monitoring_enabled")
+      .in("wiki_code", wikiCodes);
+    if (existingArticlesError) throw existingArticlesError;
+
+    for (const row of existingArticles ?? []) {
+      const key = articleKey(row);
+      if (expectedArticleKeys.has(key) && typeof row.monitoring_enabled === "boolean") {
+        existingMonitoring.set(key, row.monitoring_enabled);
+      }
+    }
+  }
+
   const articleRows = seed.articles.map((article) => {
     const entityId = entityIdBySlug.get(article.entity_slug);
     if (!entityId) {
       throw new Error(`Missing seeded entity for article slug ${article.entity_slug}`);
     }
+    const key = articleKey(article);
+    const monitoring_enabled = monitoringEnabled ? true : existingMonitoring.get(key) ?? false;
     return {
       entity_id: entityId,
       wiki_code: article.wiki_code,
@@ -185,9 +213,13 @@ async function main() {
       page_title: article.page_title,
       canonical_url: article.canonical_url,
       article_type: article.article_type,
-      monitoring_enabled: monitoringEnabled,
+      monitoring_enabled,
     };
   });
+
+  if (!monitoringEnabled) {
+    console.log(`[seed:watchlist] existing_articles_preserved=${existingMonitoring.size}`);
+  }
 
   const { error: articleError } = await supabase
     .from("wiki_articles")

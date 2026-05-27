@@ -21,24 +21,18 @@ type SeedFile = {
 };
 
 function parseArgs(argv: string[]): { mode: "enable" | "disable"; apply: boolean } {
-  let mode: "enable" | "disable" | null = null;
-  let apply = false;
+  const enable = argv.includes("--enable");
+  const disable = argv.includes("--disable");
+  const apply = argv.includes("--apply");
 
-  for (const arg of argv) {
-    if (arg === "--enable") {
-      mode = "enable";
-    } else if (arg === "--disable") {
-      mode = "disable";
-    } else if (arg === "--apply") {
-      apply = true;
-    }
-  }
-
-  if (!mode) {
+  if (enable === disable) {
     throw new Error("Exactly one of --enable or --disable is required");
   }
 
-  return { mode, apply };
+  return {
+    mode: enable ? "enable" : "disable",
+    apply,
+  };
 }
 
 function validateSeedFile(seed: SeedFile): Array<SeedArticle> {
@@ -135,7 +129,11 @@ async function main() {
     return;
   }
 
-  const ids = matchingRows.map((row) => row.id).filter((id): id is number => typeof id === "number");
+  // wiki_articles.id is a UUID in the Supabase schema.
+  const ids = matchingRows
+    .map((row) => row.id)
+    .filter((id): id is string => typeof id === "string" && id.length > 0);
+
   if (ids.length !== expectedArticles.length) {
     throw new Error(`Expected ${expectedArticles.length} valid IDs, got ${ids.length}`);
   }
