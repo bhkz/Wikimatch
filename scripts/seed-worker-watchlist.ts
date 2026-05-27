@@ -156,6 +156,8 @@ async function main() {
     return;
   }
 
+  // Load local environment variables only when an explicit database write is requested.
+  await import("dotenv/config");
   const supabase = createSupabaseClient();
 
   const { data: entities, error: entityError } = await supabase

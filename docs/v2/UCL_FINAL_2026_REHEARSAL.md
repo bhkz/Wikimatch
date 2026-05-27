@@ -80,13 +80,22 @@ Tous les titres ont été **vérifiés via l'API Wikipedia** le 2026-05-27.
 > Les commandes sans `--apply` sont des vérifications. Les commandes avec `--apply` effectuent les écritures nécessaires.
 >
 > ```bash
+> # 1. Vérifications locales sans écriture
 > npm run import:rehearsal:match
 > npm run seed:rehearsal:watchlist
-> npm run build:rehearsal:watchlist
+>
+> # 2. Écritures contrôlées après validation des deux fichiers
 > npm run import:rehearsal:match -- --apply
 > npm run seed:rehearsal:watchlist -- --apply
+>
+> # 3. Vérification du rattachement, qui nécessite les données déjà présentes en base
+> npm run build:rehearsal:watchlist
+>
+> # 4. Écriture du rattachement après validation
 > npm run build:rehearsal:watchlist -- --apply
 > ```
+>
+> Le dry-run de `build:rehearsal:watchlist` intervient après les deux premières écritures, car il vérifie en lecture les identifiants du match et des articles déjà créés dans Supabase ; il n'écrit toutefois rien sans `--apply`.
 
 ### Étape 1 — Vérifier le match en dry-run
 
@@ -134,7 +143,7 @@ npm run build:rehearsal:watchlist
 >
 > Le script valide désormais qu'il trouve exactement 12 articles (4 entités × 3 langues) avant d'autoriser l'upsert.
 
-### Étape 5 — Rattacher les articles au match (après validation)
+### Étape 6 — Rattacher les articles au match après validation
 
 ```bash
 npm run build:rehearsal:watchlist -- --apply
