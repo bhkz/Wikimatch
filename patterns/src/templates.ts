@@ -54,15 +54,15 @@ function slugify(s: string): string {
 function articleInstabilityTemplate(ctx: TemplateContext): TemplateOutput {
   const lang = ctx.language_codes[0]?.toUpperCase() ?? "";
   const langPretty = langLabel(ctx.language_codes[0] ?? "");
-  const title = `ARTICLE INSTABLE · ${ctx.page_title.toUpperCase()} (${lang})`;
+  const title = `ACTIVITÉ À VÉRIFIER · ${ctx.page_title.toUpperCase()} (${lang})`;
   const observation =
-    `Sur l'article ${langPretty} de ${ctx.page_title}, ` +
-    `une séquence d'ajout, retrait puis restauration a été observée ` +
-    `entre ${formatHHMM(ctx.observed_window_start)} et ${formatHHMM(ctx.observed_window_end)}.`;
+    `Sur l'article ${langPretty} de ${ctx.page_title}, plusieurs modifications comprenant des ajouts et des retraits ont été détectées entre ${formatHHMM(
+      ctx.observed_window_start
+    )} et ${formatHHMM(ctx.observed_window_end)}.`;
   const interpretation =
-    `Cette séquence indique que le passage concerné n'a pas encore stabilisé sa formulation dans cette édition.`;
+    `Cette activité peut signaler une réécriture en cours, mais ne démontre ni contestation d'un passage précis, ni séquence d'ajout, retrait et restauration.`;
   const limitation =
-    `Aucune cause éditoriale n'est inférée. Aucune motivation de contributeur n'est attribuée. Le code linguistique désigne une édition de Wikipédia, jamais un pays.`;
+    `Une vérification manuelle des diffs est nécessaire avant toute qualification d'instabilité éditoriale. Aucune motivation de contributeur n'est attribuée.`;
   return {
     title,
     excerpt: observation,
@@ -71,7 +71,7 @@ function articleInstabilityTemplate(ctx: TemplateContext): TemplateOutput {
     limitation_text: limitation,
     languages: [lang],
     source_count: ctx.proposition_summary ? 1 : 1,
-    slug_seed: `${slugify(ctx.page_title)}-instabilite-${lang.toLowerCase()}`,
+    slug_seed: `${slugify(ctx.page_title)}-activite-a-verifier-${lang.toLowerCase()}`,
   };
 }
 
@@ -79,12 +79,13 @@ function languageConvergenceTemplate(ctx: TemplateContext): TemplateOutput {
   const codes = ctx.language_codes_substantive.length
     ? ctx.language_codes_substantive
     : ctx.language_codes;
-  const title = `MISE À JOUR CONVERGENTE · ${ctx.page_title.toUpperCase()}`;
+  const title = `MISE À JOUR ÉQUIVALENTE DÉTECTÉE · ${ctx.page_title.toUpperCase()}`;
   const observation =
-    `La même observation factuelle (${ctx.proposition_summary}) ` +
-    `est désormais présente dans ${codes.length} éditions linguistiques observées : ${uppercaseLangList(codes)}.`;
+    `Une proposition structurée équivalente (${ctx.proposition_summary}) a été détectée dans les modifications de ${codes.length} éditions linguistiques observées : ${uppercaseLangList(
+      codes
+    )}.`;
   const interpretation =
-    `Cette présence multilingue indique une mise à jour convergente, pas une tension entre éditions.`;
+    `Cette convergence porte sur les modifications détectées dans la fenêtre observée. Elle ne suffit pas à résumer l'ensemble du contenu actuel des articles.`;
   const limitation =
     `Aucune interprétation politique ou nationale ne peut en être déduite. Les codes linguistiques désignent des éditions de Wikipédia.`;
   return {
@@ -103,16 +104,16 @@ function underRadarTemplate(ctx: TemplateContext): TemplateOutput {
   const presentCode = ctx.language_codes_substantive[0] ?? ctx.language_codes[0];
   const absentCodes = ctx.language_codes_absent ?? [];
   const presentLang = langLabel(presentCode);
-  const title = `SOUS LE RADAR · ${ctx.page_title.toUpperCase()}`;
+  const title = `AJOUT ISOLÉ À VÉRIFIER · ${ctx.page_title.toUpperCase()}`;
   const observation =
-    `L'édition ${presentLang} de ${ctx.page_title} documente : ${ctx.proposition_summary}. ` +
+    `Dans la fenêtre observée, une proposition substantielle (${ctx.proposition_summary}) a été détectée dans l'édition ${presentLang}, ` +
     (absentCodes.length
-      ? `Aucun ajout équivalent n'est détecté dans ${langEnumerated(absentCodes)} observées au même instant.`
-      : `Aucun ajout équivalent n'est détecté dans les autres éditions observées au même instant.`);
+      ? `sans détection d'un ajout substantiel comparable dans ${langEnumerated(absentCodes)} observées.`
+      : `sans détection d'un ajout substantiel comparable dans les autres éditions observées.`);
   const interpretation =
-    `Cette asymétrie d'éditions linguistiques est un décalage de documentation, pas une opinion attribuable à un public.`;
+    `Ce signal identifie un décalage dans les modifications observées, pas une absence démontrée de l'information dans les autres articles.`;
   const limitation =
-    `Cette observation porte uniquement sur les éditions et la fenêtre temporelle observées. Aucune cause éditoriale n'est inférée.`;
+    `La présence actuelle du fait dans chaque article doit être vérifiée manuellement avant toute publication éditoriale.`;
   return {
     title,
     excerpt: observation,
@@ -121,7 +122,7 @@ function underRadarTemplate(ctx: TemplateContext): TemplateOutput {
     limitation_text: limitation,
     languages: [presentCode.toUpperCase(), ...absentCodes.map((c) => c.toUpperCase())],
     source_count: 1,
-    slug_seed: `${slugify(ctx.page_title)}-sous-radar-${presentCode.toLowerCase()}`,
+    slug_seed: `${slugify(ctx.page_title)}-ajout-isole-${presentCode.toLowerCase()}`,
   };
 }
 

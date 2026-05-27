@@ -25,6 +25,7 @@ const stats = {
   publication_disabled: 0,
   dry_run_duplicates_skipped: 0,
   errors: 0,
+  manual_review_required: 0,
 };
 
 function sleep(ms: number): Promise<void> {
@@ -58,6 +59,10 @@ async function runOnce(): Promise<void> {
         case "blocked_safety":
           stats.blocked_safety += 1;
           console.log(`[patterns] blocked: ${pattern.pattern_type} reason=${r.reason}`);
+          break;
+        case "manual_review_required":
+          stats.manual_review_required += 1;
+          console.log(`[patterns] manual review required: ${pattern.pattern_type} reason=${r.reason}`);
           break;
         case "already_published":
           stats.already_published += 1;
