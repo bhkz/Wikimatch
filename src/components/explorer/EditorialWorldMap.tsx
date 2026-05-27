@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Link } from "react-router-dom";
 import { StoryGeoAnchor, ExplorerStoryType } from "../../types";
+import { isDemoMode } from "../../data";
 
 export default function EditorialWorldMap({ anchors, unmapped }: { anchors: StoryGeoAnchor[], unmapped: any[] }) {
   const [activeFilter, setActiveFilter] = useState<ExplorerStoryType | "all">("all");
@@ -108,7 +109,7 @@ export default function EditorialWorldMap({ anchors, unmapped }: { anchors: Stor
                     >
                        <div className="flex flex-col gap-2">
                           <div className={`font-mono text-[9px] uppercase font-bold tracking-widest px-2 py-1 w-fit border ${getTypeBadgeClass(selectedAnchor.type)}`}>
-                            {getTypeLabel(selectedAnchor.type)} · CAS FICTIF
+                            {getTypeLabel(selectedAnchor.type)}{(isDemoMode || selectedAnchor.isDemo) ? " · CAS FICTIF" : ""}
                           </div>
                           <h3 className="font-display text-4xl uppercase text-white mt-2 leading-tight">
                             {selectedAnchor.subjectLabel}

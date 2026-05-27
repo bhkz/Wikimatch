@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import DemoBadge from "./DemoBadge";
 import type { TrackedMatch } from "../types";
+import { isDemoMode } from "../data";
 
 export default function TrackedMatchPoster({
   nextMatch,
@@ -69,8 +70,11 @@ export default function TrackedMatchPoster({
                   <span className="font-mono text-xs uppercase text-cream border-t border-cream/10 pt-2">{nextMatch.trackedPagesLabel}</span>
                 </div>
               </div>
-              <Link to="/match/demo-france-belgique" className="mt-12 bg-cream text-navy px-6 py-4 font-medium uppercase font-display tracking-widest text-lg hover:bg-blue-electric hover:text-white transition-colors w-full text-center">
-                Voir comment un match sera raconté
+              <Link
+                to={isDemoMode ? "/match/demo-france-belgique" : "/matches"}
+                className="mt-12 bg-cream text-navy px-6 py-4 font-medium uppercase font-display tracking-widest text-lg hover:bg-blue-electric hover:text-white transition-colors w-full text-center"
+              >
+                {isDemoMode ? "Voir comment un match sera raconté" : "Voir tous les matchs surveillés"}
               </Link>
             </div>
           </div>

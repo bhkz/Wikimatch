@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search, Filter, X } from "lucide-react";
 import { StoryArchiveFilter } from "../../types";
+import { isDemoMode } from "../../data";
 
 type Props = {
   filters: StoryArchiveFilter[];

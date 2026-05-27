@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { StoriesArchiveStats } from "../../types";
+import { isDemoMode } from "../../data";
 
 export default function ArchiveStatsStrip({ stats }: { stats: StoriesArchiveStats }) {
   const total = stats.storyCount + stats.matchCount + stats.languageCount + stats.sourceCount;

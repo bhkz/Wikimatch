@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import DemoBadge from "./DemoBadge";
 import type { PublishedStory } from "../types";
+import { isDemoMode } from "../data";
 
 export default function HeroSection({
   featuredStory,
@@ -91,8 +92,9 @@ export default function HeroSection({
         </motion.div>
       </div>
 
-      {/* Floating Teaser (Scrolls up) */}
-      <motion.div 
+      {/* Floating Teaser — utilise les vraies données de featuredStory.
+          Le titre et les langues viennent de la story ; rien n'est hardcodé. */}
+      <motion.div
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.8 }}
@@ -100,16 +102,18 @@ export default function HeroSection({
       >
         <Link to={`/story/${featuredStory.slug}`}>
           <div className="bg-cream text-navy p-6 shadow-2xl border-t-4 border-blue-electric flex flex-col gap-4 hover:translate-y-[-4px] transition-transform">
-            <DemoBadge />
+            {(isDemoMode || featuredStory.isDemo) && <DemoBadge />}
             <div>
               <div className="font-mono text-xs text-navy/50 mb-1">À LA UNE</div>
-              <h3 className="font-display text-2xl uppercase leading-tight">Un même carton rouge. Trois traitements Wikipédia.</h3>
+              <h3 className="font-display text-2xl uppercase leading-tight">{featuredStory.title}</h3>
             </div>
-            <div className="flex gap-2">
-              {["EN", "ES", "FR"].map(lang => (
-                <span key={lang} className="px-2 py-1 bg-navy/5 font-mono text-[10px] rounded">{lang}</span>
-              ))}
-            </div>
+            {featuredStory.languages.length > 0 && (
+              <div className="flex gap-2 flex-wrap">
+                {featuredStory.languages.map((lang) => (
+                  <span key={lang} className="px-2 py-1 bg-navy/5 font-mono text-[10px] rounded">{lang}</span>
+                ))}
+              </div>
+            )}
           </div>
         </Link>
       </motion.div>

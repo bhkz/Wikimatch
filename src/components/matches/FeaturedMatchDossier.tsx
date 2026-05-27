@@ -28,9 +28,11 @@ export default function FeaturedMatchDossier({ match }: { match: TrackedMatchCar
             <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/50 to-transparent opacity-80" />
             
             <div className="relative z-10 flex flex-col items-center gap-6">
-              <div className="font-mono text-[10px] font-bold uppercase tracking-widest bg-blue-electric px-3 py-1 text-white">
-                DÉMONSTRATION · DOSSIER FICTIF
-              </div>
+              {(match.isDemo) && (
+                <div className="font-mono text-[10px] font-bold uppercase tracking-widest bg-blue-electric px-3 py-1 text-white">
+                  DÉMONSTRATION · DOSSIER FICTIF
+                </div>
+              )}
               <div className="font-display text-5xl md:text-7xl uppercase tracking-widest text-white leading-none">
                 {match.homeTeam.name}
               </div>

@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import { isLiveMode } from "../../data";
 
 export default function SearchRedCardDemoJourney() {
+  if (isLiveMode) return null;
   return (
     <div className="bg-navy border border-blue-electric/30 p-6 md:p-8 flex flex-col gap-8 relative overflow-hidden mt-8 lg:mt-0 shadow-[0_0_30px_rgba(0,102,255,0.05)]">
       <div className="relative z-10 flex flex-col gap-2">

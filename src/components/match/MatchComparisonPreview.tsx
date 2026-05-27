@@ -1,8 +1,13 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { MatchLanguageComparison } from "../../types";
+import { isLiveMode } from "../../data";
 
 export default function MatchComparisonPreview({ comparison }: { comparison: MatchLanguageComparison }) {
+  // Encart explicatif construit autour de l'incident fictif demo-divergence.
+  // En live, la vraie comparaison cross-langue arrive via
+  // /api/public/v1/matches/[slug].comparisonItems.
+  if (isLiveMode) return null;
   return (
     <section className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10 overflow-hidden text-navy">
       <div className="w-full max-w-screen-xl mx-auto flex flex-col gap-12">

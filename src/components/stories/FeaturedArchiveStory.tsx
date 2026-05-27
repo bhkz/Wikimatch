@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { StoryArchiveItem } from "../../types";
+import { isDemoMode } from "../../data";
 
 export default function FeaturedArchiveStory({ story }: { story: StoryArchiveItem }) {
   return (

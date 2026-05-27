@@ -22,8 +22,7 @@ export default function SearchEmptyState() {
 
       <p className="font-sans text-lg text-white/70 leading-relaxed max-w-2xl mt-6 font-light">
         WikiMatch ne trouve aucune histoire publiée, aucun dossier public ni
-        aucune trace exposable correspondant à votre requête dans cette
-        démonstration.
+        aucune trace exposable correspondant à votre requête.
       </p>
       <p className="font-sans text-lg text-[#e63946] leading-relaxed max-w-2xl mt-2 font-medium">
         Les candidats non validés et les données privées ne sont jamais affichés

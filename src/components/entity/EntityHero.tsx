@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import DemoBadge from "../DemoBadge";
 import { EntityProfile } from "../../types";
+import { isDemoMode } from "../../data";
 
 export default function EntityHero({ entity }: { entity: EntityProfile }) {
   
@@ -87,17 +88,31 @@ export default function EntityHero({ entity }: { entity: EntityProfile }) {
                className="flex items-center gap-4 mt-6"
             >
                <h2 className="font-display text-4xl text-navy uppercase tracking-widest">{entity.name}</h2>
-               <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#e63946] border border-[#e63946]/30 px-2 py-1">PERSONNAGE FICTIF</span>
+               {(isDemoMode || entity.isDemo) && (
+                 <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#e63946] border border-[#e63946]/30 px-2 py-1">PERSONNAGE FICTIF</span>
+               )}
             </motion.div>
 
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.8 }}
-              className="max-w-xl font-sans text-lg md:text-xl text-navy/70 leading-relaxed font-light mt-2"
-            >
-              Après un match fictif contre le Sénégal, l’édition japonaise enrichit son article avec plusieurs éléments de performance. Au même moment, les éditions anglaise et française observées restent beaucoup plus limitées.
-            </motion.p>
+            {(isDemoMode || entity.isDemo) && (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.8 }}
+                className="max-w-xl font-sans text-lg md:text-xl text-navy/70 leading-relaxed font-light mt-2"
+              >
+                Après un match fictif contre le Sénégal, l’édition japonaise enrichit son article avec plusieurs éléments de performance. Au même moment, les éditions anglaise et française observées restent beaucoup plus limitées.
+              </motion.p>
+            )}
+            {!isDemoMode && !entity.isDemo && entity.shortDescription && (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.8 }}
+                className="max-w-xl font-sans text-lg md:text-xl text-navy/70 leading-relaxed font-light mt-2"
+              >
+                {entity.shortDescription}
+              </motion.p>
+            )}
             
             <motion.div 
                initial={{ opacity: 0 }}

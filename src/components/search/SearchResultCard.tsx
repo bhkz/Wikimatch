@@ -9,9 +9,7 @@ export default function SearchResultCard({
   const handleNotBuilt = (e: React.MouseEvent) => {
     if (!item.available) {
       e.preventDefault();
-      alert(
-        "Cette page détail n’est pas construite dans la démonstration frontend.",
-      );
+      alert("Cette page détail n’est pas disponible.");
     }
   };
 

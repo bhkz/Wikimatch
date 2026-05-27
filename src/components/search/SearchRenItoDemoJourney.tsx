@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import { isLiveMode } from "../../data";
 
 export default function SearchRenItoDemoJourney() {
+  if (isLiveMode) return null;
   return (
     <div className="bg-[#111] border border-white/10 p-6 md:p-8 flex flex-col gap-8 relative overflow-hidden">
       <div className="absolute -right-16 -top-16 opacity-5 font-display text-[200px] text-white">

@@ -1,8 +1,14 @@
 import { motion } from "motion/react";
 import { ArticleInstabilityCase } from "../../types";
 import MatchDemoBadge from "./MatchDemoBadge";
+import { isLiveMode } from "../../data";
 
 export default function ArticleInstabilityFeature({ data }: { data: ArticleInstabilityCase }) {
+  // Cette section illustre une instabilité avec des libellés démo
+  // "ARTICLE ANGLAIS · DÉMONSTRATION" et un incident fictif. En mode
+  // live, le pipeline expose les vraies instabilités via published_stories
+  // de type article_instability, donc ce composant n'a plus à s'afficher.
+  if (isLiveMode) return null;
   return (
     <section className="py-24 px-4 md:px-8 bg-navy text-cream relative overflow-hidden bg-grid-pattern">
       <div className="w-full max-w-screen-xl mx-auto flex flex-col lg:flex-row gap-16 items-center">

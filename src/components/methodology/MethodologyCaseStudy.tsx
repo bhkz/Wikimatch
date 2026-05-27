@@ -1,7 +1,12 @@
 import { motion } from "motion/react";
 import SectionLabel from "../SectionLabel";
+import { isLiveMode } from "../../data";
 
 export default function MethodologyCaseStudy() {
+  // Étude de cas écrite intégralement autour de demo-divergence (France-Belgique).
+  // En live, cette section n'a aucune valeur — masquée. À remplacer plus tard
+  // par un sélecteur dynamique parmi les stories réellement publiées.
+  if (isLiveMode) return null;
   return (
     <section className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10">
       <div className="w-full max-w-screen-xl mx-auto flex flex-col gap-16">

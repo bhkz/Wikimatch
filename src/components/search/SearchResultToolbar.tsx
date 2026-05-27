@@ -34,8 +34,7 @@ export default function SearchResultToolbar() {
         </h2>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-4">
           <p className="font-mono text-xs uppercase tracking-widest text-white/50">
-            {results.length} résultat{results.length > 1 ? "s" : ""} public
-            {results.length > 1 ? "s" : ""} dans la démonstration
+            {results.length} résultat{results.length > 1 ? "s" : ""} public{results.length > 1 ? "s" : ""}
           </p>
           <p className="font-sans text-xs text-white/40 italic">
             Classés par correspondance textuelle. Aucun score de popularité

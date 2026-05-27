@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { TrackedMatchCard } from "../../../types";
+import { isDemoMode } from "../../../data";
 
 export default function UpcomingMatchCard({ match, index }: { match: TrackedMatchCard, index: number }) {
   return (
@@ -57,7 +58,7 @@ export default function UpcomingMatchCard({ match, index }: { match: TrackedMatc
         <div className="text-navy/40 font-mono text-[10px] uppercase font-bold tracking-widest text-center cursor-not-allowed">
           [Voir le suivi prévu]
         </div>
-        {match.id === "demo-japan-senegal" && (
+        {isDemoMode && match.id === "demo-japan-senegal" && (
            <Link to="/entity/demo-japan-goalkeeper" className="text-blue-electric hover:text-blue-electric/70 transition-colors font-mono text-[10px] uppercase font-bold tracking-widest text-center mt-2 decoration-blue-electric/30 underline">
              Voir le joueur observé
            </Link>

@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import DemoBadge from "./DemoBadge";
 import type { ObservatoryTeaserType } from "../types";
+import { isDemoMode } from "../data";
 
 export default function ObservatoryTeaser({
   observatoryData,
@@ -54,33 +55,37 @@ export default function ObservatoryTeaser({
             </div>
           </div>
 
-          <div className="mt-8 bg-[#0B1021] border border-cream/10 p-4 md:p-6 overflow-x-auto rounded">
-            <div className="font-mono text-[10px] text-cream/40 uppercase tracking-widest mb-4">Flux brut récent (démonstration)</div>
-            <div className="flex flex-col gap-3 font-mono text-xs text-cream/80 whitespace-nowrap min-w-[500px]">
-              <div className="flex hover:text-white transition-colors">
-                <span className="w-16 opacity-50">22:14</span>
-                <span className="w-12 text-blue-electric">EN</span>
-                <span className="w-32 opacity-70">Article joueur</span>
-                <span className="flex-grow">Section carrière modifiée</span>
-                <span className="w-32 text-right opacity-50 hover:opacity-100 cursor-pointer underline">Voir la source</span>
-              </div>
-              <div className="flex hover:text-white transition-colors">
-                <span className="w-16 opacity-50">22:18</span>
-                <span className="w-12 text-blue-electric">FR</span>
-                <span className="w-32 opacity-70">Article match</span>
-                <span className="flex-grow">Résultat ajouté</span>
-                <span className="w-32 text-right opacity-50 hover:opacity-100 cursor-pointer underline">Voir la source</span>
-              </div>
-              <div className="flex hover:text-white transition-colors">
-                <span className="w-16 opacity-50">22:23</span>
-                <span className="w-12 text-blue-electric">ES</span>
-                <span className="w-32 opacity-70">Article joueur</span>
-                <span className="flex-grow">Mention reformulée</span>
-                <span className="w-32 text-right opacity-50 hover:opacity-100 cursor-pointer underline">Voir la source</span>
+          {/* Flux brut récent : maquette uniquement en mode démo.
+              Les vraies traces apparaissent sur /observatoire. */}
+          {isDemoMode && (
+            <div className="mt-8 bg-[#0B1021] border border-cream/10 p-4 md:p-6 overflow-x-auto rounded">
+              <div className="font-mono text-[10px] text-cream/40 uppercase tracking-widest mb-4">Flux brut récent (démonstration)</div>
+              <div className="flex flex-col gap-3 font-mono text-xs text-cream/80 whitespace-nowrap min-w-[500px]">
+                <div className="flex hover:text-white transition-colors">
+                  <span className="w-16 opacity-50">22:14</span>
+                  <span className="w-12 text-blue-electric">EN</span>
+                  <span className="w-32 opacity-70">Article joueur</span>
+                  <span className="flex-grow">Section carrière modifiée</span>
+                  <span className="w-32 text-right opacity-50 hover:opacity-100 cursor-pointer underline">Voir la source</span>
+                </div>
+                <div className="flex hover:text-white transition-colors">
+                  <span className="w-16 opacity-50">22:18</span>
+                  <span className="w-12 text-blue-electric">FR</span>
+                  <span className="w-32 opacity-70">Article match</span>
+                  <span className="flex-grow">Résultat ajouté</span>
+                  <span className="w-32 text-right opacity-50 hover:opacity-100 cursor-pointer underline">Voir la source</span>
+                </div>
+                <div className="flex hover:text-white transition-colors">
+                  <span className="w-16 opacity-50">22:23</span>
+                  <span className="w-12 text-blue-electric">ES</span>
+                  <span className="w-32 opacity-70">Article joueur</span>
+                  <span className="flex-grow">Mention reformulée</span>
+                  <span className="w-32 text-right opacity-50 hover:opacity-100 cursor-pointer underline">Voir la source</span>
+                </div>
               </div>
             </div>
-          </div>
-          
+          )}
+
           <div className="font-mono text-[10px] text-cream/40 uppercase text-center mt-2">
             Une modification brute n’est jamais automatiquement une histoire.
           </div>

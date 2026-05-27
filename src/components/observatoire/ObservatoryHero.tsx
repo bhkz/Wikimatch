@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import DemoBadge from "../DemoBadge";
+import { isDemoMode } from "../../data";
 
 export default function ObservatoryHero() {
   
@@ -73,17 +74,19 @@ export default function ObservatoryHero() {
                </span>
             </h1>
 
-            <motion.div 
-               initial={{ opacity: 0 }}
-               animate={{ opacity: 1 }}
-               transition={{ delay: 0.8 }}
-               className="bg-white border border-navy/10 p-6 md:p-8 mt-6 max-w-xl shadow-sm"
-            >
-               <h2 className="font-mono text-sm uppercase font-bold tracking-widest text-navy mb-4">REJEU FICTIF</h2>
-               <p className="font-sans text-sm md:text-base text-navy/70 leading-relaxed font-light">
-                 Cette interface ne reçoit aucune donnée réelle. Elle démontre comment les traces publiques pourraient être consultées et reliées à une histoire. L’Observatoire expose les articles surveillés, les modifications observées et les passages comparés derrière les histoires publiées par WikiMatch.
-               </p>
-            </motion.div>
+            {isDemoMode && (
+              <motion.div
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 transition={{ delay: 0.8 }}
+                 className="bg-white border border-navy/10 p-6 md:p-8 mt-6 max-w-xl shadow-sm"
+              >
+                 <h2 className="font-mono text-sm uppercase font-bold tracking-widest text-navy mb-4">REJEU FICTIF</h2>
+                 <p className="font-sans text-sm md:text-base text-navy/70 leading-relaxed font-light">
+                   Cette interface ne reçoit aucune donnée réelle. Elle démontre comment les traces publiques pourraient être consultées et reliées à une histoire. L’Observatoire expose les articles surveillés, les modifications observées et les passages comparés derrière les histoires publiées par WikiMatch.
+                 </p>
+              </motion.div>
+            )}
 
           </div>
           

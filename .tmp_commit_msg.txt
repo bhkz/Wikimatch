@@ -1,0 +1,63 @@
+fix(demo-leakage): masque tous les badges/textes/composants fictifs en live
+
+Tous les marqueurs "DEMONSTRATION D'INTERFACE", "CAS FICTIF",
+"DOSSIER FICTIF", "REJEU FICTIF", "PERSONNAGE FICTIF", "ANALYSE IA",
+"demonstration frontend" disparaissent automatiquement en
+VITE_DATA_MODE=live. En demo, ils restent visibles pour la maquette.
+
+Badges (renvoient null en live)
+- src/components/DemoBadge.tsx
+- src/components/match/MatchDemoBadge.tsx
+
+Composants 100% demo (return null en live)
+- src/components/entity/EntityEditorialSummary.tsx (Ren Ito / Japon-Senegal hardcode)
+- src/components/match/ArticleInstabilityFeature.tsx (ARTICLE ANGLAIS - DEMONSTRATION)
+- src/components/match/MatchComparisonPreview.tsx (incident fictif de fin de match)
+- src/components/methodology/MethodologyCaseStudy.tsx (etude de cas demo-divergence)
+- src/components/search/SearchRenItoDemoJourney.tsx
+- src/components/search/SearchRedCardDemoJourney.tsx
+- src/components/explorer/UnderRadarExplorerFeature.tsx (Ren Ito hardcode)
+
+Composants avec subsection demo conditionnee
+- src/components/HeroSection.tsx : floating teaser utilise maintenant
+  featuredStory.title / .languages dynamiques au lieu de "Un meme carton
+  rouge. Trois traitements Wikipedia" hardcode. DemoBadge conditionne.
+- src/components/ObservatoryTeaser.tsx : flux brut recent fictif (22:14 EN
+  Article joueur etc.) masque en live.
+- src/components/TrackedMatchPoster.tsx : link /match/demo-france-belgique
+  uniquement en demo ; live -> /matches.
+- src/components/observatoire/ObservatoryHero.tsx : subsection REJEU
+  FICTIF masquee en live.
+- src/components/entity/EntityHero.tsx : badge PERSONNAGE FICTIF et copy
+  fictive Japon-Senegal masques en live. Sinon affiche
+  entity.shortDescription.
+- src/components/explorer/EditorialWorldMap.tsx : suffixe "CAS FICTIF"
+  ajoute seulement si anchor.isDemo ou mode demo.
+- src/components/matches/cards/UpcomingMatchCard.tsx : block conditionnel
+  demo-japan-senegal masque en live.
+
+Stories (deja partiellement nettoye par Codex)
+- src/components/stories/ArchiveStoryCard.tsx : import isDemoMode ajoute.
+- src/components/stories/ArchiveStatsStrip.tsx : import isDemoMode ajoute.
+- src/components/stories/StoriesFilterBar.tsx : import isDemoMode ajoute.
+- src/components/stories/FeaturedArchiveStory.tsx : import isDemoMode ajoute.
+
+Textes inline
+- src/components/matches/FeaturedMatchDossier.tsx : "DEMONSTRATION ·
+  DOSSIER FICTIF" conditionne sur match.isDemo.
+- src/components/matches/cards/NoStoryMatchCard.tsx : "Ce match fictif"
+  -> "Ce match" en mode reel.
+- src/components/search/SearchEmptyState.tsx : retrait de "dans cette
+  demonstration".
+- src/components/search/SearchResultToolbar.tsx : retrait de "dans la
+  demonstration".
+- src/components/search/SearchResultCard.tsx : alert generique sans
+  "demonstration frontend".
+
+Verification
+- tsc --noEmit : 0 erreur
+- vite build : 16.05s, 869.99 kB JS, 218.33 kB gzip
+- Mode demo intact (fixtures non touchees)
+- Mode live : aucun texte "fictif" ou "demonstration" residuel
+  affiche par defaut sur les pages Home / Stories / Match / Entity
+  / Explorer / Observatory / Search

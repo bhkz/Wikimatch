@@ -39,7 +39,9 @@ export default function NoStoryMatchCard({ match, index }: { match: TrackedMatch
 
          <div className="flex flex-col gap-2 mt-auto text-navy/60">
             <p className="font-sans text-sm leading-relaxed font-light">
-              Ce match fictif a été surveillé, mais aucun changement suffisamment significatif n'a été retenu pour publication.
+              {match.isDemo
+                ? "Ce match fictif a été surveillé, mais aucun changement suffisamment significatif n'a été retenu pour publication."
+                : "Ce match a été surveillé, mais aucun changement suffisamment significatif n'a été retenu pour publication."}
             </p>
          </div>
 

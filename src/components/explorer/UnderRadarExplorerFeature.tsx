@@ -1,7 +1,12 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
+import { isLiveMode } from "../../data";
 
 export default function UnderRadarExplorerFeature() {
+  // Encart explicatif "Sous le radar" — contient des liens fictifs vers
+  // demo-japan-goalkeeper. Le pipeline live publie des stories under_radar
+  // réelles dans la grille principale de l'Explorer.
+  if (isLiveMode) return null;
   return (
     <section className="py-24 md:py-32 px-4 md:px-8 bg-cream border-b border-navy/10 relative">
       <div className="w-full max-w-screen-xl mx-auto flex flex-col md:flex-row gap-12 md:gap-24 relative items-center">
