@@ -72,7 +72,7 @@ Tous les titres ont été **vérifiés via l'API Wikipedia** le 2026-05-27.
 
 ---
 
-## 4. Ordre d'exécution
+## 4. Préparer la base sans armer la surveillance
 
 > [!CAUTION]
 > **Ne pas exécuter ces commandes avant que la branche soit mergée dans `main` et que les migrations SQL nécessaires aient été appliquées dans Supabase.**
@@ -84,7 +84,7 @@ Tous les titres ont été **vérifiés via l'API Wikipedia** le 2026-05-27.
 > npm run import:rehearsal:match
 > npm run seed:rehearsal:watchlist
 >
-> # 2. Écritures contrôlées après validation des deux fichiers
+> # 2. Écritures de préparation, sans activation implicite des nouveaux articles
 > npm run import:rehearsal:match -- --apply
 > npm run seed:rehearsal:watchlist -- --apply
 >
@@ -129,7 +129,16 @@ npm run seed:rehearsal:watchlist
 npm run seed:rehearsal:watchlist -- --apply
 ```
 
-- Écrit les entités et articles dans Supabase.
+- Écrit les entités et les articles manquants dans Supabase.
+- Les nouveaux articles sont insérés avec `monitoring_enabled=false` afin que les sept nouveaux articles n'activent pas la surveillance implicitement.
+- Les entités et articles déjà existants ne sont pas modifiés par ce seed.
+- **Important** : Le dry-run a montré que cinq articles de la répétition existaient déjà en base et étaient actifs avant préparation :
+  - `frwiki:Paris Saint-Germain Football Club` active
+  - `eswiki:Paris Saint-Germain Football Club` active
+  - `enwiki:Arsenal F.C.` active
+  - `frwiki:Arsenal Football Club` active
+  - `eswiki:Arsenal Football Club` active
+- Si le worker est déjà actif ou redémarre avant l'activation complète, ces cinq articles peuvent déjà produire des traces ; la préparation ne désactive pas cette couverture préexistante.
 - Ne s'exécute qu'après revue du dry-run et accord explicite de Thomas.
 
 ### Étape 5 — Rattacher les articles au match en dry-run
@@ -149,9 +158,64 @@ npm run build:rehearsal:watchlist
 npm run build:rehearsal:watchlist -- --apply
 ```
 
----
+## 5. Armer la surveillance au moment choisi
 
-## 5. Variables Render pendant le match
+Avant d'activer la surveillance, vérifier que les variables Render de sécurité sont en place :
+
+```bash
+PATTERNS_DRY_RUN=true
+AUTO_PUBLICATION_ENABLED=false
+```
+
+### Vérifier avant activation
+
+```bash
+npm run monitor:rehearsal:watchlist -- --enable
+```
+
+- Dry-run de lecture seule ; affiche l'état courant des 12 articles.
+- Indique que `--enable --apply` capturera un snapshot local de l'état initial avant activation.
+
+### Activer et capturer le snapshot
+
+```bash
+npm run monitor:rehearsal:watchlist -- --enable --apply
+```
+
+- Capture un snapshot local (ignoré par Git) de l'état `monitoring_enabled` actuel de chaque article.
+- Active les 12 articles une fois le snapshot sauvegardé.
+- Refuse de continuer si un snapshot existe déjà (protection contre écrasement accidentel).
+- Après activation, démarrer ou redémarrer le worker pour qu'il recharge l'index des articles surveillés.
+
+## 6. Arrêt et restauration après test
+
+### Arrêter immédiatement la collecte
+
+Arrêter le worker Render.
+
+### Vérifier la restauration prévue de l'état initial
+
+```bash
+npm run monitor:rehearsal:watchlist -- --disable
+```
+
+- Dry-run de lecture seule ; exige le snapshot capturé lors de l'activation.
+- Affiche pour chaque article l'état actuel et l'état cible de restauration enregistré.
+- Ne modifie rien en base.
+
+### Restaurer l'état initial en base
+
+```bash
+npm run monitor:rehearsal:watchlist -- --disable --apply
+```
+
+- Restaure exactement les états `monitoring_enabled` du snapshot :
+  - Les cinq articles initialement actifs repassent à `true` ;
+  - Les sept articles initialement inactifs repassent à `false`.
+- Supprime le snapshot local uniquement après restauration réussie.
+- Après restauration, ne redémarrer le worker que si l'on souhaite reprendre la surveillance correspondant à l'état restauré.
+
+## 7. Variables Render pendant le test
 
 | Variable | Valeur | Effet |
 |----------|--------|-------|
@@ -162,7 +226,7 @@ npm run build:rehearsal:watchlist -- --apply
 
 ---
 
-## 6. Critères de succès
+## 8. Critères de succès
 
 - [ ] Traces reçues sur au moins un article surveillé (`revision_traces`)
 - [ ] Propositions analysées par l'IA (`trace_propositions`)
@@ -201,7 +265,7 @@ Les règles suivantes s'appliquent durant la répétition :
 - Remarque : les minutes de temps additionnel sont conservées distinctement (par ex. `90+1` ≠ `90+3`) pour éviter de rapprocher deux événements différents.
 
 
-## 7. Fichiers du dispositif
+## 9. Fichiers du dispositif
 
 | Fichier | Rôle |
 |---------|------|

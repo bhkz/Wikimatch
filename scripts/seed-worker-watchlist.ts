@@ -6,9 +6,12 @@
  *   npm run seed:watchlist -- --live --apply     # write live watchlist to Supabase
  *   npm run seed:watchlist -- --file <path>      # dry-run custom JSON
  *   npm run seed:watchlist -- --file <path> --apply
+ *   npm run seed:watchlist -- --file <path> --monitoring-disabled
+ *   npm run seed:watchlist -- --file <path> --monitoring-disabled --apply
  *
  * Le format JSON est documenté dans worker/seeds/wc26-watchlist.live.json.
- * Toutes les insertions sont des upserts idempotents : safe à relancer.
+ * En mode générique actif, l'application utilise des upserts idempotents.
+ * En mode `--monitoring-disabled`, l'application n'insère que les entités et articles absents afin de préserver toute couverture existante.
  */
 
 import { readFile } from "node:fs/promises";
@@ -38,9 +41,10 @@ type SeedFile = {
   articles: SeedArticle[];
 };
 
-function parseArgs(argv: string[]): { filePath: string; apply: boolean } {
+function parseArgs(argv: string[]): { filePath: string; apply: boolean; monitoringEnabled: boolean } {
   let filePath = "worker/seeds/wc26-watchlist.live.json";
   let apply = false;
+  let monitoringEnabled = true;
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--live") {
@@ -50,9 +54,11 @@ function parseArgs(argv: string[]): { filePath: string; apply: boolean } {
       i += 1;
     } else if (arg === "--apply") {
       apply = true;
+    } else if (arg === "--monitoring-disabled") {
+      monitoringEnabled = false;
     }
   }
-  return { filePath, apply };
+  return { filePath, apply, monitoringEnabled };
 }
 
 function validateSeed(seed: SeedFile): void {
@@ -132,7 +138,7 @@ function createSupabaseClient() {
 }
 
 async function main() {
-  const { filePath, apply } = parseArgs(process.argv.slice(2));
+  const { filePath, apply, monitoringEnabled } = parseArgs(process.argv.slice(2));
   console.log(`[seed:watchlist] file=${filePath}`);
 
   const seedPath = new URL(`../${filePath}`, import.meta.url);
@@ -144,6 +150,12 @@ async function main() {
   console.log(`[seed:watchlist] entities=${seed.entities.length}`);
   console.log(`[seed:watchlist] articles=${seed.articles.length}`);
   console.log(`[seed:watchlist] mode=${apply ? "APPLY" : "DRY_RUN"}`);
+  if (monitoringEnabled) {
+    console.log("[seed:watchlist] monitoring_enabled=true");
+  } else {
+    console.log("[seed:watchlist] new_articles_monitoring_enabled=false");
+    console.log("[seed:watchlist] existing_articles_monitoring_policy=preserve_on_apply");
+  }
 
   if (!apply) {
     for (const entity of seed.entities) {
@@ -160,14 +172,85 @@ async function main() {
   await import("dotenv/config");
   const supabase = createSupabaseClient();
 
-  const { data: entities, error: entityError } = await supabase
-    .from("entities")
-    .upsert(seed.entities, { onConflict: "slug" })
-    .select("id, slug");
-  if (entityError) throw entityError;
+  if (monitoringEnabled) {
+    const { data: entities, error: entityError } = await supabase
+      .from("entities")
+      .upsert(seed.entities, { onConflict: "slug" })
+      .select("id, slug");
+    if (entityError) throw entityError;
 
-  const entityIdBySlug = new Map((entities ?? []).map((entity) => [entity.slug, entity.id]));
-  const articleRows = seed.articles.map((article) => {
+    const entityIdBySlug = new Map((entities ?? []).map((entity) => [entity.slug, entity.id]));
+    const articleRows = seed.articles.map((article) => {
+      const entityId = entityIdBySlug.get(article.entity_slug);
+      if (!entityId) {
+        throw new Error(`Missing seeded entity for article slug ${article.entity_slug}`);
+      }
+      return {
+        entity_id: entityId,
+        wiki_code: article.wiki_code,
+        language_code: article.language_code,
+        page_title: article.page_title,
+        canonical_url: article.canonical_url,
+        article_type: article.article_type,
+        monitoring_enabled: true,
+      };
+    });
+
+    const { error: articleError } = await supabase
+      .from("wiki_articles")
+      .upsert(articleRows, { onConflict: "wiki_code,page_title" });
+    if (articleError) throw articleError;
+
+    console.log(`[seed:watchlist] mode=APPLY`);
+    console.log(`[seed:watchlist] ✅ ${seed.entities.length} entities upserted`);
+    console.log(`[seed:watchlist] ✅ ${seed.articles.length} monitored wiki articles upserted`);
+    return;
+  }
+
+  const seedEntitySlugs = seed.entities.map((entity) => entity.slug);
+  const { data: existingEntities, error: existingEntitiesError } = await supabase
+    .from("entities")
+    .select("id, slug")
+    .in("slug", seedEntitySlugs);
+  if (existingEntitiesError) throw existingEntitiesError;
+
+  const existingEntitySlugs = new Set((existingEntities ?? []).map((entity) => entity.slug));
+  const missingEntities = seed.entities.filter((entity) => !existingEntitySlugs.has(entity.slug));
+
+  let insertedEntities: Array<{ id: string; slug: string }> = [];
+  if (missingEntities.length > 0) {
+    const { data: inserted, error: insertEntitiesError } = await supabase
+      .from("entities")
+      .insert(missingEntities)
+      .select("id, slug");
+    if (insertEntitiesError) throw insertEntitiesError;
+    insertedEntities = inserted ?? [];
+  }
+
+  const allEntities = [...(existingEntities ?? []), ...insertedEntities];
+  const entityIdBySlug = new Map((allEntities ?? []).map((entity) => [entity.slug, entity.id]));
+  if (entityIdBySlug.size !== seed.entities.length) {
+    throw new Error(`Expected ${seed.entities.length} entity IDs after insert/read, got ${entityIdBySlug.size}`);
+  }
+
+  const articleKey = (article: { wiki_code: string; page_title: string }) => `${article.wiki_code}::${article.page_title}`;
+  const expectedArticleKeys = new Set(seed.articles.map(articleKey));
+  const wikiCodes = Array.from(new Set(seed.articles.map((article) => article.wiki_code)));
+
+  const { data: existingArticles, error: existingArticlesError } = await supabase
+    .from("wiki_articles")
+    .select("wiki_code, page_title")
+    .in("wiki_code", wikiCodes);
+  if (existingArticlesError) throw existingArticlesError;
+
+  const existingArticleKeys = new Set(
+    (existingArticles ?? [])
+      .map((row) => articleKey(row))
+      .filter((key) => expectedArticleKeys.has(key))
+  );
+
+  const newArticles = seed.articles.filter((article) => !existingArticleKeys.has(articleKey(article)));
+  const newArticleRows = newArticles.map((article) => {
     const entityId = entityIdBySlug.get(article.entity_slug);
     if (!entityId) {
       throw new Error(`Missing seeded entity for article slug ${article.entity_slug}`);
@@ -179,18 +262,24 @@ async function main() {
       page_title: article.page_title,
       canonical_url: article.canonical_url,
       article_type: article.article_type,
-      monitoring_enabled: true,
+      monitoring_enabled: false,
     };
   });
 
-  const { error: articleError } = await supabase
-    .from("wiki_articles")
-    .upsert(articleRows, { onConflict: "wiki_code,page_title" });
-  if (articleError) throw articleError;
+  if (newArticleRows.length > 0) {
+    const { error: insertArticlesError } = await supabase
+      .from("wiki_articles")
+      .insert(newArticleRows);
+    if (insertArticlesError) throw insertArticlesError;
+  }
 
   console.log(`[seed:watchlist] mode=APPLY`);
-  console.log(`[seed:watchlist] ✅ ${seed.entities.length} entities upserted`);
-  console.log(`[seed:watchlist] ✅ ${seed.articles.length} monitored wiki articles upserted`);
+  console.log(`[seed:watchlist] existing_entities_untouched=${existingEntitySlugs.size}`);
+  console.log(`[seed:watchlist] new_entities_inserted=${missingEntities.length}`);
+  console.log(`[seed:watchlist] existing_articles_untouched=${existingArticleKeys.size}`);
+  console.log(`[seed:watchlist] new_articles_inserted=${newArticleRows.length}`);
+  console.log(`[seed:watchlist] ✅ ${seed.entities.length} entities prepared`);
+  console.log(`[seed:watchlist] ✅ ${newArticleRows.length} new wiki articles inserted with monitoring_enabled=false`);
 }
 
 main().catch((error) => {
