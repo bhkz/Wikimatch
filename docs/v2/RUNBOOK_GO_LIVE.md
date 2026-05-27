@@ -16,14 +16,17 @@ Ce runbook est divisé en deux blocs :
 
 ## §A — Actions à exécuter par toi
 
-### A.1 — Appliquer les 3 migrations dans Supabase prod (≈3 min)
+### A.1 — Appliquer les 6 migrations dans Supabase prod (≈5 min)
 
 1. Va dans https://app.supabase.com → ton projet V2 → **SQL Editor**.
-2. Pour chacun des 3 fichiers ci-dessous (dans l'**ordre**), ouvre-le, copie tout le contenu, colle dans l'éditeur, clique **Run** :
+2. Pour chacun des 6 fichiers ci-dessous (dans l'**ordre chronologique exact**), ouvre-le, copie tout le contenu, colle dans l'éditeur, clique **Run** :
 
    1. [`supabase/migrations/202605260001_v2_core_schema.sql`](../../supabase/migrations/202605260001_v2_core_schema.sql)
    2. [`supabase/migrations/202605260002_public_page_snapshots.sql`](../../supabase/migrations/202605260002_public_page_snapshots.sql)
-   3. [`supabase/migrations/202605270001_propositions_patterns_retract.sql`](../../supabase/migrations/202605270001_propositions_patterns_retract.sql) ← **livré au Jalon B+D**
+   3. [`supabase/migrations/202605270001_propositions_patterns_retract.sql`](../../supabase/migrations/202605270001_propositions_patterns_retract.sql)
+   4. [`supabase/migrations/202605271200_live_contract_alignment.sql`](../../supabase/migrations/202605271200_live_contract_alignment.sql)
+   5. [`supabase/migrations/202605271330_disable_demo_public_content.sql`](../../supabase/migrations/202605271330_disable_demo_public_content.sql)
+   6. [`supabase/migrations/202605271400_minimal_live_contract_alignment.sql`](../../supabase/migrations/202605271400_minimal_live_contract_alignment.sql)  ← **Nouvelle (PR04)** : ajoute `matches.group_label`, `published_stories.languages` et `published_stories.source_count`, et met à jour la vue publique `v_public_stories`.
 
 3. Vérifie dans **Table Editor** que tu vois bien :
    - `entities`, `wiki_articles`, `matches`, `match_watchlist`

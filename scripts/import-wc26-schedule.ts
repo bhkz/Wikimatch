@@ -55,7 +55,7 @@ async function main() {
     scheduled_at: m.scheduledAt ?? null,
     home_team_entity_id: teamId.get(m.homeTeam.slug) ?? null,
     away_team_entity_id: teamId.get(m.awayTeam.slug) ?? null,
-    status: 'scheduled',
+    status: 'upcoming',
     official_source_name: m.officialSourceName ?? 'FIFA',
     official_source_url: m.officialSourceUrl ?? null,
     source_verified_at: new Date().toISOString(),
