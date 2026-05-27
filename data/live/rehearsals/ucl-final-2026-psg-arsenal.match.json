@@ -1,5 +1,5 @@
 {
-  "_comment": "UCL Final 2025-26 rehearsal match definition. Verified 2026-05-27. Home/away order: UEFA has not officially designated home/away for the final (neutral venue). PSG is listed as home for technical watchlist mapping only.",
+  "_comment": "UCL Final 2025-26 rehearsal match definition. Verified 2026-05-27. Slugs reuse existing canonical team entities (paris-saint-germain-fc and arsenal-fc). Home/away order: UEFA has not officially designated home/away for the final (neutral venue). PSG is listed as home for technical watchlist mapping only.",
   "source": {
     "name": "UEFA",
     "url": "https://www.uefa.com/uefachampionsleague/news/02a5-2092f53360cc-8ee51562d99f-1000--when-is-the-champions-league-final-where-you-are-what-time-i/",
@@ -13,12 +13,12 @@
     "scheduledAt": "2026-05-30T18:00:00+02:00",
     "venue": "Puskás Aréna, Budapest, Hungary",
     "homeTeam": {
-      "slug": "paris-saint-germain",
+      "slug": "paris-saint-germain-fc",
       "label": "Paris Saint-Germain",
       "wikidataQid": "Q483020"
     },
     "awayTeam": {
-      "slug": "arsenal",
+      "slug": "arsenal-fc",
       "label": "Arsenal",
       "wikidataQid": "Q9617"
     },

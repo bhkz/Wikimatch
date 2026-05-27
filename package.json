@@ -27,7 +27,8 @@
     "import:rehearsal:match": "tsx scripts/import-rehearsal-match.ts",
     "seed:rehearsal:watchlist": "tsx scripts/seed-worker-watchlist.ts --file worker/seeds/ucl-final-2026-rehearsal.watchlist.json --monitoring-disabled",
     "monitor:rehearsal:watchlist": "tsx scripts/set-rehearsal-monitoring.ts",
-    "build:rehearsal:watchlist": "tsx scripts/build-rehearsal-match-watchlist.ts"
+    "build:rehearsal:watchlist": "tsx scripts/build-rehearsal-match-watchlist.ts",
+    "repair:rehearsal:entities": "tsx scripts/repair-rehearsal-team-entity-links.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
