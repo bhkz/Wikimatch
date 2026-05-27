@@ -14,6 +14,7 @@ import { detectPatterns } from "./matchers.js";
 import { publish } from "./publisher.js";
 
 let shuttingDown = false;
+const dryRunLoggedPatternKeys = new Set<string>();
 const stats = {
   detected: 0,
   published: 0,
@@ -21,6 +22,8 @@ const stats = {
   already_published: 0,
   template_missing: 0,
   dry_run: 0,
+  publication_disabled: 0,
+  dry_run_duplicates_skipped: 0,
   errors: 0,
 };
 
@@ -37,6 +40,16 @@ async function runOnce(): Promise<void> {
   for (const pattern of patterns) {
     if (shuttingDown) break;
     try {
+      if (PATTERNS_DRY_RUN) {
+        const sortedIds = [...pattern.proposition_ids].sort().join(",");
+        const key = `${pattern.pattern_type}:${sortedIds}`;
+        if (dryRunLoggedPatternKeys.has(key)) {
+          stats.dry_run_duplicates_skipped += 1;
+          continue;
+        }
+        dryRunLoggedPatternKeys.add(key);
+      }
+
       const r = await publish(pattern);
       switch (r.status) {
         case "published":
@@ -54,6 +67,9 @@ async function runOnce(): Promise<void> {
           break;
         case "dry_run":
           stats.dry_run += 1;
+          break;
+        case "publication_disabled":
+          stats.publication_disabled += 1;
           break;
         case "error":
           stats.errors += 1;

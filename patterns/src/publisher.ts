@@ -7,14 +7,14 @@
  * borné. La copy publique n'est jamais touchée par une IA.
  */
 
-import { PATTERNS_DRY_RUN, TEMPLATE_VERSION } from "./config.js";
+import { AUTO_PUBLICATION_ENABLED, PATTERNS_DRY_RUN, TEMPLATE_VERSION } from "./config.js";
 import { runSafetyChecks } from "./safety.js";
 import { supabase } from "./supabase.js";
 import { generate, methodologyVersion } from "./templates.js";
 import type { DetectedPattern } from "./types.js";
 
 interface PublishResult {
-  status: "published" | "blocked_safety" | "template_missing" | "dry_run" | "already_published" | "error";
+  status: "published" | "blocked_safety" | "template_missing" | "dry_run" | "already_published" | "error" | "publication_disabled";
   storyId?: string;
   reason?: string;
 }
@@ -40,14 +40,28 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
 
   const safety = runSafetyChecks(tmpl);
 
-  // Toujours enregistrer le pattern (même bloqué) pour audit.
+  // Dry-run : expose dans les logs ce que le moteur aurait tenté de publier, sans aucune écriture en base.
   if (PATTERNS_DRY_RUN) {
-    console.log(
-      `[publisher] DRY_RUN — pattern=${pattern.pattern_type} ` +
-        `safety=${safety.passed ? "OK" : safety.reason} ` +
-        `title="${tmpl.title}"`,
-    );
+    console.log(`[publisher] DRY_RUN_CANDIDATE ${JSON.stringify({
+      pattern_type: pattern.pattern_type,
+      safety_passed: safety.passed,
+      safety_reason: safety.reason ?? null,
+      title: tmpl.title,
+      excerpt: tmpl.excerpt,
+      observation_text: tmpl.observation_text,
+      interpretation_text: tmpl.interpretation_text,
+      limitation_text: tmpl.limitation_text,
+      languages: tmpl.languages,
+      source_count: tmpl.source_count,
+    })}`);
     return { status: "dry_run", reason: safety.passed ? undefined : safety.reason };
+  }
+
+  if (!AUTO_PUBLICATION_ENABLED) {
+    console.log(
+      `[publisher] PUBLICATION DISABLED — pattern detected but AUTO_PUBLICATION_ENABLED is not true`
+    );
+    return { status: "publication_disabled", reason: "AUTO_PUBLICATION_ENABLED is not true" };
   }
 
   if (await isAlreadyPublished(pattern)) {

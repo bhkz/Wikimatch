@@ -49,6 +49,8 @@ services:
         value: "true"
       - key: PATTERNS_POLL_INTERVAL_MS
         value: "30000"
+      - key: AUTO_PUBLICATION_ENABLED
+        value: "false" # Safety gate: must be set explicitly to "true" after manual review of detected patterns during rehearsal.
 
       # Commun
       - key: LOG_LEVEL

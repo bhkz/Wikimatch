@@ -101,6 +101,7 @@ Un seul service Render (`revision90`) lance les 3 jobs dans le même process Nod
 | Analyzer | `ANALYZER_BATCH_SIZE` | `5` |
 | Patterns | `PATTERNS_DRY_RUN` | `true` ← bascule en `false` en dernier |
 | Patterns | `PATTERNS_POLL_INTERVAL_MS` | `30000` |
+| Patterns | `AUTO_PUBLICATION_ENABLED` | `false` ← **Verrou absolu** (opt-in requis pour publier) |
 | Commun | `LOG_LEVEL` | `info` |
 
 > [!NOTE]
@@ -125,41 +126,57 @@ Un seul service Render (`revision90`) lance les 3 jobs dans le même process Nod
 - Si tu as déjà connecté le repo : **Blueprint Sync** dans le dashboard Render relit `render.yaml`.
 - Sinon : **New → Blueprint → Connect repo `bhkz/Wikimatch`**. Render lit `render.yaml` et te demande de remplir les variables `sync: false`.
 
-### A.6 — Période d'observation en DRY RUN (24-48h)
+### A.6 — Protocoles de Répétition Générale et Verrou de Publication
 
-Tous les services tournent avec écriture désactivée :
+Pour valider le dispositif WikiMatch en conditions réelles (notamment lors du match de test **PSG — Arsenal** le 30 mai), tu as le choix entre deux protocoles de répétition. Le second est **fortement recommandé** pour pouvoir analyser les données recueillies.
 
-- `wikimatch-worker` en `WORKER_DRY_RUN=true` → reçoit les events SSE et les filtre, **n'écrit pas en DB**.
-- `wikimatch-analyzer` en `ANALYZER_DRY_RUN=true` → log les propositions qu'il extrairait, **n'écrit pas**.
-- `wikimatch-patterns` en `PATTERNS_DRY_RUN=true` → log les patterns détectés et leur résultat safety, **ne publie pas**.
+#### Protocole 1 : Test technique court sans persistance (Optionnel)
+Ce protocole ultra-conservateur sert uniquement à vérifier que les services démarrent, se connectent correctement à Supabase et reçoivent le flux Wikimedia global, sans rien enregistrer en base de données.
+* `WORKER_DRY_RUN=true` → Le worker écoute et filtre le flux SSE, mais n'écrit rien en base.
+* `ANALYZER_DRY_RUN=true` → L'analyzer simule l'extraction sans insérer de proposition.
+* `PATTERNS_DRY_RUN=true` → Le pattern matcher simule la détection et logue les candidats.
+* `AUTO_PUBLICATION_ENABLED=false` → Verrou de sécurité absolu.
 
-Pendant cette période, tu surveilles **les logs Render** du service unique. Les 3 jobs préfixent leurs lignes :
+#### Protocole 2 : Répétition générale réelle sur PSG — Arsenal (Recommandé)
+Ce mode est le plus riche pour la préparation. Il permet de collecter les vraies modifications Wikipédia et de voir précisément ce que le pipeline IA aurait publié, sans que rien n'apparaisse publiquement sur ton site Vercel.
+* `WORKER_DRY_RUN=false` → **Le worker écrit les traces réelles** de la watchlist dans `revision_traces` et `trace_private_content`.
+* `ANALYZER_DRY_RUN=false` → **L'analyzer écrit les propositions réelles** de modifications dans `trace_propositions` et `ai_analysis_runs`.
+* `PATTERNS_DRY_RUN=true` → **Le pattern matcher tourne en mode simulation (Dry-Run)**. Il examine les propositions réelles et logue en détails les candidats détectés sous forme de structure JSON complète :
+  `[publisher] DRY_RUN_CANDIDATE {"pattern_type":..., "safety_passed":..., "title":..., "excerpt":..., "observation_text":..., "interpretation_text":..., "limitation_text":..., "languages":..., "source_count":...}`
+  Cela te permet d'inspecter l'intégralité de la copy éditoriale générée par les templates de stories (titre, observation, interprétation, limitation, langues, sources) directement dans les logs de Render, sans qu'aucun diff brut privé de contributeurs ne soit exposé.
+  *Note de confort :* Les candidats identiques sont dédupliqués en mémoire pendant la durée de vie du processus Render afin d'éviter de polluer tes logs à chaque cycle de polling ; un redémarrage du service Render peut toutefois produire de nouveaux logs pour un même candidat.
+* `AUTO_PUBLICATION_ENABLED=false` → **Verrou de sécurité absolu.** Même si une erreur de manipulation passait `PATTERNS_DRY_RUN` à `false` sur Render, le verrou de sécurité intercepterait la publication automatique et bloquerait toute insertion en DB de story publique, renvoyant un statut `PUBLICATION DISABLED`.
 
-- `[runtime] starting <name>` / `[runtime] ❌ <name> exited unexpectedly` — supervisor.
-- `[ingest] matched <wiki> <title> +123 chars` — worker : matches sur ta watchlist.
-- `[stats] {"processed":N,"noise":..,"ai_calls":..,"regex_calls":..}` — analyzer toutes les 60s.
-- `[publisher] DRY_RUN — pattern=article_instability safety=OK title="..."` — patterns : stories que le pipeline veut publier.
+---
 
-**Critères pour basculer en live :**
+### A.7 — Analyse Post-Match et Bascule Live Progressive
 
-- Le worker matche **au moins 5-10 events/heure** quand un match WC26 a lieu. Si zéro match : la watchlist ne couvre pas les articles édités → étendre via `--file <custom.json>` ou refresh-types.
-- L'analyzer produit majoritairement des `noise` + quelques propositions substantielles avec `confidence >= 0.5`. Si tout est `noise` : le seed de la watchlist contient trop d'articles peu actifs.
-- Le patterns matcher détecte **au moins une fois** un pattern qui passe les safety filters. Si tout est `blocked_safety` avec `forbidden_vocabulary` ou `national_tension` : les templates ont besoin d'ajustements.
+#### Étape 1 : Phase d'observation active (Pendant le match)
+Configure tes variables Render selon le **Protocole 2 (Recommandé)** ci-dessus. Laisse le système tourner de manière autonome avant, pendant et après le match PSG — Arsenal.
 
-### A.7 — Bascule live progressive
+#### Étape 2 : Analyse post-match (Après le match)
+1. Va dans ton éditeur SQL Supabase et examine les traces et les propositions réelles recueillies pour voir la réactivité du worker.
+2. Ouvre les logs Render du service `wikimatch-patterns` et recherche les lignes préfixées par `[publisher] DRY_RUN_CANDIDATE`.
+3. Analyse en détail la copy narrative générée :
+   * La pertinence et la fidélité des observations rédigées ;
+   * La prudence et la nuance apportées par l'interprétation ;
+   * L'honnêteté et la clarté de la limitation ;
+   * La validité des filtres de safety (si un candidat est marqué `safety_passed: false`, tu pourras voir son `safety_reason` associé).
+4. Tu peux également suivre l'évolution des déduplications via les statistiques régulières `[stats]` du service contenant le compteur `dry_run_duplicates_skipped`.
 
-Quand tu es prêt, dans Render → settings de chaque service :
+#### Étape 3 : Bascule progressive vers le Live Public
+Une fois que tu as validé manuellement la pertinence des logs observés pendant le match de test :
 
-1. D'abord `WORKER_DRY_RUN=false` (le worker commence à écrire dans `revision_traces` + `trace_private_content`).
-2. Attendre **2-3h** que le worker accumule des traces réelles.
-3. `ANALYZER_DRY_RUN=false` (l'analyzer commence à insérer dans `trace_propositions` et `ai_analysis_runs`).
-4. Surveiller `ai_analysis_runs.estimated_cost_eur` cumulé dans Supabase ; vérifier que le cap journalier `AI_DAILY_EUR_CAP=6.50€` est respecté.
-5. Attendre **6-12h** que des propositions s'accumulent.
-6. `PATTERNS_DRY_RUN=false` (patterns matcher commence à insérer dans `detected_patterns` et `published_stories`).
+1. `PATTERNS_DRY_RUN=false` → Le pattern matcher est autorisé à s'exécuter normalement. *Note : Tant que `AUTO_PUBLICATION_ENABLED` reste à `false`, la publication automatique publique reste verrouillée et produit des logs `PUBLICATION DISABLED`.*
+2. Une future phase intermédiaire de prépublication contrôlée peut ainsi être menée en examinant les logs sans impact sur le site public.
 
-À cette étape, ouvre ton URL Vercel : la home devrait afficher la première story réelle dès qu'un pattern passe.
+> [!IMPORTANT]
+> **CRITÈRE D'ACTIVATION DU MODE LIVE PUBLIC (`AUTO_PUBLICATION_ENABLED=true`) :**
+> N'active `AUTO_PUBLICATION_ENABLED=true` dans l'environnement de Render qu'après avoir validé la répétition générale réelle et confirmé la parfaite qualité rédactionnelle et l'absence de faux positifs. Une fois activée, toute story détectée s'affichera instantanément sur ta page d'accueil Vercel publique.
 
-### A.8 — Vérifier l'empty state honnête côté frontend (1 min)
+À cette étape, ouvre ton URL Vercel : la home affichera la première story réelle dès qu'un pattern passera.
+
+---
 
 En attendant qu'une story passe :
 
