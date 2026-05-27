@@ -14,7 +14,15 @@ import { generate, methodologyVersion } from "./templates.js";
 import type { DetectedPattern } from "./types.js";
 
 interface PublishResult {
-  status: "published" | "blocked_safety" | "template_missing" | "dry_run" | "already_published" | "error" | "publication_disabled";
+  status:
+    | "published"
+    | "blocked_safety"
+    | "template_missing"
+    | "dry_run"
+    | "already_published"
+    | "error"
+    | "publication_disabled"
+    | "manual_review_required";
   storyId?: string;
   reason?: string;
 }
@@ -40,8 +48,19 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
 
   const safety = runSafetyChecks(tmpl);
 
+  function manualReviewReason(pat: DetectedPattern): string | null {
+    if (pat.pattern_type === "article_instability")
+      return "Pattern requires manual diff verification before any instability claim";
+    if (pat.pattern_type === "under_radar")
+      return "Pattern requires manual article-content verification before any absence/asymmetry claim";
+    if (pat.pattern_type === "language_convergence" && (pat.match_id === null || pat.match_id === undefined))
+      return "Equivalent update is not linked to one unambiguous watched match";
+    return null;
+  }
+
   // Dry-run : expose dans les logs ce que le moteur aurait tenté de publier, sans aucune écriture en base.
   if (PATTERNS_DRY_RUN) {
+    const reviewReason = manualReviewReason(pattern);
     console.log(`[publisher] DRY_RUN_CANDIDATE ${JSON.stringify({
       pattern_type: pattern.pattern_type,
       safety_passed: safety.passed,
@@ -54,8 +73,22 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
       languages: tmpl.languages,
       source_count: tmpl.source_count,
       match_id: pattern.match_id,
+      automatic_publication_eligible: safety.passed && reviewReason === null,
+      manual_review_reason: reviewReason,
     })}`);
     return { status: "dry_run", reason: safety.passed ? undefined : safety.reason };
+  }
+
+  // Methodological barrier: block patterns that require manual review
+  const reviewReason = manualReviewReason(pattern);
+  if (reviewReason) {
+    console.log(
+      `[publisher] MANUAL_REVIEW_REQUIRED — pattern=${pattern.pattern_type} reason=${reviewReason}`
+    );
+    return {
+      status: "manual_review_required",
+      reason: reviewReason,
+    };
   }
 
   if (!AUTO_PUBLICATION_ENABLED) {

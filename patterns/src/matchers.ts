@@ -42,6 +42,90 @@ function isSubstantive(p: PropositionRow): boolean {
 const MATCH_LINK_WINDOW_BEFORE_HOURS = 6;
 const MATCH_LINK_WINDOW_AFTER_HOURS = 48;
 
+function normalizeClaimText(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const s = value.trim();
+  if (!s) return null;
+  // remove diacritics, collapse spaces, lowercase
+  const normalized = s
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+  return normalized;
+}
+
+function normalizeClaimMinute(value: unknown): string | null {
+  if (typeof value === "number" && Number.isFinite(value) && Number.isInteger(value) && value >= 0) {
+    return String(value);
+  }
+
+  if (typeof value !== "string") return null;
+
+  const compact = value
+    .trim()
+    .replace(/[’']/g, "")
+    .replace(/\s+/g, "");
+
+  // Accept either a plain integer minute (e.g. "90") or an added-time minute (e.g. "90+1").
+  // Reject ambiguous or partially-parsed strings like "90abc".
+  if (!/^\d{1,3}(?:\+\d{1,2})?$/.test(compact)) return null;
+
+  return compact;
+}
+
+function strictConvergenceClaimKey(p: PropositionRow): string | null {
+  const payload = p.normalized_payload ?? {} as any;
+  switch (p.proposition_type) {
+    case "match_result": {
+      // Un score sans identité d'équipes ni ordre home/away vérifiable ne suffit
+      // pas à établir automatiquement une convergence entre éditions.
+      // Pour cette répétition, n'autorisons pas automatiquement la convergence
+      // sur `match_result`.
+      return null;
+    }
+    case "goal_scored": {
+      const scorer = normalizeClaimText(payload.scorer);
+      const minute = normalizeClaimMinute(payload.minute ?? payload.time);
+      if (!scorer || !minute) return null;
+      return `goal_scored:${scorer}:${minute}`;
+    }
+    case "red_card": {
+      const player = normalizeClaimText(payload.player ?? payload.target);
+      const minute = normalizeClaimMinute(payload.minute ?? payload.time) ?? "unknown";
+      if (!player) return null;
+      return `red_card:${player}:${minute}`;
+    }
+    case "yellow_card": {
+      const player = normalizeClaimText(payload.player ?? payload.target);
+      const minute = normalizeClaimMinute(payload.minute ?? payload.time);
+      if (!player || !minute) return null;
+      return `yellow_card:${player}:${minute}`;
+    }
+    case "substitution": {
+      const pin = normalizeClaimText(payload.player_in);
+      const pout = normalizeClaimText(payload.player_out);
+      const minute = normalizeClaimMinute(payload.minute ?? payload.time);
+      if (!pin || !pout || !minute) return null;
+      return `substitution:${pin}:${pout}:${minute}`;
+    }
+    case "qualification": {
+      const team = normalizeClaimText(payload.team);
+      const stage = normalizeClaimText(payload.stage_reached ?? payload.stage);
+      if (!team || !stage) return null;
+      return `qualification:${team}:${stage}`;
+    }
+    case "sanction": {
+      const target = normalizeClaimText(payload.target);
+      const kind = normalizeClaimText(payload.sanction_kind ?? payload.kind ?? payload.type);
+      if (!target || !kind) return null;
+      return `sanction:${target}:${kind}`;
+    }
+    default:
+      return null;
+  }
+}
+
 /**
  * Cette fenêtre sert uniquement à relier prudemment une observation documentaire
  * à un match surveillé. Elle ne prouve aucune causalité.
@@ -240,15 +324,21 @@ async function detectInstability(rows: PropositionRow[]): Promise<DetectedPatter
  * proposition_type substantif dans des language_code distincts.
  */
 async function detectConvergence(rows: PropositionRow[]): Promise<DetectedPattern[]> {
-  const byEntityType = new Map<string, PropositionRow[]>();
+  // Convergence publiable : on n'agrège que des faits structurés strictement
+  // équivalents sur des articles de match. Un même type de proposition ne suffit jamais.
+  const byEntityClaim = new Map<string, PropositionRow[]>();
   for (const r of rows) {
     if (!isSubstantive(r)) continue;
-    const key = `${r.trace.article.entity_id}::${r.proposition_type}`;
-    if (!byEntityType.has(key)) byEntityType.set(key, []);
-    byEntityType.get(key)!.push(r);
+    // Only consider match articles for safe automatic convergence
+    if (r.trace.article.article_type !== "match") continue;
+    const claimKey = strictConvergenceClaimKey(r);
+    if (!claimKey) continue;
+    const key = `${r.trace.article.entity_id}::${claimKey}`;
+    if (!byEntityClaim.has(key)) byEntityClaim.set(key, []);
+    byEntityClaim.get(key)!.push(r);
   }
   const out: DetectedPattern[] = [];
-  for (const [key, group] of byEntityType) {
+  for (const [key, group] of byEntityClaim) {
     const distinctLangs = new Set(group.map((g) => g.language_code.toLowerCase()));
     if (distinctLangs.size < CONVERGENCE_MIN_LANGUAGES) continue;
     const [entityId] = key.split("::");
