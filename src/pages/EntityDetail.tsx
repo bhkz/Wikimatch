@@ -42,7 +42,7 @@ export default function EntityDetail() {
   if (state.status === "error" || state.data === null) {
     return (
       <div className="min-h-screen bg-cream flex flex-col justify-center items-center p-8 text-center text-navy font-mono uppercase tracking-widest gap-4">
-         <div>Cette entité n'est pas construite dans la démo frontend.</div>
+         <div>Cette entité n'est pas publiée ou n'est plus disponible.</div>
          <a href="/stories" className="border-b border-navy/20 hover:border-navy transition-colors">Retour aux histoires</a>
       </div>
     );

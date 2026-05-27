@@ -15,6 +15,8 @@ export default async function handler(
       .from("published_stories")
       .select("*")
       .eq("publication_status", "published")
+      .is("retracted_at", null)
+      .not("slug", "like", "demo-%")
       .order("published_at", { ascending: false })
       .limit(4);
 
@@ -28,15 +30,26 @@ export default async function handler(
     const { count: storiesCount } = await supabase
       .from("published_stories")
       .select("*", { count: "exact", head: true })
-      .eq("publication_status", "published");
+      .eq("publication_status", "published")
+      .is("retracted_at", null)
+      .not("slug", "like", "demo-%");
 
     const monitoredLanguages = await countDistinctMonitoredLanguages(supabase);
 
     // 3. Fetch next match
     const { data: matchData } = await supabase
       .from("matches")
-      .select("*")
-      .order("kickoff_time", { ascending: true })
+      .select(`
+        *,
+        home:entities!matches_home_team_entity_id_fkey (
+          canonical_label
+        ),
+        away:entities!matches_away_team_entity_id_fkey (
+          canonical_label
+        )
+      `)
+      .not("slug", "like", "demo-%")
+      .order("scheduled_at", { ascending: true })
       .limit(1)
       .maybeSingle();
 
@@ -49,9 +62,9 @@ export default async function handler(
       label: storyTypeLabel(stories[0].story_type),
       title: stories[0].title,
       excerpt: stories[0].excerpt || "",
-      languages: stories[0].languages || [],
+      languages: [],
       publishedAt: stories[0].published_at || new Date().toISOString(),
-      sourceCount: stories[0].source_count || 1,
+      sourceCount: 0,
       isDemo: false,
     } : null;
 
@@ -62,21 +75,28 @@ export default async function handler(
       label: storyTypeLabel(s.story_type),
       title: s.title,
       excerpt: s.excerpt || "",
-      languages: s.languages || [],
+      languages: [],
       publishedAt: s.published_at || new Date().toISOString(),
-      sourceCount: s.source_count || 1,
+      sourceCount: 0,
       isDemo: false,
-      heroImage: s.hero_image || undefined,
+      heroImage: s.share_image_url || undefined,
     }));
 
     // 5. Map match. Si pas de match en base, on renvoie null — le frontend
     // affiche un empty state honnête au lieu d'un placeholder maquillé.
     const nextMatch = matchData ? {
       id: matchData.id,
-      teams: [matchData.team_a_label, matchData.team_b_label],
+      teams: [
+        matchData.home?.canonical_label ?? "À confirmer",
+        matchData.away?.canonical_label ?? "À confirmer",
+      ],
       stage: matchData.stage_label || "Phase de groupes",
-      dateLabel: new Date(matchData.kickoff_time).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }).toUpperCase(),
-      timeLabel: new Date(matchData.kickoff_time).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+      dateLabel: matchData.scheduled_at
+        ? new Date(matchData.scheduled_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }).toUpperCase()
+        : "DATE À CONFIRMER",
+      timeLabel: matchData.scheduled_at
+        ? new Date(matchData.scheduled_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+        : "",
       status: matchData.status || "upcoming",
       trackedPagesLabel: "Match · Sélections · Joueurs",
       isDemo: false,

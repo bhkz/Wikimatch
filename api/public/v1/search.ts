@@ -18,7 +18,9 @@ export default async function handler(
     const { count: storiesCount } = await supabase
       .from("published_stories")
       .select("*", { count: "exact", head: true })
-      .in("publication_status", ["published", "corrected"]);
+      .in("publication_status", ["published", "corrected"])
+      .is("retracted_at", null)
+      .not("slug", "like", "demo-%");
 
     const { count: matchesCount } = await supabase
       .from("matches")
@@ -54,7 +56,7 @@ export default async function handler(
         label: "Histoires publiées",
         query: "divergence",
         filter: "story" as const,
-        description: "Parcourir les récits publiés par le pipeline automatique.",
+        description: "Parcourir les récits publiés par WikiMatch.",
       },
     ];
 
@@ -100,20 +102,36 @@ export default async function handler(
 
     const { data: matches } = await supabase
       .from("matches")
-      .select("id, slug, team_a_label, team_b_label, stage_label")
-      .or(`team_a_label.ilike.%${escapeIlike(queryStr)}%,team_b_label.ilike.%${escapeIlike(queryStr)}%`)
-      .limit(10);
+      .select(`
+        id,
+        slug,
+        stage_label,
+        home:entities!matches_home_team_entity_id_fkey (
+          canonical_label
+        ),
+        away:entities!matches_away_team_entity_id_fkey (
+          canonical_label
+        )
+      `)
+      .not("slug", "like", "demo-%")
+      .limit(200);
 
     if (matches) {
-      for (const m of matches) {
+      for (const m of matches.filter((match: any) => {
+        const home = String(match.home?.canonical_label ?? "").toLowerCase();
+        const away = String(match.away?.canonical_label ?? "").toLowerCase();
+        return home.includes(queryStr) || away.includes(queryStr) || String(match.stage_label ?? "").toLowerCase().includes(queryStr);
+      }).slice(0, 10) as any[]) {
+        const homeName = m.home?.canonical_label ?? "À confirmer";
+        const awayName = m.away?.canonical_label ?? "À confirmer";
         allResults.push({
           id: `match-${m.id}`,
           type: "match",
-          title: `${m.team_a_label} — ${m.team_b_label}`,
-          excerpt: `Dossier de match : ${m.team_a_label} contre ${m.team_b_label}${m.stage_label ? ` (${m.stage_label})` : ""}.`,
+          title: `${homeName} — ${awayName}`,
+          excerpt: `Dossier de match : ${homeName} contre ${awayName}${m.stage_label ? ` (${m.stage_label})` : ""}.`,
           metadataLabel: "DOSSIER MATCH",
           publicStatusLabel: "DOSSIER DISPONIBLE",
-          keywords: [m.team_a_label.toLowerCase(), m.team_b_label.toLowerCase(), "match", "dossier"],
+          keywords: [homeName.toLowerCase(), awayName.toLowerCase(), "match", "dossier"],
           route: `/match/${m.slug}`,
           available: true,
           isDemo: false,
@@ -123,9 +141,11 @@ export default async function handler(
 
     const { data: stories } = await supabase
       .from("published_stories")
-      .select("id, slug, title, excerpt, story_type, languages")
+      .select("id, slug, title, excerpt, story_type")
       .or(`title.ilike.%${escapeIlike(queryStr)}%,excerpt.ilike.%${escapeIlike(queryStr)}%`)
       .in("publication_status", ["published", "corrected"])
+      .is("retracted_at", null)
+      .not("slug", "like", "demo-%")
       .limit(10);
 
     if (stories) {
@@ -137,7 +157,7 @@ export default async function handler(
           title: s.title,
           excerpt: s.excerpt || "",
           metadataLabel: "HISTOIRE PUBLIÉE",
-          languages: s.languages || [],
+          languages: [],
           publicStatusLabel: storyTypeLabel(s.story_type),
           keywords: [s.title.toLowerCase(), "story", "histoire"],
           route: `/story/${s.slug}`,

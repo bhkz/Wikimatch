@@ -14,6 +14,8 @@ export default async function handler(
       .from("published_stories")
       .select("*")
       .in("publication_status", ["published", "corrected"])
+      .is("retracted_at", null)
+      .not("slug", "like", "demo-%")
       .order("published_at", { ascending: false });
 
     const rawStories = storiesData ?? [];
@@ -56,8 +58,8 @@ export default async function handler(
         : "",
       matchLabel: s.meta_match_label || undefined,
       entityLabel: s.geo_subject_label || undefined,
-      languages: s.languages || [],
-      sourceCount: s.source_count || 1,
+      languages: [],
+      sourceCount: 0,
       readingTimeLabel: s.reading_time_minutes ? `${s.reading_time_minutes} min` : "",
       isDemo: false,
       availableDetailRoute: `/story/${s.slug}`,
@@ -72,7 +74,7 @@ export default async function handler(
           id: "collection-recent",
           label: "DERNIERS RÉCITS",
           title: "DERNIÈRES HISTOIRES PUBLIÉES",
-          description: "Les récits les plus récents générés par le pipeline automatique de WikiMatch.",
+          description: "Les récits les plus récents publiés par WikiMatch à partir de traces observées.",
           storyIds: stories.slice(0, 3).map((s) => s.id),
           isDemo: false,
         }

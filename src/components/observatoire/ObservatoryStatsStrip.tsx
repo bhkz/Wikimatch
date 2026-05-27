@@ -7,11 +7,13 @@ export default function ObservatoryStatsStrip({ stats }: { stats: ObservatoryPub
       <div className="w-full max-w-screen-2xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-16">
         
         <div className="flex flex-col gap-2 shrink-0 text-center md:text-left">
-           <div className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-widest text-[#e63946] bg-navy/5 px-2 py-1 border border-[#e63946]/20">
-             EXEMPLE D'INTERFACE · DONNÉES FICTIVES
+           <div className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-widest text-navy/60 bg-navy/5 px-2 py-1 border border-navy/10">
+             {stats.isDemo ? "EXEMPLE D'INTERFACE · DONNÉES FICTIVES" : "OBSERVATOIRE LIVE · DONNÉES WIKIPÉDIA"}
            </div>
            <p className="font-sans text-xs text-navy/50 font-light max-w-xs mt-2">
-             Ces chiffres décrivent uniquement le jeu de traces fictives utilisé pour concevoir l’interface. Ils ne représentent aucun suivi réel de Wikipédia.
+             {stats.isDemo
+               ? "Ces chiffres décrivent uniquement le jeu de traces fictives utilisé pour concevoir l’interface."
+               : "Ces chiffres sont calculés depuis les traces, extraits publics et articles réellement présents dans Supabase."}
            </p>
         </div>
 

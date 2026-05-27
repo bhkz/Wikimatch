@@ -32,6 +32,8 @@ export default async function handler(
       .from("published_stories")
       .select("*")
       .in("publication_status", ["published", "corrected"])
+      .is("retracted_at", null)
+      .not("slug", "like", "demo-%")
       .order("published_at", { ascending: false });
 
     const stats = {
@@ -90,7 +92,7 @@ export default async function handler(
       categoryLabel: storyTypeLabel(s.story_type),
       title: s.title,
       matchLabel: s.meta_match_label || "",
-      languages: s.languages || [],
+      languages: [],
       route: `/story/${s.slug}`,
       isDemo: false,
     }));
@@ -120,7 +122,7 @@ export default async function handler(
         type: s.story_type || "language_divergence",
         title: s.title,
         excerpt: s.excerpt || "",
-        languages: s.languages || [],
+      languages: [],
         route: `/story/${s.slug}`,
         isDemo: false,
       }));

@@ -8,7 +8,7 @@ export default function MatchesStatsStrip({ stats }: { stats: MatchesArchiveStat
         
         <div className="flex justify-between items-center">
           <div className="font-mono text-[10px] sm:text-xs font-bold uppercase tracking-widest text-navy/40 px-2 py-1 border border-navy/10 rounded-sm">
-            EXEMPLE D’INTERFACE · DONNÉES FICTIVES
+            {stats.isDemo ? "EXEMPLE D’INTERFACE · DONNÉES FICTIVES" : "CALENDRIER LIVE · DONNÉES SUPABASE"}
           </div>
         </div>
 

@@ -15,19 +15,3 @@ export function createServerSupabaseClient() {
     },
   });
 }
-
-export async function readPublishedSnapshot(pageKey: string) {
-  const supabase = createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from("public_page_snapshots")
-    .select("payload")
-    .eq("page_key", pageKey)
-    .in("publication_status", ["published", "corrected"])
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data?.payload ?? null;
-}

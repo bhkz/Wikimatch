@@ -123,7 +123,13 @@ export type MatchTimelineItem = {
   languageCode?: string;
   title: string;
   description: string;
-  sourceStatus: "official_event_demo" | "wikipedia_demo" | "published_demo";
+  sourceStatus:
+    | "official_event_demo"
+    | "wikipedia_demo"
+    | "published_demo"
+    | "official_event"
+    | "wikipedia_observation"
+    | "published_story";
 };
 
 export type MatchLanguageComparison = {

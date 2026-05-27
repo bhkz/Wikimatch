@@ -7,11 +7,13 @@ export default function ExplorerStatsStrip({ stats }: { stats: ExplorerStats }) 
       <div className="w-full max-w-screen-2xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-16">
         
         <div className="flex flex-col gap-2 shrink-0 text-center md:text-left">
-           <div className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-widest text-[#e63946] bg-navy/5 px-2 py-1 border border-[#e63946]/20">
-             EXEMPLE D'INTERFACE · DONNÉES FICTIVES
+           <div className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-widest text-navy/60 bg-navy/5 px-2 py-1 border border-navy/10">
+             {stats.isDemo ? "EXEMPLE D'INTERFACE · DONNÉES FICTIVES" : "EXPLORER LIVE · HISTOIRES PUBLIÉES"}
            </div>
            <p className="font-sans text-xs text-navy/50 font-light max-w-xs mt-2">
-             Ces indicateurs décrivent uniquement les histoires fictives présentées dans la maquette.
+             {stats.isDemo
+               ? "Ces indicateurs décrivent uniquement les histoires fictives présentées dans la maquette."
+               : "Ces indicateurs sont calculés depuis les stories publiées, sujets suivis et matchs présents en base."}
            </p>
         </div>
 

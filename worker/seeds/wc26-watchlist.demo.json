@@ -35,15 +35,6 @@
       "subject_geography_label": "Japan",
       "subject_latitude": 36.2048,
       "subject_longitude": 138.2529
-    },
-    {
-      "slug": "ren-ito-demo-goalkeeper",
-      "type": "player",
-      "canonical_label": "Ren Ito (demo goalkeeper)",
-      "wikidata_qid": null,
-      "subject_geography_label": "Japan",
-      "subject_latitude": 36.2048,
-      "subject_longitude": 138.2529
     }
   ],
   "articles": [

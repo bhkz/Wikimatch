@@ -39,7 +39,7 @@ type SeedFile = {
 };
 
 function parseArgs(argv: string[]): { filePath: string } {
-  let filePath = "worker/seeds/wc26-watchlist.demo.json";
+  let filePath = "worker/seeds/wc26-watchlist.live.json";
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--live") {

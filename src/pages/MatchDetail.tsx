@@ -71,14 +71,24 @@ export default function MatchDetail() {
         {matchState === "post_match" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             <MatchEditorialRecap recap={recap} />
-            <MatchStoriesGrid stories={matchStories} />
-            <MatchNarrativeTimeline timeline={matchTimeline} />
-            <MatchComparisonPreview comparison={matchComparison} />
-            <ArticleInstabilityFeature data={instability} />
-            <StabilizedFactsSection />
+            {matchStories.length > 0 && <MatchStoriesGrid stories={matchStories} />}
+            {matchTimeline.length > 0 && <MatchNarrativeTimeline timeline={matchTimeline} />}
+            {isDemoMode && <MatchComparisonPreview comparison={matchComparison} />}
+            {isDemoMode && instability && <ArticleInstabilityFeature data={instability} />}
+            {isDemoMode && <StabilizedFactsSection />}
             <TrackedSubjectsSection subjects={trackedSubjects} />
-            <MatchSourcesSection />
-            <MatchShareCardPreview />
+            {isDemoMode && <MatchSourcesSection />}
+            {isDemoMode && <MatchShareCardPreview />}
+            {!isDemoMode && matchStories.length === 0 && matchTimeline.length === 0 && (
+              <section className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10">
+                <div className="max-w-screen-xl mx-auto bg-white border border-navy/10 p-8 text-center">
+                  <div className="font-display text-3xl uppercase text-navy/40 mb-4">AUCUNE OBSERVATION PUBLIEE</div>
+                  <p className="font-sans text-sm text-navy/60 font-light">
+                    Ce match est suivi, mais aucune trace publique ou histoire publiee n'est encore disponible.
+                  </p>
+                </div>
+              </section>
+            )}
             <MatchFinalCTA />
           </div>
         )}

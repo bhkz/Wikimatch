@@ -10,8 +10,8 @@ export default async function handler(
 
     const { data, error } = await supabase
       .from("methodology_versions")
-      .select("content_payload")
-      .eq("publication_status", "published")
+      .select("content_json")
+      .eq("status", "published")
       .order("published_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -24,7 +24,7 @@ export default async function handler(
     }
 
     setPublicCache(response, 600);
-    response.status(200).json(data.content_payload);
+    response.status(200).json(data.content_json);
   } catch (error) {
     console.error("Methodology API failed:", error);
     sendServerError(response);

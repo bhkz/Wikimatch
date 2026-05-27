@@ -20,6 +20,8 @@ export default async function handler(
       .select("*")
       .eq("slug", slug)
       .in("publication_status", ["published", "corrected"])
+      .is("retracted_at", null)
+      .not("slug", "like", "demo-%")
       .maybeSingle();
 
     if (!story) {
@@ -33,6 +35,8 @@ export default async function handler(
       .select("slug")
       .eq("story_type", story.story_type)
       .in("publication_status", ["published", "corrected"])
+      .is("retracted_at", null)
+      .not("slug", "like", "demo-%")
       .neq("id", story.id)
       .order("published_at", { ascending: false })
       .limit(3);
@@ -53,7 +57,7 @@ export default async function handler(
         matchLabel: story.meta_match_label || "",
         matchStage: story.meta_match_stage || "",
         eventLabel: story.geo_subject_label || "",
-        languages: story.languages || [],
+        languages: [],
         isDemo: false,
         observedSummary: story.observation_text || "",
         interpretationSummary: story.interpretation_text || "",
