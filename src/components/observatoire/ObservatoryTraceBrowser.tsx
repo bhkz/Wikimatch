@@ -22,7 +22,7 @@ export default function ObservatoryTraceBrowser({ traces }: { traces: Observator
         <div className="flex flex-col gap-4">
           {dataProvider.mode === "live" ? (
             <div className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-widest text-[#2a9d8f] bg-navy/5 px-4 py-2 border border-[#2a9d8f]/20 w-fit mb-4">
-               ● FLUX TEMPS RÉEL ACTIF · WIKIPÉDIA CONNECTÉ
+               ● FLUX TEMPS RÉEL · WIKIPÉDIA CONNECTÉ
             </div>
           ) : (
             <div className="font-mono text-[10px] sm:text-xs uppercase font-bold tracking-widest text-[#e63946] bg-navy/5 px-4 py-2 border border-[#e63946]/20 w-fit mb-4">
@@ -30,12 +30,17 @@ export default function ObservatoryTraceBrowser({ traces }: { traces: Observator
             </div>
           )}
 
-          <h2 className="font-display text-5xl md:text-7xl uppercase tracking-wide text-navy">
-            EXPLORER<br/><span className="text-navy/40">LES TRACES OBSERVÉES</span>
+          <h2 className="font-display text-4xl md:text-5xl uppercase tracking-wide text-navy">
+            TRACES OBSERVÉES
           </h2>
-          <p className="font-sans text-xl text-navy/70 leading-relaxed font-light max-w-2xl mt-2">
-            Corrections mineures, changements substantiels ou modifications liées à une histoire publiée : tout n’a pas le même poids éditorial.
-          </p>
+          {/* Le texte explicatif n'apparaît qu'en démo, là où il sert à
+              cadrer la maquette. En live, le tableau ci-dessous est
+              auto-explicatif (statuts colorés + filtres). */}
+          {dataProvider.mode !== "live" && (
+            <p className="font-sans text-base text-navy/70 leading-relaxed font-light max-w-2xl mt-2">
+              Corrections mineures, changements substantiels ou modifications liées à une histoire publiée : tout n’a pas le même poids éditorial.
+            </p>
+          )}
         </div>
 
         {/* Main Filters */}
@@ -76,13 +81,17 @@ export default function ObservatoryTraceBrowser({ traces }: { traces: Observator
                        </motion.div>
                     ))
                  ) : (
-                    <motion.div 
-                       initial={{ opacity: 0 }} 
-                       animate={{ opacity: 1 }} 
+                    <motion.div
+                       initial={{ opacity: 0 }}
+                       animate={{ opacity: 1 }}
                        className="p-12 text-center bg-white border border-navy/10"
                     >
                        <div className="font-display text-3xl uppercase text-navy/40 mb-4">AUCUNE TRACE</div>
-                       <p className="font-sans text-sm text-navy/60 font-light">Aucune modification fictive ne correspond à ce filtre.</p>
+                       <p className="font-sans text-sm text-navy/60 font-light">
+                         {dataProvider.mode === "live"
+                           ? "Aucune modification observée pour ce filtre. Le worker continue d'écouter Wikipédia."
+                           : "Aucune modification fictive ne correspond à ce filtre."}
+                       </p>
                        <button onClick={() => setActiveStatus("all")} className="font-mono text-[10px] uppercase font-bold tracking-widest mt-4 text-navy underline decoration-navy/20">Réinitialiser les filtres</button>
                     </motion.div>
                  )}

@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import type { MethodologyComparisonRule } from "../../types";
+import { isDemoMode } from "../../data";
 
 export default function LanguageIsNotCountrySection({
   comparisonRules,
@@ -86,14 +87,16 @@ export default function LanguageIsNotCountrySection({
           </div>
         </div>
 
-        <div className="flex justify-center mt-4">
-          <a
-            href="/story/demo-divergence"
-            className="bg-white text-navy px-8 py-4 font-mono text-[11px] uppercase font-bold tracking-widest hover:bg-cream transition-colors flex items-center justify-center gap-2"
-          >
-            VOIR UNE COMPARAISON EN CONTEXTE →
-          </a>
-        </div>
+        {isDemoMode && (
+          <div className="flex justify-center mt-4">
+            <a
+              href="/story/demo-divergence"
+              className="bg-white text-navy px-8 py-4 font-mono text-[11px] uppercase font-bold tracking-widest hover:bg-cream transition-colors flex items-center justify-center gap-2"
+            >
+              VOIR UNE COMPARAISON EN CONTEXTE →
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );

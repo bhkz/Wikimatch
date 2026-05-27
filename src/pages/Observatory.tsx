@@ -12,7 +12,7 @@ import MinorTraceExplanationSection from "../components/observatoire/MinorTraceE
 import ObservatoryPrivacySection from "../components/observatoire/ObservatoryPrivacySection";
 import PublicVsPrivateSection from "../components/observatoire/PublicVsPrivateSection";
 import ObservatoryFinalCTA from "../components/observatoire/ObservatoryFinalCTA";
-import { dataProvider, useAsyncData } from "../data";
+import { dataProvider, isDemoMode, useAsyncData } from "../data";
 
 export default function Observatory() {
   useEffect(() => {
@@ -49,15 +49,17 @@ export default function Observatory() {
 
       <main className="relative pt-[72px]">
          <ObservatoryHero />
-         <ObservatoryScopeStatement />
+         {/* Sections explicatives : réservées à la maquette démo, elles ne
+             servent à rien quand on regarde des vraies traces qui bougent. */}
+         {isDemoMode && <ObservatoryScopeStatement />}
          <ObservatoryStatsStrip stats={stats} />
-         <PublicPipelineSection steps={pipelineSteps} />
-         <TrackedArticlesSection articles={trackedArticles} />
+         {isDemoMode && <PublicPipelineSection steps={pipelineSteps} />}
+         {isDemoMode && <TrackedArticlesSection articles={trackedArticles} />}
          <ObservatoryTraceBrowser traces={traces} />
          {sourceChain && <StorySourceChainSection chain={sourceChain} />}
-         <MinorTraceExplanationSection />
-         <ObservatoryPrivacySection />
-         <PublicVsPrivateSection />
+         {isDemoMode && <MinorTraceExplanationSection />}
+         {isDemoMode && <ObservatoryPrivacySection />}
+         {isDemoMode && <PublicVsPrivateSection />}
          <ObservatoryFinalCTA />
       </main>
 

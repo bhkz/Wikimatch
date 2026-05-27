@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import SectionLabel from "../SectionLabel";
+import { isDemoMode } from "../../data";
 
 export default function GeographyMethodSection() {
   return (
@@ -29,18 +30,37 @@ export default function GeographyMethodSection() {
               POSITION DU SUJET
             </div>
             <ul className="flex flex-col gap-4 font-sans text-lg text-navy">
-              <li className="flex gap-3">
-                <span className="text-[#38b000]">✓</span>
-                Ren Ito associé à la sélection japonaise fictive.
-              </li>
-              <li className="flex gap-3">
-                <span className="text-[#38b000]">✓</span>
-                Une histoire portant sur la sélection marocaine.
-              </li>
-              <li className="flex gap-3">
-                <span className="text-[#38b000]">✓</span>
-                Un record lié à un attaquant portugais fictif.
-              </li>
+              {isDemoMode ? (
+                <>
+                  <li className="flex gap-3">
+                    <span className="text-[#38b000]">✓</span>
+                    Ren Ito associé à la sélection japonaise fictive.
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-[#38b000]">✓</span>
+                    Une histoire portant sur la sélection marocaine.
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-[#38b000]">✓</span>
+                    Un record lié à un attaquant portugais fictif.
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li className="flex gap-3">
+                    <span className="text-[#38b000]">✓</span>
+                    Un joueur associé à sa sélection nationale.
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-[#38b000]">✓</span>
+                    Une histoire portant sur une équipe nationale.
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-[#38b000]">✓</span>
+                    Un record lié à un joueur clairement identifié.
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 
@@ -80,19 +100,21 @@ export default function GeographyMethodSection() {
             LES CONTRIBUTEURS NE SONT PAS CARTOGRAPHIÉS.
           </h3>
 
-          <div className="w-full max-w-sm h-32 relative mt-4 opacity-70 z-10">
-            {/* Mini stylized map preview */}
-            <div className="absolute inset-0 border border-white/20 bg-white/5 flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-blue-electric shadow-[0_0_10px_rgba(58,134,255,0.8)] relative">
-                <div className="absolute -top-8 -left-8 bg-white text-navy font-mono text-[8px] uppercase font-bold px-2 py-1">
-                  JAPON · REN ITO
+          {isDemoMode && (
+            <div className="w-full max-w-sm h-32 relative mt-4 opacity-70 z-10">
+              {/* Mini stylized map preview */}
+              <div className="absolute inset-0 border border-white/20 bg-white/5 flex items-center justify-center">
+                <div className="w-2 h-2 rounded-full bg-blue-electric shadow-[0_0_10px_rgba(58,134,255,0.8)] relative">
+                  <div className="absolute -top-8 -left-8 bg-white text-navy font-mono text-[8px] uppercase font-bold px-2 py-1">
+                    JAPON · REN ITO
+                  </div>
+                </div>
+                <div className="absolute top-4 left-4 font-mono text-[8px] text-white/30 tracking-widest">
+                  Sujet documenté
                 </div>
               </div>
-              <div className="absolute top-4 left-4 font-mono text-[8px] text-white/30 tracking-widest">
-                Sujet documenté
-              </div>
             </div>
-          </div>
+          )}
 
           <a
             href="/explorer"

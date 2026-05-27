@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import SectionLabel from "../SectionLabel";
+import { isDemoMode } from "../../data";
 
 export default function ArticleInstabilityMethodSection() {
   return (
@@ -176,14 +177,16 @@ export default function ArticleInstabilityMethodSection() {
           </div>
         </div>
 
-        <div className="flex justify-center mt-4">
-          <a
-            href="/match/demo-france-belgique"
-            className="bg-navy text-white px-8 py-4 font-mono text-[11px] uppercase font-bold tracking-widest hover:bg-blue-electric transition-colors flex items-center justify-center gap-2"
-          >
-            VOIR L'EXEMPLE DANS LE DOSSIER MATCH →
-          </a>
-        </div>
+        {isDemoMode && (
+          <div className="flex justify-center mt-4">
+            <a
+              href="/match/demo-france-belgique"
+              className="bg-navy text-white px-8 py-4 font-mono text-[11px] uppercase font-bold tracking-widest hover:bg-blue-electric transition-colors flex items-center justify-center gap-2"
+            >
+              VOIR L'EXEMPLE DANS LE DOSSIER MATCH →
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );

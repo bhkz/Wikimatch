@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import SectionLabel from "../SectionLabel";
 import type { MethodologyDefinition } from "../../types";
+import { isDemoMode } from "../../data";
 
 export default function CoreDefinitionsSection({
   methodologyDefinitions,
@@ -45,7 +46,7 @@ export default function CoreDefinitionsSection({
               <p className="font-sans text-sm text-navy/70 leading-relaxed">
                 {def.fullDefinition}
               </p>
-              {def.example && (
+              {def.example && isDemoMode && (
                 <div className="mt-auto pt-4 border-t border-navy/5 font-mono text-[10px] text-navy/60 italic">
                   Exemple fictif :<br />
                   {def.example}
@@ -55,6 +56,7 @@ export default function CoreDefinitionsSection({
           ))}
         </div>
 
+        {isDemoMode && (
         <div className="w-full mt-12 mb-8 bg-white border border-navy/10 p-8 flex flex-col items-center justify-center text-center shadow-inner relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cream/50 via-transparent to-transparent opacity-50"></div>
 
@@ -117,6 +119,7 @@ export default function CoreDefinitionsSection({
             </a>
           </div>
         </div>
+        )}
       </div>
     </section>
   );
