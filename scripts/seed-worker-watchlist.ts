@@ -236,11 +236,13 @@ async function main() {
   const articleKey = (article: { wiki_code: string; page_title: string }) => `${article.wiki_code}::${article.page_title}`;
   const expectedArticleKeys = new Set(seed.articles.map(articleKey));
   const wikiCodes = Array.from(new Set(seed.articles.map((article) => article.wiki_code)));
+  const pageTitles = Array.from(new Set(seed.articles.map((article) => article.page_title)));
 
   const { data: existingArticles, error: existingArticlesError } = await supabase
     .from("wiki_articles")
     .select("wiki_code, page_title")
-    .in("wiki_code", wikiCodes);
+    .in("wiki_code", wikiCodes)
+    .in("page_title", pageTitles);
   if (existingArticlesError) throw existingArticlesError;
 
   const existingArticleKeys = new Set(
