@@ -129,9 +129,16 @@ npm run seed:rehearsal:watchlist
 npm run seed:rehearsal:watchlist -- --apply
 ```
 
-- Écrit les entités et articles dans Supabase.
-- Les 12 articles sont créés avec `monitoring_enabled=false` afin de préparer la base sans armer la surveillance.
-- Si certains articles existent déjà dans Supabase, leur état actuel de `monitoring_enabled` est préservé par le seed.
+- Écrit les entités et les articles manquants dans Supabase.
+- Les nouveaux articles sont insérés avec `monitoring_enabled=false` afin de préparer la base sans armer la surveillance.
+- Les entités et articles déjà existants ne sont pas modifiés par ce seed.
+- Cela garantit seulement qu'aucun nouvel article n'est activé implicitement ; des articles existants peuvent rester actifs.
+- Le dry-run a déjà montré que cinq articles de la répétition existaient déjà en base et étaient actifs :
+  - `frwiki:Paris Saint-Germain Football Club`
+  - `eswiki:Paris Saint-Germain Football Club`
+  - `enwiki:Arsenal F.C.`
+  - `frwiki:Arsenal Football Club`
+  - `eswiki:Arsenal Football Club`
 - Ne s'exécute qu'après revue du dry-run et accord explicite de Thomas.
 
 ### Étape 5 — Rattacher les articles au match en dry-run
@@ -172,14 +179,15 @@ npm run monitor:rehearsal:watchlist -- --enable --apply
 - Il n'écrit rien sans `--apply`.
 - Après activation, démarrer ou redémarrer le worker pour qu'il recharge l'index des articles surveillés.
 
-## 6. Désarmer après test ou en urgence
+## 6. Arrêt après test
 
 ```bash
 npm run monitor:rehearsal:watchlist -- --disable
-npm run monitor:rehearsal:watchlist -- --disable --apply
 ```
 
-- Après désactivation, redémarrer le worker pour vider son index en mémoire des articles désormais inactifs.
+- `--disable --apply` est volontairement bloqué tant qu'une restauration de l'état initial des articles n'est pas définie.
+- Après le test, arrêter ou redémarrer le worker suffit pour arrêter la collecte en mémoire.
+- Ne pas désactiver automatiquement les 12 articles en base, car certains étaient déjà actifs avant la répétition.
 - Cette opération ne supprime pas les traces déjà collectées.
 
 ## 7. Variables Render pendant le test

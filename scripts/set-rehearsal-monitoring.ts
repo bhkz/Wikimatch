@@ -5,6 +5,9 @@
  * Après activation des articles, il faudra démarrer ou redémarrer le worker.
  * Après désactivation, il faudra aussi redémarrer le worker pour que les articles
  * cessent d'être surveillés en mémoire.
+ *
+ * Note : `--disable --apply` est volontairement bloqué tant qu'une restauration de
+ * l'état initial des articles n'a pas été définie.
  */
 
 import { readFile } from "node:fs/promises";
@@ -89,6 +92,12 @@ async function loadExpectedArticles(): Promise<Array<SeedArticle>> {
 
 async function main() {
   const { mode, apply } = parseArgs(process.argv.slice(2));
+  if (apply && mode === "disable") {
+    throw new Error(
+      "Disable apply is blocked: rehearsal reuses articles that were already monitored before staging. Stop the worker after the test; implement baseline restoration before changing database monitoring state."
+    );
+  }
+
   const targetEnabled = mode === "enable";
   const expectedArticles = await loadExpectedArticles();
   const expectedKeys = new Set(expectedArticles.map(formatArticleKey));

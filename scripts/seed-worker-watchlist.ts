@@ -171,41 +171,89 @@ async function main() {
   await import("dotenv/config");
   const supabase = createSupabaseClient();
 
-  const { data: entities, error: entityError } = await supabase
-    .from("entities")
-    .upsert(seed.entities, { onConflict: "slug" })
-    .select("id, slug");
-  if (entityError) throw entityError;
+  if (monitoringEnabled) {
+    const { data: entities, error: entityError } = await supabase
+      .from("entities")
+      .upsert(seed.entities, { onConflict: "slug" })
+      .select("id, slug");
+    if (entityError) throw entityError;
 
-  const entityIdBySlug = new Map((entities ?? []).map((entity) => [entity.slug, entity.id]));
+    const entityIdBySlug = new Map((entities ?? []).map((entity) => [entity.slug, entity.id]));
+    const articleRows = seed.articles.map((article) => {
+      const entityId = entityIdBySlug.get(article.entity_slug);
+      if (!entityId) {
+        throw new Error(`Missing seeded entity for article slug ${article.entity_slug}`);
+      }
+      return {
+        entity_id: entityId,
+        wiki_code: article.wiki_code,
+        language_code: article.language_code,
+        page_title: article.page_title,
+        canonical_url: article.canonical_url,
+        article_type: article.article_type,
+        monitoring_enabled: true,
+      };
+    });
+
+    const { error: articleError } = await supabase
+      .from("wiki_articles")
+      .upsert(articleRows, { onConflict: "wiki_code,page_title" });
+    if (articleError) throw articleError;
+
+    console.log(`[seed:watchlist] mode=APPLY`);
+    console.log(`[seed:watchlist] ✅ ${seed.entities.length} entities upserted`);
+    console.log(`[seed:watchlist] ✅ ${seed.articles.length} monitored wiki articles upserted`);
+    return;
+  }
+
+  const seedEntitySlugs = seed.entities.map((entity) => entity.slug);
+  const { data: existingEntities, error: existingEntitiesError } = await supabase
+    .from("entities")
+    .select("id, slug")
+    .in("slug", seedEntitySlugs);
+  if (existingEntitiesError) throw existingEntitiesError;
+
+  const existingEntitySlugs = new Set((existingEntities ?? []).map((entity) => entity.slug));
+  const missingEntities = seed.entities.filter((entity) => !existingEntitySlugs.has(entity.slug));
+
+  let insertedEntities: Array<{ id: string; slug: string }> = [];
+  if (missingEntities.length > 0) {
+    const { data: inserted, error: insertEntitiesError } = await supabase
+      .from("entities")
+      .insert(missingEntities)
+      .select("id, slug");
+    if (insertEntitiesError) throw insertEntitiesError;
+    insertedEntities = inserted ?? [];
+  }
+
+  const allEntities = [...(existingEntities ?? []), ...insertedEntities];
+  const entityIdBySlug = new Map((allEntities ?? []).map((entity) => [entity.slug, entity.id]));
+  if (entityIdBySlug.size !== seed.entities.length) {
+    throw new Error(`Expected ${seed.entities.length} entity IDs after insert/read, got ${entityIdBySlug.size}`);
+  }
 
   const articleKey = (article: { wiki_code: string; page_title: string }) => `${article.wiki_code}::${article.page_title}`;
   const expectedArticleKeys = new Set(seed.articles.map(articleKey));
-  const existingMonitoring = new Map<string, boolean>();
+  const wikiCodes = Array.from(new Set(seed.articles.map((article) => article.wiki_code)));
 
-  if (!monitoringEnabled) {
-    const wikiCodes = Array.from(new Set(seed.articles.map((article) => article.wiki_code)));
-    const { data: existingArticles, error: existingArticlesError } = await supabase
-      .from("wiki_articles")
-      .select("wiki_code, page_title, monitoring_enabled")
-      .in("wiki_code", wikiCodes);
-    if (existingArticlesError) throw existingArticlesError;
+  const { data: existingArticles, error: existingArticlesError } = await supabase
+    .from("wiki_articles")
+    .select("wiki_code, page_title")
+    .in("wiki_code", wikiCodes);
+  if (existingArticlesError) throw existingArticlesError;
 
-    for (const row of existingArticles ?? []) {
-      const key = articleKey(row);
-      if (expectedArticleKeys.has(key) && typeof row.monitoring_enabled === "boolean") {
-        existingMonitoring.set(key, row.monitoring_enabled);
-      }
-    }
-  }
+  const existingArticleKeys = new Set(
+    (existingArticles ?? [])
+      .map((row) => articleKey(row))
+      .filter((key) => expectedArticleKeys.has(key))
+  );
 
-  const articleRows = seed.articles.map((article) => {
+  const newArticles = seed.articles.filter((article) => !existingArticleKeys.has(articleKey(article)));
+  const newArticleRows = newArticles.map((article) => {
     const entityId = entityIdBySlug.get(article.entity_slug);
     if (!entityId) {
       throw new Error(`Missing seeded entity for article slug ${article.entity_slug}`);
     }
-    const key = articleKey(article);
-    const monitoring_enabled = monitoringEnabled ? true : existingMonitoring.get(key) ?? false;
     return {
       entity_id: entityId,
       wiki_code: article.wiki_code,
@@ -213,22 +261,24 @@ async function main() {
       page_title: article.page_title,
       canonical_url: article.canonical_url,
       article_type: article.article_type,
-      monitoring_enabled,
+      monitoring_enabled: false,
     };
   });
 
-  if (!monitoringEnabled) {
-    console.log(`[seed:watchlist] existing_articles_preserved=${existingMonitoring.size}`);
+  if (newArticleRows.length > 0) {
+    const { error: insertArticlesError } = await supabase
+      .from("wiki_articles")
+      .insert(newArticleRows);
+    if (insertArticlesError) throw insertArticlesError;
   }
 
-  const { error: articleError } = await supabase
-    .from("wiki_articles")
-    .upsert(articleRows, { onConflict: "wiki_code,page_title" });
-  if (articleError) throw articleError;
-
   console.log(`[seed:watchlist] mode=APPLY`);
-  console.log(`[seed:watchlist] ✅ ${seed.entities.length} entities upserted`);
-  console.log(`[seed:watchlist] ✅ ${seed.articles.length} monitored wiki articles upserted`);
+  console.log(`[seed:watchlist] existing_entities_untouched=${existingEntitySlugs.size}`);
+  console.log(`[seed:watchlist] new_entities_inserted=${missingEntities.length}`);
+  console.log(`[seed:watchlist] existing_articles_untouched=${existingArticleKeys.size}`);
+  console.log(`[seed:watchlist] new_articles_inserted=${newArticleRows.length}`);
+  console.log(`[seed:watchlist] ✅ ${seed.entities.length} entities prepared`);
+  console.log(`[seed:watchlist] ✅ ${newArticleRows.length} new wiki articles inserted with monitoring_enabled=false`);
 }
 
 main().catch((error) => {
