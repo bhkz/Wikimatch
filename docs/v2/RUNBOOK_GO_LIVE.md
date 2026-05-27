@@ -68,18 +68,28 @@ Dans **Table Editor**, vérifie que tu vois bien :
 
 Le seed live initial couvre **16 entités** (1 tournoi + 7 équipes + 8 joueurs) et **~50 articles Wikipédia** en 5 langues. C'est volontairement modéré pour ne pas saturer le pipeline au démarrage.
 
-Localement, avec `SUPABASE_URL` et `SUPABASE_SERVICE_KEY` posés dans `.env.local` :
+Localement :
 
 ```powershell
 npm run seed:watchlist -- --live
 ```
 
+Cette commande est un dry-run par défaut : elle valide le JSON et affiche les entités/articles qui seraient upsertés, sans écrire en base.
+
 Tu devrais voir :
 
 ```
-[seed:watchlist] loading worker/seeds/wc26-watchlist.live.json
-[seed:watchlist] ✅ 16 entities upserted
-[seed:watchlist] ✅ 50 monitored wiki articles upserted
+[seed:watchlist] file=worker/seeds/wc26-watchlist.live.json
+[seed:watchlist] entities=16
+[seed:watchlist] articles=50
+[seed:watchlist] mode=DRY_RUN
+[seed:watchlist] DRY-RUN complete. Use --apply to write to Supabase.
+```
+
+Pour écrire en base, exécute avec `--apply` et des variables Supabase valides :
+
+```powershell
+npm run seed:watchlist -- --live --apply
 ```
 
 Le seed est **idempotent** : tu peux le relancer sans risque pour ajouter des articles supplémentaires plus tard.
