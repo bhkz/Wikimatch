@@ -153,6 +153,9 @@ Un seul service Render (`revision90`) lance les 3 jobs dans le même process Nod
 
 ### A.6 — Protocoles de Répétition Générale et Verrou de Publication
 
+> [!TIP]
+> **Répétition PSG — Arsenal (30 mai 2026)** : Voir le guide dédié [`docs/v2/UCL_FINAL_2026_REHEARSAL.md`](UCL_FINAL_2026_REHEARSAL.md) pour le périmètre complet, les articles surveillés et l'ordre d'exécution.
+
 Pour valider le dispositif WikiMatch en conditions réelles (notamment lors du match de test **PSG — Arsenal** le 30 mai), tu as le choix entre deux protocoles de répétition. Le second est **fortement recommandé** pour pouvoir analyser les données recueillies.
 
 #### Protocole 1 : Test technique court sans persistance (Optionnel)

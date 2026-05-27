@@ -1,0 +1,33 @@
+{
+  "_comment": "UCL Final 2025-26 rehearsal match definition. Verified 2026-05-27. Home/away order: UEFA has not officially designated home/away for the final (neutral venue). PSG listed first as convention from draw order. Kickoff time: 21:00 CEST is the standard UCL final time, confirmed by multiple sources.",
+  "source": {
+    "name": "UEFA",
+    "url": "https://www.uefa.com/uefachampionsleague/",
+    "verified_at": "2026-05-27T12:50:00+02:00"
+  },
+  "match": {
+    "slug": "2026-ucl-final-psg-arsenal",
+    "competitionLabel": "UEFA Champions League 2025/26",
+    "stageLabel": "Finale",
+    "groupLabel": null,
+    "scheduledAt": null,
+    "_scheduledAt_note": "Conflicting reports: UEFA website indicates 18:00 CEST, other sources indicate 21:00 CEST. Set to null until confirmed. Verify with UEFA match schedule closer to 30 May 2026.",
+    "venue": "Puskás Aréna, Budapest, Hungary",
+    "homeTeam": {
+      "slug": "paris-saint-germain",
+      "label": "Paris Saint-Germain",
+      "wikidataQid": "Q483020"
+    },
+    "awayTeam": {
+      "slug": "arsenal",
+      "label": "Arsenal",
+      "wikidataQid": "Q9617"
+    },
+    "officialSourceName": "UEFA",
+    "officialSourceUrl": "https://www.uefa.com/uefachampionsleague/"
+  },
+  "_uncertainties": {
+    "homeAway": "UEFA Champions League finals are played at a neutral venue. The home/away designation is determined by UEFA draw. PSG is listed as 'home' based on convention but this may not reflect the official draw order. Verify with UEFA official match sheet before the match.",
+    "kickoffTime": "21:00 CEST is the standard UCL final kickoff time. Verify with UEFA closer to match day."
+  }
+}
