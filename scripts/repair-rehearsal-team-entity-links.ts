@@ -6,6 +6,9 @@
  * It also safely audits and repairs incorrect metadata (wikidata_qid) on the
  * canonical Arsenal team entity if it matches the observed incorrect QID.
  *
+ * This script is sequential, idempotent, and designed to fail-closed on any
+ * concurrency changes or unexpected state.
+ *
  * Usage:
  *   npm run repair:rehearsal:entities               # dry-run (default)
  *   npm run repair:rehearsal:entities -- --apply    # perform the write operations
@@ -124,7 +127,22 @@ async function main() {
   console.log(`[repair:rehearsal:entities] canonical_home_qid current=${canonicalHome.wikidata_qid} expected=${EXPECTED_TEAM_QIDS.home}`);
   console.log(`[repair:rehearsal:entities] canonical_away_qid current=${canonicalAway.wikidata_qid} expected=${EXPECTED_TEAM_QIDS.away} repair_required=${canonicalAwayNeedsQidRepair}`);
 
-  // 6. Fetch 12 expected articles from seed JSON
+  // 6. Verify Match current links before any repair (fail-closed guard)
+  const allowedHomeEntityIds = new Set([canonicalHome.id, duplicateHome.id]);
+  const allowedAwayEntityIds = new Set([canonicalAway.id, duplicateAway.id]);
+
+  if (!allowedHomeEntityIds.has(matchRow.home_team_entity_id)) {
+    throw new Error(
+      `Safety alert! Match home team points to an unexpected entity ID. Refusing automatic repair.`
+    );
+  }
+  if (!allowedAwayEntityIds.has(matchRow.away_team_entity_id)) {
+    throw new Error(
+      `Safety alert! Match away team points to an unexpected entity ID. Refusing automatic repair.`
+    );
+  }
+
+  // 7. Fetch 12 expected articles from seed JSON
   const seedPath = new URL('../worker/seeds/ucl-final-2026-rehearsal.watchlist.json', import.meta.url);
   const seed = JSON.parse(await readFile(seedPath, 'utf8')) as SeedFile;
   const expectedArticles = seed.articles;
@@ -142,7 +160,7 @@ async function main() {
   const articleKey = (a: { wiki_code: string; page_title: string }) => `${a.wiki_code}::${a.page_title}`;
   const articleMap = new Map(articles?.map(a => [articleKey(a), a]) ?? []);
 
-  // 7. Determine required match & article changes
+  // 8. Determine required match & article changes
   let homeTeamSlugCurrent = 'UNKNOWN';
   if (matchRow.home_team_entity_id === canonicalHome.id) homeTeamSlugCurrent = canonicalHome.slug;
   if (matchRow.home_team_entity_id === duplicateHome.id) homeTeamSlugCurrent = duplicateHome.slug;
@@ -154,7 +172,14 @@ async function main() {
   console.log(`[repair:rehearsal:entities] match_home current=${homeTeamSlugCurrent} target=${canonicalHome.slug}`);
   console.log(`[repair:rehearsal:entities] match_away current=${awayTeamSlugCurrent} target=${canonicalAway.slug}`);
 
-  const articleUpdates: Array<{ id: string; target_entity_id: string; key: string; current_slug: string; target_slug: string }> = [];
+  const articleUpdates: Array<{
+    id: string;
+    source_entity_id: string;
+    target_entity_id: string;
+    key: string;
+    current_slug: string;
+    target_slug: string;
+  }> = [];
 
   for (const seedArticle of expectedArticles) {
     const key = articleKey(seedArticle);
@@ -183,6 +208,7 @@ async function main() {
     if (isLinkedToDuplicate) {
       articleUpdates.push({
         id: dbArticle.id,
+        source_entity_id: dbArticle.entity_id,
         target_entity_id: expectedCanonicalEntity.id,
         key,
         current_slug: duplicateSlug,
@@ -213,7 +239,7 @@ async function main() {
     return;
   }
 
-  // 8. Perform Supabase updates in APPLY mode
+  // 9. Perform Supabase updates in APPLY mode
   // A. Repair Arsenal QID first if necessary
   if (canonicalAwayNeedsQidRepair) {
     const { data: currentDbAway, error: fetchAwayErr } = await supabase
@@ -227,55 +253,70 @@ async function main() {
       throw new Error(`Concurrency error: Arsenal QID in DB has changed to ${currentDbAway.wikidata_qid ?? 'null'}. Aborting repair.`);
     }
 
-    const { error: qidUpdateErr } = await supabase
+    const { data: updatedAway, error: qidUpdateErr } = await supabase
       .from('entities')
       .update({ wikidata_qid: EXPECTED_TEAM_QIDS.away })
       .eq('id', canonicalAway.id)
-      .eq('wikidata_qid', OBSERVED_INCORRECT_CANONICAL_QIDS.away);
+      .eq('wikidata_qid', OBSERVED_INCORRECT_CANONICAL_QIDS.away)
+      .select('id, wikidata_qid');
 
     if (qidUpdateErr) throw qidUpdateErr;
 
-    // Verify QID was successfully updated
-    const { data: verifiedAway, error: verifyAwayErr } = await supabase
-      .from('entities')
-      .select('wikidata_qid')
-      .eq('id', canonicalAway.id)
-      .single();
-    if (verifyAwayErr) throw verifyAwayErr;
-
-    if (verifiedAway.wikidata_qid !== EXPECTED_TEAM_QIDS.away) {
-      throw new Error('Verification failed: Arsenal QID was not successfully updated to ' + EXPECTED_TEAM_QIDS.away);
+    if (!updatedAway || updatedAway.length !== 1 || updatedAway[0].wikidata_qid !== EXPECTED_TEAM_QIDS.away) {
+      throw new Error(
+        'Concurrency error: Arsenal QID repair did not update exactly the expected entity. Aborting before match/article relinking.'
+      );
     }
 
     console.log(`[repair:rehearsal:entities] ✅ Canonical Arsenal QID successfully repaired to ${EXPECTED_TEAM_QIDS.away}`);
   }
 
-  // B. Update match if necessary
+  // B. Update match if necessary (conditional on previous state)
   if (matchRow.home_team_entity_id !== canonicalHome.id || matchRow.away_team_entity_id !== canonicalAway.id) {
-    const { error: updateMatchErr } = await supabase
+    const { data: updatedMatch, error: updateMatchErr } = await supabase
       .from('matches')
       .update({
         home_team_entity_id: canonicalHome.id,
         away_team_entity_id: canonicalAway.id,
       })
-      .eq('id', matchRow.id);
+      .eq('id', matchRow.id)
+      .eq('home_team_entity_id', matchRow.home_team_entity_id)
+      .eq('away_team_entity_id', matchRow.away_team_entity_id)
+      .select('id, home_team_entity_id, away_team_entity_id');
+
     if (updateMatchErr) throw updateMatchErr;
+
+    if (!updatedMatch || updatedMatch.length !== 1) {
+      throw new Error(
+        'Concurrency error: rehearsal match references changed before repair could be applied. Aborting article relinking.'
+      );
+    }
     console.log('[repair:rehearsal:entities] ✅ Rehearsal match entity links updated');
   } else {
     console.log('[repair:rehearsal:entities] Match already linked to canonical entities');
   }
 
-  // C. Update articles if necessary
+  // C. Update articles if necessary (conditional on duplicate slug entity_id)
   for (const update of articleUpdates) {
-    const { error: updateArtErr } = await supabase
+    const { data: updatedArticles, error: updateArtErr } = await supabase
       .from('wiki_articles')
       .update({ entity_id: update.target_entity_id })
-      .eq('id', update.id);
+      .eq('id', update.id)
+      .eq('entity_id', update.source_entity_id)
+      .select('id, entity_id');
+
     if (updateArtErr) throw updateArtErr;
+
+    if (!updatedArticles || updatedArticles.length !== 1) {
+      throw new Error(
+        `Concurrency error: article ${update.key} no longer points to the expected duplicate entity. ` +
+        `Relinking aborted mid-process.`
+      );
+    }
     console.log(`[repair:rehearsal:entities] ✅ Relinked ${update.key} to ${update.target_slug}`);
   }
 
-  // 9. Verify after apply
+  // 10. Verify after apply
   const { data: verifiedMatch } = await supabase
     .from('matches')
     .select('home_team_entity_id, away_team_entity_id')

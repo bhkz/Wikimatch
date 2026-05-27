@@ -158,6 +158,10 @@ Une étape de réparation contrôlée est donc nécessaire pour :
 
 Les entités doublonnées `paris-saint-germain` et `arsenal` ne seront pas supprimées de la base lors de cette étape de réparation pour permettre tout audit historique ultérieur.
 
+> [!IMPORTANT]
+> **Absence de transaction SQL :**
+> La réparation est séquentielle et idempotente, mais elle n'est pas exécutée dans une transaction SQL unique. Si une étape échoue après une mise à jour déjà réalisée, ne pas relancer aveuglément : exécuter d'abord le dry-run à nouveau pour identifier les opérations restantes. Les mises à jour sont conditionnées à l'état précédemment observé afin d'éviter d'écraser une modification concurrente.
+
 1. Vérifier les changements de réalignement et de correction de métadonnée prévus en dry-run :
 ```bash
 npm run repair:rehearsal:entities
@@ -170,7 +174,7 @@ Le script de réparation valide l'existence des entités canoniques, compare l'�
 npm run repair:rehearsal:entities -- --apply
 ```
 
-Cette commande met à jour de façon atomique et contrôlée le QID d'Arsenal dans la table `entities`, puis les liaisons du match dans la table `matches` ainsi que les articles concernés dans `wiki_articles` pour réutiliser les entités canoniques historiques. Une assertion vérifie le bon déroulement de l'opération après coup.
+Cette commande met à jour de façon séquentielle et contrôlée le QID d'Arsenal dans la table `entities`, puis les liaisons du match dans la table `matches` ainsi que les articles concernés dans `wiki_articles` pour réutiliser les entités canoniques historiques. Des verrous conditionnels vérifient que l'état initial n'a pas changé pour chaque ligne avant de procéder.
 
 ### Étape 6 — Rattacher les articles au match en dry-run
 
