@@ -90,7 +90,7 @@ Un seul service Render (`revision90`) lance les 3 jobs dans le même process Nod
 | --------- | -------- | ------ |
 | Supabase | `SUPABASE_URL` | `https://<projet>.supabase.co` |
 | Supabase | `SUPABASE_SERVICE_KEY` | `eyJ...` (service_role) |
-| Worker SSE | `WIKIMEDIA_USER_AGENT` | `WikiMatch/2.0 (thomas.david9492@gmail.com) Node` |
+| Worker SSE | `WIKIMEDIA_USER_AGENT` | `WikiMatch/2.0 (<CONTACT_EMAIL_OR_PROJECT_URL>) Node` |
 | Worker SSE | `WORKER_DRY_RUN` | `true` ← bascule en `false` après vérif |
 | Worker SSE | `WORKER_FETCH_DIFF` | `true` |
 | Analyzer | `OPENAI_API_KEY` | `sk-...` |
@@ -102,6 +102,9 @@ Un seul service Render (`revision90`) lance les 3 jobs dans le même process Nod
 | Patterns | `PATTERNS_DRY_RUN` | `true` ← bascule en `false` en dernier |
 | Patterns | `PATTERNS_POLL_INTERVAL_MS` | `30000` |
 | Commun | `LOG_LEVEL` | `info` |
+
+> [!NOTE]
+> **RÈGLE SUR `WIKIMEDIA_USER_AGENT` :** La variable `WIKIMEDIA_USER_AGENT` doit obligatoirement être configurée avec un moyen de contact valide (email ou URL de projet) dans l'environnement Render pour respecter les règles d'accès de l'API Wikimedia, mais aucune adresse email personnelle réelle ne doit être commise dans ce dépôt public.
 
 **Vars à supprimer si présentes** (leftover) :
 - `AI_DAILY_USD_CAP` (n'existe nulle part dans le code)
