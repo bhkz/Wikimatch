@@ -89,7 +89,7 @@ export default function StoriesArchiveHero({ hasStories = true }: Props) {
                  to="/matches" 
                  className="bg-blue-electric text-white px-8 py-4 font-bold uppercase font-mono tracking-widest text-[10px] hover:bg-white hover:text-blue-electric transition-colors w-full md:w-auto text-center block"
                >
-                 Voir les matchs observés
+                 Voir les matchs
                </Link>
              )}
              <a href="/methodology" className="border border-cream/20 text-cream px-8 py-4 font-bold uppercase font-mono tracking-widest text-[10px] hover:bg-cream/10 transition-colors w-full md:w-auto text-center hidden md:block">
