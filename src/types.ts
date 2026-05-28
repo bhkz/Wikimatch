@@ -29,6 +29,7 @@ export type PublishedStory = {
 
 export type TrackedMatch = {
   id: string;
+  slug?: string;
   teams: [string, string];
   stage: string;
   dateLabel: string;
