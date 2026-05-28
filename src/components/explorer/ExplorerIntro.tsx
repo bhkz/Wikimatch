@@ -2,7 +2,11 @@ import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { isLiveMode } from "../../data";
 
-export default function ExplorerIntro() {
+type Props = {
+  hasStories?: boolean;
+};
+
+export default function ExplorerIntro({ hasStories = true }: Props) {
   return (
     <section className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10 relative">
       <div className="w-full max-w-screen-xl mx-auto flex flex-col gap-16 md:gap-24 relative">
@@ -65,9 +69,11 @@ export default function ExplorerIntro() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 mt-8 justify-center">
-          <button onClick={() => document.getElementById("map")?.scrollIntoView({ behavior: "smooth" })} className="bg-navy text-white px-8 py-4 font-bold uppercase font-mono tracking-widest text-[10px] hover:bg-blue-electric hover:text-white transition-colors text-center w-full sm:w-auto shadow-md">
-            Explorer les visualisations
-          </button>
+          {hasStories && (
+            <button onClick={() => document.getElementById("map")?.scrollIntoView({ behavior: "smooth" })} className="bg-navy text-white px-8 py-4 font-bold uppercase font-mono tracking-widest text-[10px] hover:bg-blue-electric hover:text-white transition-colors text-center w-full sm:w-auto shadow-md">
+              Explorer les visualisations
+            </button>
+          )}
           <Link to="/observatoire" className="bg-transparent border border-navy/20 text-navy px-8 py-4 font-bold uppercase font-mono tracking-widest text-[10px] hover:bg-navy/5 transition-colors text-center w-full sm:w-auto flex items-center justify-center">
             Ouvrir l'Observatoire
           </Link>

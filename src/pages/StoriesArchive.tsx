@@ -79,26 +79,30 @@ export default function StoriesArchive() {
   );
 
   const nextMatchRoute = archiveStories.find((s) => s.type === "match_recap")?.availableDetailRoute;
+  const hasStories = archiveStories.length > 0;
 
   return (
     <div className="min-h-screen bg-cream selection:bg-blue-electric selection:text-white">
       <SiteHeader />
 
       <main className="relative pt-[72px]">
-        <StoriesArchiveHero />
-        <ArchiveStatsStrip stats={archiveStats} />
+        <StoriesArchiveHero hasStories={hasStories} />
+        
+        {hasStories && <ArchiveStatsStrip stats={archiveStats} />}
 
-        {activeFilterId === "all" && !searchQuery && featuredStory && (
+        {hasStories && activeFilterId === "all" && !searchQuery && featuredStory && (
           <FeaturedArchiveStory story={featuredStory} />
         )}
 
-        <StoriesFilterBar
-          filters={archiveFilters}
-          activeFilterId={activeFilterId}
-          onSelectFilter={setActiveFilterId}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
+        {hasStories && (
+          <StoriesFilterBar
+            filters={archiveFilters}
+            activeFilterId={activeFilterId}
+            onSelectFilter={setActiveFilterId}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+        )}
 
         <StoriesEditorialGrid
           stories={gridStories}
@@ -106,18 +110,18 @@ export default function StoriesArchive() {
           isFiltering={activeFilterId !== "all" || searchQuery.length > 0}
         />
 
-        {featuredCollection && (
+        {hasStories && featuredCollection && (
           <FeaturedCollectionSection
             collection={featuredCollection}
             archiveStories={archiveStories}
           />
         )}
 
-        <MatchRecapsSection stories={archiveStories} />
+        {hasStories && <MatchRecapsSection stories={archiveStories} />}
 
         <ArchiveMethodologyBlock />
 
-        <StoriesFinalCTA nextMatchRoute={nextMatchRoute} />
+        {hasStories && <StoriesFinalCTA nextMatchRoute={nextMatchRoute} />}
       </main>
 
       <SiteFooter />

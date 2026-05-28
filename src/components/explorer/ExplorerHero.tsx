@@ -2,7 +2,11 @@ import { motion } from "motion/react";
 import { isLiveMode } from "../../data";
 import DemoBadge from "../DemoBadge";
 
-export default function ExplorerHero() {
+type Props = {
+  hasStories?: boolean;
+};
+
+export default function ExplorerHero({ hasStories = true }: Props) {
   const scrollToAtlas = () => document.getElementById("map")?.scrollIntoView({ behavior: "smooth" });
   const scrollToMatrix = () => document.getElementById("matrix")?.scrollIntoView({ behavior: "smooth" });
 
@@ -22,7 +26,7 @@ export default function ExplorerHero() {
         <div className="flex flex-col items-start gap-4">
           <DemoBadge text="DEMONSTRATION D'INTERFACE · VISUALISATIONS FICTIVES · AUCUNE DONNEE REELLE" />
           <div className="font-mono text-[10px] sm:text-xs text-navy/60 uppercase tracking-widest font-bold">
-            EXPLORER · WIKIMATCH · WC26
+            EXPLORER · WIKIMATCH · UCL25-26
           </div>
         </div>
 
@@ -43,50 +47,70 @@ export default function ExplorerHero() {
               ))}
             </h1>
 
+            {hasStories ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="bg-white border border-navy/10 p-6 md:p-8 mt-6 max-w-xl shadow-sm"
+              >
+                <h2 className="font-mono text-sm uppercase font-bold tracking-widest text-navy mb-4">
+                  LA CARTE SITUE LES SUJETS FOOTBALLISTIQUES.
+                  <br />
+                  JAMAIS LES PERSONNES QUI ECRIVENT.
+                </h2>
+                <p className="font-sans text-sm md:text-base text-navy/70 leading-relaxed font-light">
+                  {isLiveMode
+                    ? "Carte des sujets documentes, comparaison des editions linguistiques et chronologie des histoires publiees a partir des donnees Supabase live."
+                    : "Carte des sujets documentes, comparaison des editions linguistiques et chronologie des histoires publiees : parcourez les recits fictifs de la demonstration WikiMatch."}
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="bg-white border border-navy/10 p-6 md:p-8 mt-6 max-w-xl shadow-sm"
+              >
+                <h2 className="font-mono text-sm uppercase font-bold tracking-widest text-navy mb-4">
+                  CE QUE LES WIKIPÉDIAS RETIENDRONT DU TOURNOI.
+                </h2>
+                <p className="font-sans text-sm md:text-base text-navy/70 leading-relaxed font-light">
+                  Lorsque des observations vérifiées seront publiées, Explorer permettra de comparer leurs éditions linguistiques et leurs chronologies.
+                </p>
+              </motion.div>
+            )}
+          </div>
+
+          {hasStories && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              className="bg-white border border-navy/10 p-6 md:p-8 mt-6 max-w-xl shadow-sm"
+              transition={{ delay: 1.0 }}
+              className="flex flex-col gap-4 w-full md:w-auto"
             >
-              <h2 className="font-mono text-sm uppercase font-bold tracking-widest text-navy mb-4">
-                LA CARTE SITUE LES SUJETS FOOTBALLISTIQUES.
-                <br />
-                JAMAIS LES PERSONNES QUI ECRIVENT.
-              </h2>
-              <p className="font-sans text-sm md:text-base text-navy/70 leading-relaxed font-light">
-                {isLiveMode
-                  ? "Carte des sujets documentes, comparaison des editions linguistiques et chronologie des histoires publiees a partir des donnees Supabase live."
-                  : "Carte des sujets documentes, comparaison des editions linguistiques et chronologie des histoires publiees : parcourez les recits fictifs de la demonstration WikiMatch."}
-              </p>
+              <button onClick={scrollToAtlas} className="bg-navy text-white px-8 py-4 font-bold uppercase font-mono tracking-widest text-[10px] hover:bg-blue-electric hover:text-white transition-colors w-full md:w-auto text-center shadow-lg">
+                Ouvrir l'atlas
+              </button>
+              <button onClick={scrollToMatrix} className="border border-navy/20 text-navy px-8 py-4 font-bold uppercase font-mono tracking-widest text-[10px] hover:bg-navy/5 transition-colors w-full md:w-auto text-center bg-white">
+                Voir la matrice des editions
+              </button>
             </motion.div>
-          </div>
+          )}
+        </div>
 
+        {hasStories && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.0 }}
-            className="flex flex-col gap-4 w-full md:w-auto"
+            transition={{ delay: 1.5 }}
+            className="flex flex-wrap gap-4 mt-8 md:mt-16 font-mono text-[9px] uppercase font-bold tracking-widest"
           >
-            <button onClick={scrollToAtlas} className="bg-navy text-white px-8 py-4 font-bold uppercase font-mono tracking-widest text-[10px] hover:bg-blue-electric hover:text-white transition-colors w-full md:w-auto text-center shadow-lg">
-              Ouvrir l'atlas
-            </button>
-            <button onClick={scrollToMatrix} className="border border-navy/20 text-navy px-8 py-4 font-bold uppercase font-mono tracking-widest text-[10px] hover:bg-navy/5 transition-colors w-full md:w-auto text-center bg-white">
-              Voir la matrice des editions
-            </button>
+            <span className="text-[#e63946] border border-[#e63946]/20 bg-[#e63946]/5 px-3 py-1.5">DIVERGENCE</span>
+            <span className="text-blue-electric border border-blue-electric/20 bg-blue-electric/5 px-3 py-1.5">MISE A JOUR CONVERGENTE</span>
+            <span className="text-navy/50 border border-navy/20 bg-navy/5 px-3 py-1.5">ARTICLE INSTABLE</span>
           </motion.div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-          className="flex flex-wrap gap-4 mt-8 md:mt-16 font-mono text-[9px] uppercase font-bold tracking-widest"
-        >
-          <span className="text-[#e63946] border border-[#e63946]/20 bg-[#e63946]/5 px-3 py-1.5">DIVERGENCE</span>
-          <span className="text-blue-electric border border-blue-electric/20 bg-blue-electric/5 px-3 py-1.5">MISE A JOUR CONVERGENTE</span>
-          <span className="text-navy/50 border border-navy/20 bg-navy/5 px-3 py-1.5">ARTICLE INSTABLE</span>
-        </motion.div>
+        )}
       </div>
     </section>
   );
