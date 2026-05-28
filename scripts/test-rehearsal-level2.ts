@@ -14,6 +14,8 @@ import {
   isLevel2AutoPublishable,
   buildObservationKey,
   buildObservationSlug,
+  ALLOWED_AUTO_PROPOSITION_TYPES,
+  FINAL_REHEARSAL_BLOCKED_REASON,
 } from "../patterns/src/rehearsalLevel2.js";
 import { generate, generateLevel2Observation } from "../patterns/src/templates.js";
 import type { DetectedPattern, EvidenceRow } from "../patterns/src/types.js";
@@ -128,7 +130,10 @@ function pattern(
   assert(r.eligible === true, "2. red_card EN+ES avec sources est éligible");
 }
 
-// 3. qualification EN + FR avec claim structurée → éligible
+// 3. qualification EN + FR avec sources → REFUSÉ (final-rehearsal v1)
+//    Le match test est une FINALE : les deux clubs sont déjà qualifiés,
+//    un fait `qualification` ajouté dans la fenêtre est contextuel et
+//    ambigu. La whitelist auto v1 ne contient que goal_scored et red_card.
 {
   const p = pattern({
     proposition_type: "qualification",
@@ -138,7 +143,55 @@ function pattern(
     ],
   });
   const r = isLevel2AutoPublishable(p);
-  assert(r.eligible === true, "3. qualification EN+FR avec claim structurée est éligible");
+  assert(
+    r.eligible === false &&
+      r.reason.includes(FINAL_REHEARSAL_BLOCKED_REASON) &&
+      r.reason.includes("qualification"),
+    `3. qualification EN+FR est refusé avec raison ${FINAL_REHEARSAL_BLOCKED_REASON}`,
+  );
+}
+
+// 3bis. la whitelist publique contient exactement {goal_scored, red_card}
+{
+  const exact =
+    ALLOWED_AUTO_PROPOSITION_TYPES.size === 2 &&
+    ALLOWED_AUTO_PROPOSITION_TYPES.has("goal_scored") &&
+    ALLOWED_AUTO_PROPOSITION_TYPES.has("red_card") &&
+    !ALLOWED_AUTO_PROPOSITION_TYPES.has("qualification");
+  assert(exact, "3bis. ALLOWED_AUTO_PROPOSITION_TYPES = {goal_scored, red_card} (qualification exclue)");
+}
+
+// 3ter. match_result brut → refusé
+{
+  const p = pattern({
+    proposition_type: "match_result",
+    evidenceRows: [
+      ev("t1", "en", "match_result", { strict_claim_key: "match_result:1-0" }),
+      ev("t2", "fr", "match_result", { strict_claim_key: "match_result:1-0" }),
+    ],
+    strict_claim_key: "match_result:1-0",
+  });
+  const r = isLevel2AutoPublishable(p);
+  assert(
+    r.eligible === false && r.reason.includes(FINAL_REHEARSAL_BLOCKED_REASON),
+    "3ter. match_result brut est refusé avec raison final-rehearsal",
+  );
+}
+
+// 3quater. article_instability → refusé
+{
+  const p: DetectedPattern = {
+    ...pattern({
+      proposition_type: "goal_scored",
+      evidenceRows: [ev("t1", "en", "goal_scored"), ev("t2", "fr", "goal_scored")],
+    }),
+    pattern_type: "article_instability",
+  };
+  const r = isLevel2AutoPublishable(p);
+  assert(
+    r.eligible === false && r.reason.includes("not auto-publishable"),
+    "3quater. pattern_type article_instability est refusé",
+  );
 }
 
 // =====================================================================
@@ -251,8 +304,10 @@ function pattern(
   });
   const r = isLevel2AutoPublishable(p);
   assert(
-    r.eligible === false && r.reason.includes("not in the rehearsal whitelist"),
-    "9. substitution multi-langue est refusée",
+    r.eligible === false &&
+      r.reason.includes("substitution") &&
+      r.reason.includes(FINAL_REHEARSAL_BLOCKED_REASON),
+    "9. substitution multi-langue est refusée (final-rehearsal v1)",
   );
 }
 

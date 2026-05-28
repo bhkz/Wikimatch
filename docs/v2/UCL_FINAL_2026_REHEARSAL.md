@@ -332,7 +332,10 @@ Seules les observations niveau 2 strictement conformes
 - `pattern_type === "language_convergence"` uniquement ;
 - match canonique `2026-ucl-final-psg-arsenal` (match_id résolu via
   `match_watchlist`) ;
-- `proposition_type ∈ {goal_scored, red_card, qualification}` ;
+- `proposition_type ∈ {goal_scored, red_card}` (whitelist final-rehearsal v1 —
+  `qualification` est explicitement exclu : pour cette finale, les deux clubs
+  sont déjà qualifiés, un fait `qualification` ajouté dans la fenêtre serait
+  contextuel et ambigu) ;
 - ≥2 langues distinctes parmi `en`, `fr`, `es` ;
 - ≥2 evidence rows avec lien `source_diff_url` ou `source_revision_url`
   Wikimedia consultable, dont au moins une par langue annoncée ;
@@ -343,10 +346,21 @@ Seules les observations niveau 2 strictement conformes
 
 `under_radar`, `article_instability`, `language_divergence`, volume seul,
 mono-langue, `match_result` brut, `substitution`, `yellow_card`,
-`lineup_change`, `transfer`, `biographical_fact`, `performance`, `other`,
-`noise`, et toute `language_convergence` dont la claim n'est pas dans la
-whitelist §7.1. Le publisher retourne `manual_review_required` ou
+`lineup_change`, `transfer`, `biographical_fact`, `performance`,
+`qualification`, `sanction`, `other`, `noise`, et toute
+`language_convergence` dont la claim n'est pas dans la whitelist final-
+rehearsal v1. Le publisher retourne `manual_review_required` ou
 `level2_not_eligible` et n'écrit rien dans `published_stories`.
+
+### Limite assumée du rehearsal v1
+
+Si PSG — Arsenal ne produit ni but recoupé dans ≥2 éditions, ni carton
+rouge recoupé dans ≥2 éditions, **aucune observation automatique ne sera
+publiée**. Ce n'est pas un bug : c'est la conséquence directe du niveau
+de preuve choisi. Le score final, le vainqueur, le titre remporté ne
+sont pas auto-publiés tant qu'un type structuré fiable (par ex.
+`title_won`, `final_result`) n'a pas été ajouté à l'extracteur et
+validé hors ligne. Cela ne sera pas improvisé à deux jours du match.
 
 ### Vérification dry-run hors ligne
 
@@ -354,7 +368,18 @@ whitelist §7.1. Le publisher retourne `manual_review_required` ou
 npx tsx scripts/test-rehearsal-level2.ts
 ```
 
-Le script valide 15 cas sans accès à Supabase et sans publication.
+Le script valide 25+ cas sans accès à Supabase et sans publication, dont :
+- `goal_scored` EN+FR → éligible ;
+- `red_card` EN+ES → éligible ;
+- `qualification` EN+FR → refusé (`not_allowed_in_final_rehearsal_v1`) ;
+- `match_result` EN+FR → refusé ;
+- `substitution`, `under_radar`, `article_instability` → refusés ;
+- watchlist_role autre que `match` → refusé ;
+- match non canonique → refusé ;
+- source manquante → refusé ;
+- ancien `methodology_version` → non public ; marker niveau 2 → public ;
+- même fait, ordre de langues différent → même slug ; faits différents →
+  slugs distincts.
 
 ### Surface publique
 

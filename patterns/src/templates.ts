@@ -114,10 +114,12 @@ function level2AutoObservationTemplate(ctx: TemplateContext): TemplateOutput {
     : ctx.language_codes;
   const upperCodes = codes.map((c) => c.toUpperCase());
   const propType = ctx.level2_proposition_type ?? "goal_scored";
+  // Whitelist final-rehearsal v1 : seuls goal_scored et red_card alimentent
+  // un titre niveau 2. `qualification` est explicitement exclu pour la
+  // finale PSG — Arsenal (cf. rehearsalLevel2.ts FORBIDDEN_PROPOSITION_TYPES).
   const titleByType: Record<string, string> = {
     goal_scored: "Un but apparaît dans plusieurs éditions Wikipédia suivies",
     red_card: "Un carton rouge apparaît dans plusieurs éditions Wikipédia suivies",
-    qualification: "Une qualification apparaît dans plusieurs éditions Wikipédia suivies",
   };
   const title = titleByType[propType] ?? "Un fait apparaît dans plusieurs éditions Wikipédia suivies";
   const excerpt =

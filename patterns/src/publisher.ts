@@ -51,9 +51,12 @@ async function isLevel2ObservationAlreadyPublished(
 ): Promise<boolean> {
   // Dédup stricte fondée sur l'identité documentaire stable du fait (slug
   // dérivé de match_slug + proposition_type + strict_claim_key). Toute
-  // redétection du même but / carton rouge / qualification — même avec
-  // proposition_ids différents ou une 3e langue — renvoie ici true et
-  // n'écrit rien.
+  // redétection du même but / carton rouge — même avec proposition_ids
+  // différents ou une 3e langue — renvoie ici true et n'écrit rien.
+  // En cas de course concurrente (deux workers détectent simultanément),
+  // la contrainte UNIQUE published_stories.slug fait office de second
+  // garde-fou : l'INSERT lève 23505 et est traité comme already_published
+  // plus bas (cf. handler 23505 dans publish()).
   const { data, error } = await supabase
     .from("published_stories")
     .select("id")
@@ -99,10 +102,10 @@ function manualReviewReason(pat: DetectedPattern): string | null {
     return "Equivalent update is not linked to one unambiguous watched match";
   }
   if (isForbiddenPropositionType(pat.proposition_type)) {
-    return `proposition_type ${pat.proposition_type ?? "null"} is explicitly blocked (substitution/yellow_card/match_result/lineup_change/transfer/biographical_fact/performance/other/noise)`;
+    return `proposition_type ${pat.proposition_type ?? "null"} is explicitly blocked (qualification/substitution/yellow_card/match_result/lineup_change/transfer/biographical_fact/performance/sanction/other/noise)`;
   }
   if (!pat.proposition_type || !ALLOWED_AUTO_PROPOSITION_TYPES.has(pat.proposition_type)) {
-    return `proposition_type ${pat.proposition_type ?? "null"} is not in the rehearsal whitelist (goal_scored, red_card, qualification)`;
+    return `proposition_type ${pat.proposition_type ?? "null"} is not in the rehearsal whitelist (goal_scored, red_card)`;
   }
   return null;
 }
@@ -246,6 +249,17 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
     .single();
 
   if (storyError || !storyRow) {
+    // Postgres unique_violation (slug already taken). La contrainte UNIQUE
+    // sur published_stories.slug (cf. supabase/migrations/202605260001 :
+    // `slug text unique not null`) garantit que deux workers ne peuvent pas
+    // publier deux stories pour le même fait. On traite cette collision
+    // comme une redétection idempotente, pas comme une erreur.
+    if (storyError?.code === "23505") {
+      console.log(
+        `[publisher] ALREADY_PUBLISHED (unique_violation race) — observation_slug=${slug}`,
+      );
+      return { status: "already_published" };
+    }
     console.error("[publisher] published_stories insert failed:", storyError?.message);
     return { status: "error", reason: storyError?.message };
   }

@@ -12,11 +12,20 @@ import { createHash } from "node:crypto";
 import { CANONICAL_REHEARSAL_MATCH_SLUG } from "./config.js";
 import type { DetectedPattern, EvidenceRow } from "./types.js";
 
+// Whitelist publique pendant le rehearsal final PSG — Arsenal du 30/05/2026.
+// Le match étant la finale, les deux clubs sont déjà qualifiés : un fait
+// de type `qualification` ajouté dans cette fenêtre est probablement
+// contextuel (palmarès, qualification antérieure, ambiguë) et ne décrit
+// pas un événement live de la rencontre. On le maintient détectable côté
+// pipeline mais on le refuse explicitement en publication auto v1.
 export const ALLOWED_AUTO_PROPOSITION_TYPES = new Set<string>([
   "goal_scored",
   "red_card",
-  "qualification",
 ]);
+
+// Raison stable et lisible (utilisée dans les logs / messages d'erreur de
+// `manualReviewReason` et dans les tests offline).
+export const FINAL_REHEARSAL_BLOCKED_REASON = "not_allowed_in_final_rehearsal_v1";
 
 export const ALLOWED_AUTO_LANGUAGE_CODES = new Set<string>(["en", "fr", "es"]);
 
@@ -43,6 +52,7 @@ const FORBIDDEN_PROPOSITION_TYPES = new Set<string>([
   "transfer",
   "biographical_fact",
   "performance",
+  "qualification",
   "other",
   "noise",
 ]);
@@ -107,7 +117,7 @@ export function buildObservationSlug(
  *  1. pattern_type === "language_convergence"
  *  2. match_slug === slug canonique du rehearsal
  *  3. match_id non nul
- *  4. proposition_type ∈ {goal_scored, red_card, qualification}
+ *  4. proposition_type ∈ {goal_scored, red_card} (whitelist final-rehearsal v1)
  *  5. claim key strict non null et identique sur toutes les preuves
  *  6. ≥2 langues distinctes parmi {en, fr, es}
  *  7. ≥2 evidence rows avec source diff/revision consultable
@@ -133,10 +143,19 @@ export function isLevel2AutoPublishable(pattern: DetectedPattern): Level2Result 
   }
 
   const propType = pattern.proposition_type;
-  if (!propType || !ALLOWED_AUTO_PROPOSITION_TYPES.has(propType)) {
+  if (!propType) {
+    return { eligible: false, reason: "proposition_type is null" };
+  }
+  if (FORBIDDEN_PROPOSITION_TYPES.has(propType)) {
     return {
       eligible: false,
-      reason: `proposition_type ${propType ?? "null"} is not in the rehearsal whitelist`,
+      reason: `proposition_type ${propType} is forbidden (${FINAL_REHEARSAL_BLOCKED_REASON})`,
+    };
+  }
+  if (!ALLOWED_AUTO_PROPOSITION_TYPES.has(propType)) {
+    return {
+      eligible: false,
+      reason: `proposition_type ${propType} is not in the rehearsal whitelist (${FINAL_REHEARSAL_BLOCKED_REASON})`,
     };
   }
 
