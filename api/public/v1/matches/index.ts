@@ -42,7 +42,11 @@ export default async function handler(
 
     if (matchesError) throw matchesError;
 
-    const matches = matchesData ?? [];
+    // The legacy PSG–Arsenal record carries an obsolete broad watchlist.
+    // Only the validated 12-article rehearsal record is public for this test.
+    const SUPERSEDED_REHEARSAL_MATCH_SLUG = "final-ucl-2026-psg-arsenal";
+
+    const matches = (matchesData ?? []).filter((m) => m.slug !== SUPERSEDED_REHEARSAL_MATCH_SLUG);
     const matchIds = matches.map((match) => match.id);
     const storyCountByMatch = new Map<string, number>();
     const storyTypesByMatch = new Map<string, string[]>();

@@ -25,6 +25,14 @@ export default async function handler(
     return;
   }
 
+  // The legacy PSG–Arsenal record carries an obsolete broad watchlist.
+  // Only the validated 12-article rehearsal record is public for this test.
+  const SUPERSEDED_REHEARSAL_MATCH_SLUG = "final-ucl-2026-psg-arsenal";
+  if (slug === SUPERSEDED_REHEARSAL_MATCH_SLUG) {
+    sendNotFound(response);
+    return;
+  }
+
   try {
     const supabase = createServerSupabaseClient();
 
