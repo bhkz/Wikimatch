@@ -94,9 +94,13 @@ export type MatchContext = {
 export type MatchTrackedSubject = {
   id: string;
   type: "match" | "team" | "player" | "coach" | "tournament";
+  role?: "match" | "home_team" | "away_team" | "tournament";
   label: string;
   reason: string;
   languageCode?: string;
+  pageTitle?: string;
+  canonicalUrl?: string;
+  wikiCode?: string;
 };
 
 export type MatchPublishedStory = {

@@ -23,16 +23,42 @@ export default function TrackedSubjectsSection({ subjects }: { subjects: MatchTr
     return new Set(keys).size;
   }, [subjects]);
 
+  // Group subjects into distinct understandable categories using the actual role from match_watchlist
+  const groupedSubjects = useMemo(() => {
+    const matchItems = subjects.filter((subject) => subject.role === "match");
+    const homeTeamItems = subjects.filter((subject) => subject.role === "home_team");
+    const awayTeamItems = subjects.filter((subject) => subject.role === "away_team");
+    const tournamentItems = subjects.filter((subject) => subject.role === "tournament");
+    const fallbackItems = subjects.filter(
+      (subject) =>
+        !subject.role ||
+        !["match", "home_team", "away_team", "tournament"].includes(subject.role),
+    );
+
+    const homeTeamTitle = homeTeamItems[0]?.label || "ÉQUIPE 1";
+    const awayTeamTitle = awayTeamItems[0]?.label || "ÉQUIPE 2";
+
+    const groupsList = [
+      { id: "match", title: "ARTICLE DU MATCH", items: matchItems },
+      { id: "home_team", title: homeTeamTitle.toUpperCase(), items: homeTeamItems },
+      { id: "away_team", title: awayTeamTitle.toUpperCase(), items: awayTeamItems },
+      { id: "tournament", title: "COMPÉTITION", items: tournamentItems },
+      { id: "fallback", title: "AUTRES ARTICLES SÉLECTIONNÉS", items: fallbackItems },
+    ];
+
+    return groupsList.filter((g) => g.items.length > 0);
+  }, [subjects]);
+
   return (
     <section className="py-24 px-4 md:px-8 bg-cream-dark border-b border-navy/10">
       <div className="w-full max-w-screen-xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16">
         
         <div className="lg:col-span-4 flex flex-col gap-6">
           <h2 className="font-display text-4xl sm:text-5xl uppercase text-navy">
-PÉRIMÈTRE<br/>SÉLECTIONNÉ
+            PÉRIMÈTRE<br/>SÉLECTIONNÉ
           </h2>
           <p className="font-sans text-lg text-navy/70 leading-relaxed font-light mb-8 lg:mb-0">
-Ces articles constituent le périmètre préparé pour le test. La collecte dédiée n'est pas encore activée et aucune histoire n'a été publiée.
+            Ces articles constituent le périmètre préparé pour le test. La collecte dédiée n'est pas encore activée et aucune histoire n'a été publiée.
           </p>
         </div>
 
@@ -62,33 +88,76 @@ Ces articles constituent le périmètre préparé pour le test. La collecte déd
                   </div>
                 </div>
               </div>
-              <button onClick={() => setExpanded((v) => !v)} className="mt-6 font-mono text-[10px] uppercase font-bold tracking-widest text-blue-electric border-t border-navy/5 pt-4 w-full text-left">{expanded ? "Masquer les articles sélectionnés" : "Voir les articles sélectionnés"}</button>
+              <button 
+                onClick={() => setExpanded((v) => !v)} 
+                className="mt-6 font-mono text-[10px] uppercase font-bold tracking-widest text-blue-electric border-t border-navy/5 pt-4 w-full text-left cursor-pointer hover:text-navy transition-colors"
+              >
+                {expanded ? "Masquer les articles sélectionnés" : "Voir les articles sélectionnés"}
+              </button>
             </div>
           )}
 
           {(expanded || !isLiveMode) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {subjects.map((sub, i) => (
-              <motion.div 
-                key={sub.id}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white border border-navy/10 p-6 flex flex-col gap-3 hover:border-blue-electric transition-colors shadow-sm"
-              >
-                <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-blue-electric">
-                  {sub.type === "match" ? "Page Match" : sub.type === "team" ? "Équipe" : sub.type === "player" ? "Joueur" : "Tournoi"}
+            <div className="flex flex-col gap-8">
+              {groupedSubjects.map((group) => (
+                <div key={group.title} className="flex flex-col gap-4">
+                  <h3 className="font-display text-2xl text-navy tracking-wide border-b border-navy/10 pb-2 uppercase">
+                    {group.title}
+                  </h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    {group.items.map((sub, i) => {
+                      const displayReason = sub.reason && sub.reason !== "ucl_final_2026_rehearsal" ? sub.reason : null;
+                      return (
+                        <motion.div 
+                          key={sub.id}
+                          initial={{ opacity: 1, y: 0 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-white border border-navy/10 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-blue-electric transition-colors shadow-sm"
+                        >
+                          <div className="flex items-start gap-4">
+                            <span className="font-mono text-xs font-bold px-2 py-1 bg-navy/5 text-navy border border-navy/10 min-w-[36px] text-center uppercase rounded-sm">
+                              {sub.languageCode || "—"}
+                            </span>
+                            <div className="flex flex-col gap-1">
+                              {sub.canonicalUrl ? (
+                                <a
+                                  href={sub.canonicalUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-sans text-base font-semibold text-navy hover:text-blue-electric transition-colors leading-snug break-all sm:break-normal"
+                                >
+                                  {sub.pageTitle || sub.label}
+                                </a>
+                              ) : (
+                                <span className="font-sans text-base font-semibold text-navy leading-snug">
+                                  {sub.pageTitle || sub.label}
+                                </span>
+                              )}
+                              {displayReason && (
+                                <span className="font-sans text-xs text-navy/50 font-light">
+                                  {displayReason}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {sub.canonicalUrl && (
+                            <a
+                              href={sub.canonicalUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-mono text-[9px] uppercase tracking-widest text-blue-electric hover:underline flex items-center gap-1 self-start sm:self-center shrink-0"
+                            >
+                              Ouvrir sur Wikipédia ↗
+                            </a>
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </div>
                 </div>
-                <h4 className="font-display text-2xl uppercase tracking-wide text-navy">
-                  {sub.label}
-                </h4>
-                <p className="font-sans text-sm text-navy/60 font-light leading-relaxed mt-auto">
-                  {sub.reason}
-                </p>
-              </motion.div>
-            ))}
-          </div>
+              ))}
+            </div>
           )}
 
           <div className="mt-8 font-mono text-[10px] text-navy/40 uppercase tracking-widest text-center border-t border-navy/5 pt-6">
