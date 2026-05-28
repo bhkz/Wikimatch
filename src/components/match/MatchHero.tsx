@@ -19,7 +19,7 @@ export default function MatchHero({ match }: { match: MatchContext }) {
     subtitle = match.isDemo
       ? "Le dispositif de surveillance est pret. Les modifications Wikimedia rattachees aux articles suivis apparaitront automatiquement apres ingestion."
       : isRehearsalMatch
-      ? "Le périmètre d'observation est préparé. Douze articles en français, anglais et espagnol ont été sélectionnés pour suivre le match, les deux clubs et la compétition. La collecte dédiée sera activée au moment du test."
+      ? "Le périmètre d'observation est préparé. Douze articles en français, anglais et espagnol ont été sélectionnés pour suivre le match, les deux clubs et la compétition. La collecte dédiée n’est pas encore activée. Si le test est armé, les modifications observées apparaîtront ici."
       : "Cette page rassemble les observations vérifiables rattachées aux articles suivis pour ce match.";
   }
 

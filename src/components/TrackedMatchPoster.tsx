@@ -13,7 +13,7 @@ export default function TrackedMatchPoster({
     <section id="matchs" className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10 relative overflow-hidden bg-grid-pattern-light">
       <div className="w-full max-w-screen-2xl mx-auto flex flex-col gap-12">
         <h2 className="font-display text-4xl sm:text-5xl uppercase text-navy">
-          PROCHAIN MATCH SURVEILLÉ
+          MATCH TEST À VENIR
         </h2>
 
         <motion.div 
