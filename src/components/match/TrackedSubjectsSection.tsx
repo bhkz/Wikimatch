@@ -29,21 +29,21 @@ export default function TrackedSubjectsSection({ subjects }: { subjects: MatchTr
         
         <div className="lg:col-span-4 flex flex-col gap-6">
           <h2 className="font-display text-4xl sm:text-5xl uppercase text-navy">
-PÉRIMÈTRE<br/>SURVEILLÉ
+PÉRIMÈTRE<br/>SÉLECTIONNÉ
           </h2>
           <p className="font-sans text-lg text-navy/70 leading-relaxed font-light mb-8 lg:mb-0">
-Ces articles sont surveillés par le pipeline. Leur présence ici ne signifie pas qu’ils ont changé ni qu’une histoire a été publiée.
+Ces articles constituent le périmètre préparé pour le test. La collecte dédiée n'est pas encore activée et aucune histoire n'a été publiée.
           </p>
         </div>
 
         <div className="lg:col-span-8 flex flex-col gap-4">
           {isLiveMode && (
             <div className="bg-white border border-navy/10 p-4 md:p-6 shadow-sm">
-              <div className="font-mono text-[10px] uppercase tracking-widest text-navy/50">ARTICLES OBSERVÉS POUR CE MATCH</div>
+              <div className="font-mono text-[10px] uppercase tracking-widest text-navy/50">ARTICLES SÉLECTIONNÉS POUR CE MATCH</div>
               <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="flex flex-col">
                   <div className="font-display text-3xl text-navy">{subjects.length}</div>
-                  <div className="font-mono text-[10px] uppercase text-navy/50 tracking-wider mt-1">Articles observés</div>
+                  <div className="font-mono text-[10px] uppercase text-navy/50 tracking-wider mt-1">Articles sélectionnés</div>
                 </div>
                 <div className="flex flex-col">
                   <div className="font-display text-2xl md:text-3xl text-navy">
@@ -62,7 +62,7 @@ Ces articles sont surveillés par le pipeline. Leur présence ici ne signifie pa
                   </div>
                 </div>
               </div>
-              <button onClick={() => setExpanded((v) => !v)} className="mt-6 font-mono text-[10px] uppercase font-bold tracking-widest text-blue-electric border-t border-navy/5 pt-4 w-full text-left">{expanded ? "Masquer les articles surveillés" : "Voir les articles surveillés"}</button>
+              <button onClick={() => setExpanded((v) => !v)} className="mt-6 font-mono text-[10px] uppercase font-bold tracking-widest text-blue-electric border-t border-navy/5 pt-4 w-full text-left">{expanded ? "Masquer les articles sélectionnés" : "Voir les articles sélectionnés"}</button>
             </div>
           )}
 

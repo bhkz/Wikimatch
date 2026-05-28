@@ -85,10 +85,7 @@ function HomeNoStoriesHero() {
           <span className="block text-blue-electric">publiée pour l'instant.</span>
         </h1>
         <p className="font-sans text-sm md:text-lg text-cream/80 leading-relaxed font-light max-w-xl">
-          Le pipeline observe les modifications Wikipédia sur les articles
-          suivis. Aucune histoire automatique n'a encore franchi les filtres
-          de publication. Elles apparaîtront ici dès qu'un récit vérifiable
-          sera disponible.
+          WikiMatch est conçu pour observer les modifications Wikipédia liées aux matchs suivis. Aucune histoire n'est publiée sans vérification dans les modifications sources.
         </p>
       </div>
     </section>

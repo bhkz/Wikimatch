@@ -51,15 +51,33 @@ export default function Explorer() {
       <main className="relative pt-[72px]">
         <ExplorerHero />
         <ExplorerIntro />
-        <ExplorerStatsStrip stats={stats} />
-        <ExplorerInternalNav />
-        <EditorialWorldMap anchors={anchors} unmapped={unmapped} />
-        <LanguageEditionsMatrix rows={matrixRows} />
-        <TournamentEditorialTimeline events={timelineEvents} />
-        <StoryTypeLegend legend={legend} />
-        <UnderRadarExplorerFeature />
-        <MapTrustSection />
-        <ExplorerFinalCTA />
+        
+        {anchors.length === 0 ? (
+          <section className="py-24 px-4 md:px-8 bg-navy text-cream border-b border-cream/10 relative overflow-hidden">
+            <div className="w-full max-w-screen-xl mx-auto text-center py-16 flex flex-col items-center gap-6">
+              <div className="w-12 h-[1px] bg-blue-electric/50" />
+              <h2 className="font-display text-4xl sm:text-5xl uppercase tracking-wide text-white">
+                Aucune observation vérifiée publiée pour le moment
+              </h2>
+              <p className="font-sans text-base md:text-lg text-cream/70 leading-relaxed font-light max-w-2xl">
+                L’explorateur affichera les comparaisons et chronologies uniquement lorsqu’elles pourront être reliées à des modifications sources consultables. Le match test PSG — Arsenal est préparé. La collecte dédiée n’est pas encore activée.
+              </p>
+              <div className="w-12 h-[1px] bg-blue-electric/50 mt-2" />
+            </div>
+          </section>
+        ) : (
+          <>
+            <ExplorerStatsStrip stats={stats} />
+            <ExplorerInternalNav />
+            <EditorialWorldMap anchors={anchors} unmapped={unmapped} />
+            <LanguageEditionsMatrix rows={matrixRows} />
+            <TournamentEditorialTimeline events={timelineEvents} />
+            <StoryTypeLegend legend={legend} />
+            <UnderRadarExplorerFeature />
+            <MapTrustSection />
+            <ExplorerFinalCTA />
+          </>
+        )}
       </main>
 
       <SiteFooter />
