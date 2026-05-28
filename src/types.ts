@@ -97,6 +97,9 @@ export type MatchTrackedSubject = {
   label: string;
   reason: string;
   languageCode?: string;
+  pageTitle?: string;
+  canonicalUrl?: string;
+  wikiCode?: string;
 };
 
 export type MatchPublishedStory = {

@@ -66,6 +66,8 @@ export default async function handler(
           id,
           page_title,
           language_code,
+          wiki_code,
+          canonical_url,
           article_type,
           entity:entities!inner (
             id,
@@ -92,7 +94,10 @@ export default async function handler(
         type: row.role === "home_team" || row.role === "away_team" ? "team" : row.role,
         label: entity?.canonical_label || article?.page_title || "",
         reason: row.monitoring_reason || entityTypeLabel(entity?.type),
-        languageCode: article?.language_code || "",
+        languageCode: (article?.language_code || "").toUpperCase(),
+        pageTitle: article?.page_title || "",
+        canonicalUrl: article?.canonical_url || "",
+        wikiCode: article?.wiki_code || "",
       };
     });
 
