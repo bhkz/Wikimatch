@@ -21,8 +21,13 @@ export default async function handler(
 
     const monitoredLanguages = await countDistinctMonitoredLanguages(supabase);
 
+    // The legacy PSG–Arsenal record carries an obsolete broad watchlist.
+    // Only the validated 12-article rehearsal record is public for this test.
+    const CANONICAL_REHEARSAL_MATCH_SLUG = "2026-ucl-final-psg-arsenal";
+    const SUPERSEDED_REHEARSAL_MATCH_SLUG = "final-ucl-2026-psg-arsenal";
+
     // 3. Fetch next match
-    const { data: matchData } = await supabase
+    let { data: matchData } = await supabase
       .from("matches")
       .select(`
         *,
@@ -33,10 +38,28 @@ export default async function handler(
           canonical_label
         )
       `)
-      .not("slug", "like", "demo-%")
-      .order("scheduled_at", { ascending: true })
-      .limit(1)
+      .eq("slug", CANONICAL_REHEARSAL_MATCH_SLUG)
       .maybeSingle();
+
+    if (!matchData) {
+      const { data: genericMatch } = await supabase
+        .from("matches")
+        .select(`
+          *,
+          home:entities!matches_home_team_entity_id_fkey (
+            canonical_label
+          ),
+          away:entities!matches_away_team_entity_id_fkey (
+            canonical_label
+          )
+        `)
+        .not("slug", "like", "demo-%")
+        .neq("slug", SUPERSEDED_REHEARSAL_MATCH_SLUG)
+        .order("scheduled_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      matchData = genericMatch as any;
+    }
 
     // 4. Map stories. Les labels publics viennent de story_type, jamais de
     // "HISTOIRE IA" ou autre attribut éditorial fabriqué.
@@ -84,7 +107,7 @@ export default async function handler(
         ? new Date(matchData.scheduled_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }) + " CEST"
         : "",
       status: matchData.status || "upcoming",
-      trackedPagesLabel: matchData.slug === "2026-ucl-final-psg-arsenal"
+      trackedPagesLabel: matchData.slug === CANONICAL_REHEARSAL_MATCH_SLUG
         ? "Match · Clubs · Compétition (FR · EN · ES)"
         : "Match · Sélections · Joueurs",
       isDemo: false,

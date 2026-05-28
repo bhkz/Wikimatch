@@ -13,14 +13,12 @@ export default function TrackedMatchPoster({
     <section id="matchs" className="py-24 px-4 md:px-8 bg-cream border-b border-navy/10 relative overflow-hidden bg-grid-pattern-light">
       <div className="w-full max-w-screen-2xl mx-auto flex flex-col gap-12">
         <h2 className="font-display text-4xl sm:text-5xl uppercase text-navy">
-          PROCHAIN MATCH SURVEILLÉ
+          MATCH TEST À VENIR
         </h2>
 
         <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           className="relative w-full bg-navy text-cream flex flex-col shadow-2xl overflow-hidden"
         >
           {/* Background Poster Image */}

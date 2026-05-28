@@ -72,10 +72,8 @@ export default function HowItWorksSection() {
           {steps.map((step, index) => (
             <motion.div 
               key={step.num}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: index * 0.15, duration: 0.5 }}
+              initial={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               className="relative z-10 bg-cream-dark p-6 md:p-8 flex flex-col gap-6 md:hover:-translate-y-2 transition-transform duration-300"
             >
               <div className="font-display text-5xl text-blue-electric h-12 flex items-center">
