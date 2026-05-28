@@ -92,6 +92,7 @@ export default async function handler(
       return {
         id: row.id,
         type: row.role === "home_team" || row.role === "away_team" ? "team" : row.role,
+        role: row.role,
         label: entity?.canonical_label || article?.page_title || "",
         reason: row.monitoring_reason || entityTypeLabel(entity?.type),
         languageCode: (article?.language_code || "").toUpperCase(),

@@ -23,39 +23,30 @@ export default function TrackedSubjectsSection({ subjects }: { subjects: MatchTr
     return new Set(keys).size;
   }, [subjects]);
 
-  // Group 12 subjects into 4 distinct understandable subject categories
+  // Group subjects into distinct understandable categories using the actual role from match_watchlist
   const groupedSubjects = useMemo(() => {
-    const groups: Record<string, { title: string; typeLabel: string; items: MatchTrackedSubject[] }> = {
-      match: { title: "ARTICLE DU MATCH", typeLabel: "Page Match", items: [] },
-      psg: { title: "PARIS SAINT-GERMAIN", typeLabel: "Équipe", items: [] },
-      arsenal: { title: "ARSENAL", typeLabel: "Équipe", items: [] },
-      competition: { title: "COMPÉTITION", typeLabel: "Tournoi", items: [] },
-    };
+    const matchItems = subjects.filter((subject) => subject.role === "match");
+    const homeTeamItems = subjects.filter((subject) => subject.role === "home_team");
+    const awayTeamItems = subjects.filter((subject) => subject.role === "away_team");
+    const tournamentItems = subjects.filter((subject) => subject.role === "tournament");
+    const fallbackItems = subjects.filter(
+      (subject) =>
+        !subject.role ||
+        !["match", "home_team", "away_team", "tournament"].includes(subject.role),
+    );
 
-    subjects.forEach((sub) => {
-      const lowerLabel = (sub.label ?? "").toLowerCase();
-      const lowerPageTitle = (sub.pageTitle ?? "").toLowerCase();
-      
-      if (sub.type === "match" || lowerLabel.includes("final") || lowerPageTitle.includes("final")) {
-        groups.match.items.push(sub);
-      } else if (lowerLabel.includes("paris") || lowerPageTitle.includes("paris")) {
-        groups.psg.items.push(sub);
-      } else if (lowerLabel.includes("arsenal") || lowerPageTitle.includes("arsenal")) {
-        groups.arsenal.items.push(sub);
-      } else if (sub.type === "tournament" || lowerLabel.includes("league") || lowerPageTitle.includes("league")) {
-        groups.competition.items.push(sub);
-      } else {
-        // Fallback for sorting players or other items
-        if (sub.type === "team") {
-          if (groups.psg.items.length < 3) groups.psg.items.push(sub);
-          else groups.arsenal.items.push(sub);
-        } else {
-          groups.competition.items.push(sub);
-        }
-      }
-    });
+    const homeTeamTitle = homeTeamItems[0]?.label || "ÉQUIPE 1";
+    const awayTeamTitle = awayTeamItems[0]?.label || "ÉQUIPE 2";
 
-    return Object.values(groups).filter(g => g.items.length > 0);
+    const groupsList = [
+      { id: "match", title: "ARTICLE DU MATCH", items: matchItems },
+      { id: "home_team", title: homeTeamTitle.toUpperCase(), items: homeTeamItems },
+      { id: "away_team", title: awayTeamTitle.toUpperCase(), items: awayTeamItems },
+      { id: "tournament", title: "COMPÉTITION", items: tournamentItems },
+      { id: "fallback", title: "AUTRES ARTICLES SÉLECTIONNÉS", items: fallbackItems },
+    ];
+
+    return groupsList.filter((g) => g.items.length > 0);
   }, [subjects]);
 
   return (
