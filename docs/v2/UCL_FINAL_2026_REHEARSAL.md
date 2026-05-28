@@ -300,6 +300,77 @@ Les règles suivantes s'appliquent durant la répétition :
 - Remarque : les minutes de temps additionnel sont conservées distinctement (par ex. `90+1` ≠ `90+3`) pour éviter de rapprocher deux événements différents.
 
 
+## 8bis. Mode observation automatique sécurisé (Prompt 3B)
+
+Le pipeline `patterns/` sait désormais publier automatiquement une
+**observation niveau 2** conforme à
+[`STORY_PUBLICATION_CONTRACT.md`](./STORY_PUBLICATION_CONTRACT.md) §4 + §7.1,
+sous garde-fous mécaniques. Par défaut, la publication automatique reste
+désactivée.
+
+### Activation cumulative
+
+Trois variables doivent être positionnées simultanément pour qu'une
+publication réelle ait lieu :
+
+```text
+PATTERNS_DRY_RUN=false
+AUTO_PUBLICATION_ENABLED=true
+REHEARSAL_AUTO_PUBLICATION_ENABLED=true
+```
+
+`REHEARSAL_AUTO_PUBLICATION_ENABLED` est un kill switch dédié : repasser
+sa valeur à `false` suffit à stopper toute nouvelle publication sans
+interrompre le worker ni supprimer les traces déjà collectées
+(cf. `patterns/src/config.ts`).
+
+### Ce qui passe en publication automatique
+
+Seules les observations niveau 2 strictement conformes
+(`isLevel2AutoPublishable`, `patterns/src/rehearsalLevel2.ts`) :
+
+- `pattern_type === "language_convergence"` uniquement ;
+- match canonique `2026-ucl-final-psg-arsenal` (match_id résolu via
+  `match_watchlist`) ;
+- `proposition_type ∈ {goal_scored, red_card, qualification}` ;
+- ≥2 langues distinctes parmi `en`, `fr`, `es` ;
+- ≥2 evidence rows avec lien `source_diff_url` ou `source_revision_url`
+  Wikimedia consultable, dont au moins une par langue annoncée ;
+- safety filters passés (PII, vocabulaire interdit, causalité, tension
+  nationale, classement/réaction entre éditions linguistiques).
+
+### Ce qui reste bloqué par construction
+
+`under_radar`, `article_instability`, `language_divergence`, volume seul,
+mono-langue, `match_result` brut, `substitution`, `yellow_card`,
+`lineup_change`, `transfer`, `biographical_fact`, `performance`, `other`,
+`noise`, et toute `language_convergence` dont la claim n'est pas dans la
+whitelist §7.1. Le publisher retourne `manual_review_required` ou
+`level2_not_eligible` et n'écrit rien dans `published_stories`.
+
+### Vérification dry-run hors ligne
+
+```bash
+npx tsx scripts/test-rehearsal-level2.ts
+```
+
+Le script valide 15 cas sans accès à Supabase et sans publication.
+
+### Surface publique
+
+- `GET /api/public/v1/stories/{slug}` retourne 200 uniquement si la story
+  est `published`/`corrected`, non retractée, `published_by_pipeline =
+  auto_template_v1`, `story_type = language_convergence`, rattachée au
+  match canonique et possède ≥2 evidence rows avec lien Wikimedia.
+- `GET /api/public/v1/stories` liste strictement les observations niveau 2
+  conformes (vide par défaut).
+- Page publique `/observation/{slug}` (`src/pages/Level2ObservationDetail.tsx`)
+  affiche badge + titre + observation + limitation + sources cliquables,
+  sans CTA « comparer les versions » (interdit tant qu'aucun
+  `public_trace_excerpts.safe_to_publish=true` n'existe).
+
+---
+
 ## 9. Fichiers du dispositif
 
 | Fichier | Rôle |

@@ -56,6 +56,25 @@ const FORBIDDEN_NATIONAL_TENSION: RegExp[] = [
   /\b(les)\s+(Français|Anglais|Espagnols|Allemands|Italiens|Portugais|Marocains|Argentins|Brésiliens|Japonais|Mexicains|Canadiens|Suisses|Belges|Néerlandais)\b/i,
 ];
 
+// Classement / réaction entre éditions linguistiques (STORY_PUBLICATION_CONTRACT.md §8.2).
+// WikiMatch ne doit jamais publier de phrase suggérant qu'une édition est plus rapide,
+// en retard, "réagit", "ignore" ou "garde le silence" — c'est interpréter les langues
+// comme des opinions publiques, ce que les données ne soutiennent pas.
+const FORBIDDEN_LANGUAGE_RANKING: RegExp[] = [
+  /\bplus rapide\b/i,
+  /\ben retard\b/i,
+  /\ben avance\b/i,
+  /\bsilence\b/i,
+  /\bignore(?:nt|r|ent|s)?\b/i,
+  /\bréaction\b/i,
+  /\bréagi(?:t|ssent|r)\b/i,
+  // JavaScript `\b` is ASCII-only, so a trailing `\b` after `é` never matches.
+  // Use a negative lookahead on the next letter class instead.
+  /\bcommunaut[ée]s?(?![a-zA-ZÀ-ÿ])/i,
+  /\bpublic\s+(?:fran[çc]ais|anglais|espagnol|allemand|italien|portugais)\b/i,
+  /\bfans?\s+de\s+(?:la\s+)?(?:France|Angleterre|Espagne|Allemagne|Italie|Portugal)\b/i,
+];
+
 function checkPiiOnString(text: string, fieldName: string): SafetyCheckResult {
   for (const p of PII_PATTERNS) {
     if (p.rx.test(text)) {
@@ -123,6 +142,19 @@ function checkNationalTension(text: string, fieldName: string): SafetyCheckResul
   return { passed: true };
 }
 
+function checkLanguageRanking(text: string, fieldName: string): SafetyCheckResult {
+  for (const rx of FORBIDDEN_LANGUAGE_RANKING) {
+    if (rx.test(text)) {
+      return {
+        passed: false,
+        reason: "language_ranking_forbidden",
+        details: { field: fieldName, match: text.match(rx)?.[0] },
+      };
+    }
+  }
+  return { passed: true };
+}
+
 function checkLength(text: string, fieldName: string): SafetyCheckResult {
   if (text.length > PUBLIC_FIELD_MAX_CHARS) {
     return {
@@ -141,6 +173,7 @@ const FIELD_CHECKS: ((text: string, name: string) => SafetyCheckResult)[] = [
   checkForbiddenVocab,
   checkCausality,
   checkNationalTension,
+  checkLanguageRanking,
 ];
 
 export function runSafetyChecks(output: TemplateOutput): SafetyCheckResult {

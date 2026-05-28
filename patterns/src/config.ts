@@ -8,6 +8,16 @@ export const PATTERNS_POLL_INTERVAL_MS = Number(
 // Safety gate: automatic public story publication is opt-in only. It must stay false during rehearsal.
 export const AUTO_PUBLICATION_ENABLED = process.env.AUTO_PUBLICATION_ENABLED === "true";
 
+// Rehearsal-only kill switch. Even when AUTO_PUBLICATION_ENABLED=true, Level 2
+// observations (docs/v2/STORY_PUBLICATION_CONTRACT.md §4) only reach published_stories
+// if REHEARSAL_AUTO_PUBLICATION_ENABLED=true as well. Setting this back to false
+// stops every new publication without interrupting the worker or analyzer.
+export const REHEARSAL_AUTO_PUBLICATION_ENABLED =
+  process.env.REHEARSAL_AUTO_PUBLICATION_ENABLED === "true";
+
+// Canonical rehearsal match. Level 2 auto-publication is restricted to this slug.
+export const CANONICAL_REHEARSAL_MATCH_SLUG = "2026-ucl-final-psg-arsenal";
+
 // Fenêtres temporelles (minutes) — bornées pour rester conservatrices.
 export const INSTABILITY_WINDOW_MIN = Number(
   process.env.PATTERNS_INSTABILITY_WINDOW_MIN ?? 30,

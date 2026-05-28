@@ -130,8 +130,13 @@ function strictConvergenceClaimKey(p: PropositionRow): string | null {
  * Cette fenêtre sert uniquement à relier prudemment une observation documentaire
  * à un match surveillé. Elle ne prouve aucune causalité.
  * En cas de plusieurs matchs possibles, aucun rattachement n'est effectué.
+ *
+ * Retourne `{ id, slug }` ou `null`. Le slug est indispensable pour valider
+ * qu'une observation niveau 2 pointe bien vers le match canonique du rehearsal.
  */
-async function resolveUniqueMatchIdForRows(rows: PropositionRow[]): Promise<string | null> {
+async function resolveUniqueMatchForRows(
+  rows: PropositionRow[],
+): Promise<{ id: string; slug: string } | null> {
   const articleIds = [...new Set(rows.map((row) => row.trace.article_id))];
   if (articleIds.length === 0) return null;
 
@@ -194,7 +199,19 @@ async function resolveUniqueMatchIdForRows(rows: PropositionRow[]): Promise<stri
     return null;
   }
 
-  return candidates[0].id;
+  return { id: candidates[0].id, slug: candidates[0].slug };
+}
+
+function evidenceRowFromProposition(p: PropositionRow): import("./types.js").EvidenceRow {
+  return {
+    trace_id: p.trace.id,
+    language_code: p.trace.article.language_code,
+    page_title: p.trace.article.page_title,
+    revision_timestamp: p.trace.revision_timestamp,
+    source_diff_url: p.trace.source_diff_url ?? null,
+    source_revision_url: p.trace.source_revision_url ?? null,
+    proposition_type: p.proposition_type,
+  };
 }
 
 function summarizeProposition(p: PropositionRow): string {
@@ -251,6 +268,7 @@ async function fetchRecentPropositions(windowMinutes: number): Promise<Propositi
         revision_timestamp,
         size_delta,
         source_revision_url,
+        source_diff_url,
         article:wiki_articles!inner (
           id,
           entity_id,
@@ -293,14 +311,17 @@ async function detectInstability(rows: PropositionRow[]): Promise<DetectedPatter
     const article = group[0].trace.article;
     const first = group[0];
     const last = group[group.length - 1];
-    const matchId = await resolveUniqueMatchIdForRows(group);
+    const match = await resolveUniqueMatchForRows(group);
     out.push({
       pattern_type: "article_instability",
       proposition_ids: group.map((g) => g.id),
       trace_ids: group.map((g) => g.trace.id),
       entity_id: article.entity_id,
-      match_id: matchId,
+      match_id: match?.id ?? null,
+      match_slug: match?.slug ?? null,
       article_id: articleId,
+      proposition_type: first.proposition_type,
+      evidenceRows: group.map(evidenceRowFromProposition),
       templateContext: {
         language_codes: [article.language_code],
         language_codes_substantive: [article.language_code],
@@ -345,14 +366,17 @@ async function detectConvergence(rows: PropositionRow[]): Promise<DetectedPatter
     const article = group[0].trace.article;
     const first = group[0];
     const last = group[group.length - 1];
-    const matchId = await resolveUniqueMatchIdForRows(group);
+    const match = await resolveUniqueMatchForRows(group);
     out.push({
       pattern_type: "language_convergence",
       proposition_ids: group.map((g) => g.id),
       trace_ids: group.map((g) => g.trace.id),
       entity_id: entityId,
-      match_id: matchId,
+      match_id: match?.id ?? null,
+      match_slug: match?.slug ?? null,
       article_id: null,
+      proposition_type: first.proposition_type,
+      evidenceRows: group.map(evidenceRowFromProposition),
       templateContext: {
         language_codes: Array.from(distinctLangs),
         language_codes_substantive: Array.from(distinctLangs),
@@ -403,14 +427,17 @@ async function detectUnderRadar(rows: PropositionRow[]): Promise<DetectedPattern
     const article = group[0].trace.article;
     const first = group[0];
     const last = group[group.length - 1];
-    const matchId = await resolveUniqueMatchIdForRows(group);
+    const match = await resolveUniqueMatchForRows(group);
     out.push({
       pattern_type: "under_radar",
       proposition_ids: group.map((g) => g.id),
       trace_ids: group.map((g) => g.trace.id),
       entity_id: entityId,
-      match_id: matchId,
+      match_id: match?.id ?? null,
+      match_slug: match?.slug ?? null,
       article_id: article.id,
+      proposition_type: first.proposition_type,
+      evidenceRows: group.map(evidenceRowFromProposition),
       templateContext: {
         language_codes: [presentLang, ...absentLangs],
         language_codes_substantive: [presentLang],

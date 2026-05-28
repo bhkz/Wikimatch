@@ -23,6 +23,7 @@ export interface PropositionRow {
     revision_timestamp: string;
     size_delta: number | null;
     source_revision_url: string;
+    source_diff_url: string | null;
     article: {
       id: string;
       entity_id: string;
@@ -34,13 +35,31 @@ export interface PropositionRow {
   };
 }
 
+/**
+ * Evidence row carried alongside a DetectedPattern so the publisher can
+ * write meaningful public_label entries (language · page · timestamp)
+ * and so the Level 2 validator can check sources exist per language.
+ */
+export interface EvidenceRow {
+  trace_id: string;
+  language_code: string;
+  page_title: string;
+  revision_timestamp: string;
+  source_diff_url: string | null;
+  source_revision_url: string | null;
+  proposition_type: string;
+}
+
 export interface DetectedPattern {
   pattern_type: PatternType;
   proposition_ids: string[];
   trace_ids: string[];
   entity_id: string | null;
   match_id: string | null;
+  match_slug: string | null;
   article_id: string | null;
+  proposition_type: string | null;
+  evidenceRows: EvidenceRow[];
   templateContext: TemplateContext;
 }
 
@@ -60,6 +79,9 @@ export interface TemplateContext {
   entity_canonical_label?: string;
   article_canonical_url?: string;
   size_delta_pattern?: string;
+  // Niveau 2 rehearsal (STORY_PUBLICATION_CONTRACT.md §7.1) — type whitelisté
+  // utilisé par le template "observation automatique" pour produire un titre sobre.
+  level2_proposition_type?: string;
 }
 
 export interface TemplateOutput {

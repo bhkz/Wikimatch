@@ -28,10 +28,15 @@ export default function ArchiveStoryCard({ story, isLarge = false }: { story: St
     >
       <Link to={destination} className="flex flex-col h-full">
         {/* Top bar / Category */}
-        <div className={`p-4 border-b border-navy/10 flex justify-between items-start ${isRecap ? 'bg-navy text-white' : 'bg-navy/5'}`}>
+        <div className={`p-4 border-b border-navy/10 flex justify-between items-start gap-2 flex-wrap ${isRecap ? 'bg-navy text-white' : 'bg-navy/5'}`}>
            <span className="font-mono text-[10px] uppercase font-bold tracking-widest px-2 py-1 bg-white text-navy border border-navy/10">
              {story.categoryLabel}
            </span>
+           {story.badgeLabel && (
+             <span className="font-mono text-[10px] uppercase font-bold tracking-widest px-2 py-1 bg-blue-electric text-white">
+               {story.badgeLabel}
+             </span>
+           )}
        </div>
 
         {/* Content Body */}

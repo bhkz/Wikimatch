@@ -23,6 +23,8 @@ const stats = {
   template_missing: 0,
   dry_run: 0,
   publication_disabled: 0,
+  rehearsal_disabled: 0,
+  level2_not_eligible: 0,
   dry_run_duplicates_skipped: 0,
   errors: 0,
   manual_review_required: 0,
@@ -75,6 +77,13 @@ async function runOnce(): Promise<void> {
           break;
         case "publication_disabled":
           stats.publication_disabled += 1;
+          break;
+        case "rehearsal_disabled":
+          stats.rehearsal_disabled += 1;
+          break;
+        case "level2_not_eligible":
+          stats.level2_not_eligible += 1;
+          console.log(`[patterns] level2 not eligible: ${pattern.pattern_type} reason=${r.reason}`);
           break;
         case "error":
           stats.errors += 1;

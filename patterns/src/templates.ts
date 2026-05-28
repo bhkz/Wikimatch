@@ -100,6 +100,50 @@ function languageConvergenceTemplate(ctx: TemplateContext): TemplateOutput {
   };
 }
 
+/**
+ * Template "observation automatique niveau 2" pour le rehearsal.
+ *
+ * Cf. STORY_PUBLICATION_CONTRACT.md §8.1. Texte délibérément sobre, sans
+ * classement entre langues, sans qualificatif émotionnel, sans attribution
+ * communautaire. Le badge "OBSERVATION AUTOMATIQUE · SOURCES CONSULTABLES"
+ * est ajouté côté API publique à partir de published_by_pipeline.
+ */
+function level2AutoObservationTemplate(ctx: TemplateContext): TemplateOutput {
+  const codes = ctx.language_codes_substantive.length
+    ? ctx.language_codes_substantive
+    : ctx.language_codes;
+  const upperCodes = codes.map((c) => c.toUpperCase());
+  const propType = ctx.level2_proposition_type ?? "goal_scored";
+  const titleByType: Record<string, string> = {
+    goal_scored: "Un but apparaît dans plusieurs éditions Wikipédia suivies",
+    red_card: "Un carton rouge apparaît dans plusieurs éditions Wikipédia suivies",
+    qualification: "Une qualification apparaît dans plusieurs éditions Wikipédia suivies",
+  };
+  const title = titleByType[propType] ?? "Un fait apparaît dans plusieurs éditions Wikipédia suivies";
+  const excerpt =
+    "Le même fait documentaire a été détecté dans plusieurs éditions Wikipédia rattachées au match PSG — Arsenal.";
+  const observation =
+    `WikiMatch a détecté ce fait dans les éditions ${uppercaseLangList(codes)} parmi les articles sélectionnés pour ce match.`;
+  const interpretation =
+    "Cette observation décrit l'apparition du fait dans les pages Wikipédia suivies.";
+  const limitation =
+    "Cette observation décrit l'apparition du fait dans les pages Wikipédia suivies. Elle ne permet pas de conclure à l'attention des publics, à une hiérarchie entre langues, ni à une différence d'interprétation.";
+  return {
+    title,
+    excerpt,
+    observation_text: observation,
+    interpretation_text: interpretation,
+    limitation_text: limitation,
+    languages: upperCodes,
+    source_count: codes.length,
+    slug_seed: `observation-${propType.replace(/_/g, "-")}-${upperCodes.map((c) => c.toLowerCase()).join("-")}`,
+  };
+}
+
+export function generateLevel2Observation(ctx: TemplateContext): TemplateOutput {
+  return level2AutoObservationTemplate(ctx);
+}
+
 function underRadarTemplate(ctx: TemplateContext): TemplateOutput {
   const presentCode = ctx.language_codes_substantive[0] ?? ctx.language_codes[0];
   const absentCodes = ctx.language_codes_absent ?? [];

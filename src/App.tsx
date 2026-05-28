@@ -5,6 +5,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import StoryDetail from "./pages/StoryDetail";
+import Level2ObservationDetail from "./pages/Level2ObservationDetail";
 import MatchDetail from "./pages/MatchDetail";
 import StoriesArchive from "./pages/StoriesArchive";
 import MatchesCalendar from "./pages/MatchesCalendar";
@@ -24,6 +25,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/story/:slug" element={<StoryDetail />} />
+        <Route path="/observation/:slug" element={<Level2ObservationDetail />} />
         <Route path="/match/:slug" element={<MatchDetail />} />
         <Route path="/stories" element={<StoriesArchive />} />
         <Route path="/matches" element={<MatchesCalendar />} />

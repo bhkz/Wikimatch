@@ -77,18 +77,11 @@ export class LivePublicDataProvider implements PublicDataProvider {
   }
 
   async getStoriesArchivePageData(): Promise<StoriesArchivePageData> {
-    const data = await this.request<StoriesArchivePageData>("/stories");
-    return {
-      ...data,
-      stats: {
-        ...data.stats,
-        storyCount: 0,
-        sourceCount: 0,
-      },
-      featured: null,
-      stories: [],
-      collection: null,
-    };
+    // The API already filters strictly on Level 2 conforming observations
+    // (cf. docs/v2/STORY_PUBLICATION_CONTRACT.md §7.1). The wrapper used to
+    // zero out the list while the API still returned demo data; now that the
+    // endpoint is contract-conformant we pass through what it returns.
+    return this.request<StoriesArchivePageData>("/stories");
   }
 
   async getExplorerPageData(): Promise<ExplorerPageData> {

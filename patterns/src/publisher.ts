@@ -5,13 +5,29 @@
  *
  * Toute story arrive ici avec un TemplateOutput déjà généré par template
  * borné. La copy publique n'est jamais touchée par une IA.
+ *
+ * 2026-05-28 (Prompt 3B) — la publication automatique pendant le rehearsal
+ * PSG — Arsenal est limitée aux observations niveau 2 (cf.
+ * docs/v2/STORY_PUBLICATION_CONTRACT.md §4 + §7.1). Tous les autres patterns
+ * sont bloqués par construction même si AUTO_PUBLICATION_ENABLED=true.
  */
 
-import { AUTO_PUBLICATION_ENABLED, PATTERNS_DRY_RUN, TEMPLATE_VERSION } from "./config.js";
+import {
+  AUTO_PUBLICATION_ENABLED,
+  PATTERNS_DRY_RUN,
+  REHEARSAL_AUTO_PUBLICATION_ENABLED,
+  TEMPLATE_VERSION,
+} from "./config.js";
+import {
+  ALLOWED_AUTO_PROPOSITION_TYPES,
+  isForbiddenPatternType,
+  isForbiddenPropositionType,
+  isLevel2AutoPublishable,
+} from "./rehearsalLevel2.js";
 import { runSafetyChecks } from "./safety.js";
 import { supabase } from "./supabase.js";
-import { generate, methodologyVersion } from "./templates.js";
-import type { DetectedPattern } from "./types.js";
+import { generate, generateLevel2Observation, methodologyVersion } from "./templates.js";
+import type { DetectedPattern, EvidenceRow } from "./types.js";
 
 interface PublishResult {
   status:
@@ -22,7 +38,9 @@ interface PublishResult {
     | "already_published"
     | "error"
     | "publication_disabled"
-    | "manual_review_required";
+    | "manual_review_required"
+    | "rehearsal_disabled"
+    | "level2_not_eligible";
   storyId?: string;
   reason?: string;
 }
@@ -42,60 +60,126 @@ async function isAlreadyPublished(pattern: DetectedPattern): Promise<boolean> {
   });
 }
 
+function formatEvidenceLabel(row: EvidenceRow): string {
+  const lang = (row.language_code || "").toUpperCase();
+  const title = row.page_title || "Article suivi";
+  let when = "";
+  try {
+    const d = new Date(row.revision_timestamp);
+    if (!Number.isNaN(d.getTime())) {
+      when = `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")} UTC`;
+    }
+  } catch {
+    when = "";
+  }
+  const head = [lang, title].filter(Boolean).join(" · ");
+  return when ? `${head} · ${when}` : head;
+}
+
+/**
+ * Blocage par construction. Bloque par défaut TOUT pattern qui n'est pas
+ * une observation niveau 2 conforme. Le publisher préfère refuser
+ * publication que prendre un risque éditorial pendant le rehearsal.
+ */
+function manualReviewReason(pat: DetectedPattern): string | null {
+  if (isForbiddenPatternType(pat.pattern_type)) {
+    return `Pattern type ${pat.pattern_type} is never auto-publishable as a public story`;
+  }
+  if (pat.pattern_type !== "language_convergence") {
+    return `Pattern type ${pat.pattern_type} is not auto-publishable during the rehearsal`;
+  }
+  if (pat.match_id === null || pat.match_id === undefined) {
+    return "Equivalent update is not linked to one unambiguous watched match";
+  }
+  if (isForbiddenPropositionType(pat.proposition_type)) {
+    return `proposition_type ${pat.proposition_type ?? "null"} is explicitly blocked (substitution/yellow_card/match_result/lineup_change/transfer/biographical_fact/performance/other/noise)`;
+  }
+  if (!pat.proposition_type || !ALLOWED_AUTO_PROPOSITION_TYPES.has(pat.proposition_type)) {
+    return `proposition_type ${pat.proposition_type ?? "null"} is not in the rehearsal whitelist (goal_scored, red_card, qualification)`;
+  }
+  return null;
+}
+
 export async function publish(pattern: DetectedPattern): Promise<PublishResult> {
-  const tmpl = generate(pattern.pattern_type, pattern.templateContext);
+  // 1. Évaluation niveau 2 (purement fonctionnelle, sans accès DB).
+  const level2 = isLevel2AutoPublishable(pattern);
+
+  // 2. Template approprié : niveau 2 si éligible, sinon fallback historique.
+  const tmpl = level2.eligible
+    ? generateLevel2Observation({
+        ...pattern.templateContext,
+        level2_proposition_type: pattern.proposition_type ?? undefined,
+        language_codes: level2.languages,
+        language_codes_substantive: level2.languages,
+      })
+    : generate(pattern.pattern_type, pattern.templateContext);
+
   if (!tmpl) return { status: "template_missing", reason: pattern.pattern_type };
 
   const safety = runSafetyChecks(tmpl);
+  const reviewReason = manualReviewReason(pattern);
 
-  function manualReviewReason(pat: DetectedPattern): string | null {
-    if (pat.pattern_type === "article_instability")
-      return "Pattern requires manual diff verification before any instability claim";
-    if (pat.pattern_type === "under_radar")
-      return "Pattern requires manual article-content verification before any absence/asymmetry claim";
-    if (pat.pattern_type === "language_convergence" && (pat.match_id === null || pat.match_id === undefined))
-      return "Equivalent update is not linked to one unambiguous watched match";
-    return null;
-  }
-
-  // Dry-run : expose dans les logs ce que le moteur aurait tenté de publier, sans aucune écriture en base.
+  // 3. Dry-run : journalise sans rien écrire en base.
   if (PATTERNS_DRY_RUN) {
-    const reviewReason = manualReviewReason(pattern);
-    console.log(`[publisher] DRY_RUN_CANDIDATE ${JSON.stringify({
-      pattern_type: pattern.pattern_type,
-      safety_passed: safety.passed,
-      safety_reason: safety.reason ?? null,
-      title: tmpl.title,
-      excerpt: tmpl.excerpt,
-      observation_text: tmpl.observation_text,
-      interpretation_text: tmpl.interpretation_text,
-      limitation_text: tmpl.limitation_text,
-      languages: tmpl.languages,
-      source_count: tmpl.source_count,
-      match_id: pattern.match_id,
-      automatic_publication_eligible: safety.passed && reviewReason === null,
-      manual_review_reason: reviewReason,
-    })}`);
+    console.log(
+      `[publisher] DRY_RUN_CANDIDATE ${JSON.stringify({
+        pattern_type: pattern.pattern_type,
+        proposition_type: pattern.proposition_type,
+        match_slug: pattern.match_slug,
+        safety_passed: safety.passed,
+        safety_reason: safety.reason ?? null,
+        title: tmpl.title,
+        excerpt: tmpl.excerpt,
+        observation_text: tmpl.observation_text,
+        interpretation_text: tmpl.interpretation_text,
+        limitation_text: tmpl.limitation_text,
+        languages: tmpl.languages,
+        source_count: tmpl.source_count,
+        match_id: pattern.match_id,
+        level2_eligible: level2.eligible,
+        level2_reason: level2.eligible === false ? level2.reason : null,
+        manual_review_reason: reviewReason,
+        automatic_publication_eligible:
+          safety.passed && reviewReason === null && level2.eligible,
+      })}`,
+    );
     return { status: "dry_run", reason: safety.passed ? undefined : safety.reason };
   }
 
-  // Methodological barrier: block patterns that require manual review
-  const reviewReason = manualReviewReason(pattern);
+  // 4. Blocage explicite signaux interdits.
   if (reviewReason) {
     console.log(
-      `[publisher] MANUAL_REVIEW_REQUIRED — pattern=${pattern.pattern_type} reason=${reviewReason}`
+      `[publisher] MANUAL_REVIEW_REQUIRED — pattern=${pattern.pattern_type} reason=${reviewReason}`,
     );
-    return {
-      status: "manual_review_required",
-      reason: reviewReason,
-    };
+    return { status: "manual_review_required", reason: reviewReason };
   }
 
+  // 5. Le pattern a passé manualReviewReason : il revendique le niveau 2.
+  //    Si la validation niveau 2 échoue, on refuse.
+  if (level2.eligible === false) {
+    console.log(
+      `[publisher] LEVEL2_NOT_ELIGIBLE — pattern=${pattern.pattern_type} reason=${level2.reason}`,
+    );
+    return { status: "level2_not_eligible", reason: level2.reason };
+  }
+
+  // 6. Verrou global.
   if (!AUTO_PUBLICATION_ENABLED) {
     console.log(
-      `[publisher] PUBLICATION DISABLED — pattern detected but AUTO_PUBLICATION_ENABLED is not true`
+      `[publisher] PUBLICATION DISABLED — Level 2 observation detected but AUTO_PUBLICATION_ENABLED is not true`,
     );
     return { status: "publication_disabled", reason: "AUTO_PUBLICATION_ENABLED is not true" };
+  }
+
+  // 7. Kill switch rehearsal — bloque toute publication sans interrompre le worker.
+  if (!REHEARSAL_AUTO_PUBLICATION_ENABLED) {
+    console.log(
+      `[publisher] REHEARSAL DISABLED — Level 2 observation detected but REHEARSAL_AUTO_PUBLICATION_ENABLED is not true`,
+    );
+    return {
+      status: "rehearsal_disabled",
+      reason: "REHEARSAL_AUTO_PUBLICATION_ENABLED is not true",
+    };
   }
 
   if (await isAlreadyPublished(pattern)) {
@@ -163,12 +247,14 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
     published_story_id: storyId,
   });
 
-  // 3. Insert story_evidence pour chaque trace
-  const evidenceRows = pattern.trace_ids.map((tid, idx) => ({
+  // 3. Insert story_evidence — un label lisible par evidence (langue, page, heure)
+  //    pour que le frontend public puisse afficher la liste des sources sans
+  //    requête supplémentaire (STORY_PUBLICATION_CONTRACT.md §8.1).
+  const evidenceRows = pattern.evidenceRows.map((row, idx) => ({
     story_id: storyId,
-    trace_id: tid,
+    trace_id: row.trace_id,
     evidence_type: "trace" as const,
-    public_label: `Trace ${idx + 1}`,
+    public_label: formatEvidenceLabel(row),
     display_order: idx,
   }));
   if (evidenceRows.length) {
@@ -183,7 +269,7 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
     .in("id", pattern.trace_ids);
 
   console.log(
-    `[publisher] ✅ published pattern=${pattern.pattern_type} story_id=${storyId} slug=${slug}`,
+    `[publisher] ✅ published Level 2 observation pattern=${pattern.pattern_type} prop=${pattern.proposition_type} story_id=${storyId} slug=${slug}`,
   );
   return { status: "published", storyId };
 }
