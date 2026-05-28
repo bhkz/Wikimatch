@@ -26,8 +26,7 @@ export default function StoriesArchiveHero() {
         <span>01 UN FAIT ENTRE</span>
         <span>02 PLUSIEURS ÉDITIONS</span>
         <span>03 ARTICLE INSTABLE</span>
-        <span>04 SOUS LE RADAR</span>
-        <span>05 RÉCAP MATCH</span>
+        <span>04 RÉCAP MATCH</span>
       </div>
 
       <div className="relative z-10 w-full max-w-screen-2xl mx-auto flex flex-col gap-8 md:gap-16">
@@ -55,7 +54,7 @@ export default function StoriesArchiveHero() {
               transition={{ delay: 0.8, duration: 0.8 }}
               className="max-w-xl font-sans text-lg md:text-xl text-cream/70 leading-relaxed font-light"
             >
-              Résultats ajoutés, versions divergentes, articles instables, sujets sous le radar : WikiMatch rassemble les histoires documentées qui méritent réellement d'être racontées.
+              Résultats ajoutés, versions divergentes, articles instables, récits de match : WikiMatch rassemble les histoires documentées qui méritent réellement d'être racontées.
             </motion.p>
             <motion.div 
               initial={{ opacity: 0 }}

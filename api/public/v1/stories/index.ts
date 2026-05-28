@@ -32,7 +32,6 @@ export default async function handler(
       { id: "fact_entry", label: "Un fait entre", type: "fact_entry" },
       { id: "language_comparison", label: "Plusieurs éditions" },
       { id: "article_instability", label: "Article instable", type: "article_instability" },
-      { id: "under_radar", label: "Sous le radar", type: "under_radar" },
       { id: "match_recap", label: "Récaps match", type: "match_recap" },
     ];
 

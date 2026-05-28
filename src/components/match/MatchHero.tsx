@@ -14,7 +14,9 @@ export default function MatchHero({ match }: { match: MatchContext }) {
     subtitle = "WikiMatch observe les articles suivis. Aucune nouvelle histoire n'est publiee tant qu'un changement substantiel n'est pas verifie.";
   } else if (match.state === "pre_match") {
     title = "COMMENT CE MATCH\nSERA SUIVI\nSUR WIKIPEDIA.";
-    subtitle = "Le dispositif de surveillance est pret. Les modifications Wikimedia rattachees aux articles suivis apparaitront automatiquement apres ingestion.";
+    subtitle = match.isDemo
+      ? "Le dispositif de surveillance est pret. Les modifications Wikimedia rattachees aux articles suivis apparaitront automatiquement apres ingestion."
+      : "Le périmètre d'observation est préparé. Douze articles en français, anglais et espagnol ont été sélectionnés pour suivre le match, les deux clubs et la compétition. La collecte dédiée sera activée au moment du test.";
   }
 
   return (
@@ -39,7 +41,11 @@ export default function MatchHero({ match }: { match: MatchContext }) {
           <div className="flex flex-col gap-4 items-start">
             <MatchDemoBadge />
             <div className="font-mono text-[10px] sm:text-xs text-blue-electric uppercase tracking-widest font-bold">
-              DOSSIER MATCH · COUPE DU MONDE 2026 {match.state === "live" && "· EN COURS"} {match.state === "pre_match" && "· A VENIR"}
+              {match.isDemo ? (
+                `DOSSIER MATCH · COUPE DU MONDE 2026 ${match.state === "live" ? "· EN COURS" : match.state === "pre_match" ? "· A VENIR" : ""}`
+              ) : (
+                `MATCH TEST · ${match.competitionLabel?.toUpperCase() || "UEFA CHAMPIONS LEAGUE 2025/26"} ${match.state === "live" ? "· EN COURS" : match.state === "pre_match" ? "· À VENIR · COLLECTE NON ACTIVÉE" : ""}`
+              )}
             </div>
           </div>
 

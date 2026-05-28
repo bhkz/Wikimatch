@@ -77,13 +77,13 @@ export default async function handler(
       ],
       stage: matchData.stage_label || "Phase de groupes",
       dateLabel: matchData.scheduled_at
-        ? new Date(matchData.scheduled_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }).toUpperCase()
+        ? new Date(matchData.scheduled_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" }).toUpperCase()
         : "DATE À CONFIRMER",
       timeLabel: matchData.scheduled_at
-        ? new Date(matchData.scheduled_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+        ? new Date(matchData.scheduled_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }) + " CEST"
         : "",
       status: matchData.status || "upcoming",
-      trackedPagesLabel: "Match · Sélections · Joueurs",
+      trackedPagesLabel: "Match · Clubs · Compétition (FR · EN · ES)",
       isDemo: false,
     } : null;
 

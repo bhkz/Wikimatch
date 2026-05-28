@@ -40,20 +40,32 @@ export default function ObservatoryTeaser({
             <span className="font-mono text-xs text-cream/40 uppercase">Aperçu du système</span>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            <div className="flex flex-col gap-2">
-              <span className="font-display text-4xl sm:text-5xl">{observatoryData.capturedEdits.toLocaleString('fr-FR')}</span>
-              <span className="font-mono text-[10px] text-cream/50 uppercase tracking-widest">Modifications observées</span>
+          {!isDemoMode ? (
+            <div className="flex flex-col gap-4 bg-[#0B1021] border border-cream/10 p-6 rounded shadow-inner text-left">
+              <div className="font-mono text-[10px] text-cream/40 uppercase tracking-widest">État du système</div>
+              <div className="font-display text-2xl text-cream uppercase">
+                Collecte dédiée en attente d'activation
+              </div>
+              <p className="font-sans text-sm text-cream/70 leading-relaxed font-light">
+                Le dispositif de surveillance est configuré pour le match de répétition. Aucune observation ou histoire n'est publiée à ce stade.
+              </p>
             </div>
-            <div className="flex flex-col gap-2">
-              <span className="font-display text-4xl sm:text-5xl">{observatoryData.monitoredLanguages}</span>
-              <span className="font-mono text-[10px] text-cream/50 uppercase tracking-widest">Éditions suivies</span>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="flex flex-col gap-2">
+                <span className="font-display text-4xl sm:text-5xl">{observatoryData.capturedEdits.toLocaleString('fr-FR')}</span>
+                <span className="font-mono text-[10px] text-cream/50 uppercase tracking-widest">Modifications observées</span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <span className="font-display text-4xl sm:text-5xl">{observatoryData.monitoredLanguages}</span>
+                <span className="font-mono text-[10px] text-cream/50 uppercase tracking-widest">Éditions suivies</span>
+              </div>
+              <div className="flex flex-col gap-2 col-span-2 md:col-span-1 border-t border-cream/10 md:border-none pt-4 md:pt-0">
+                <span className="font-display text-4xl sm:text-5xl text-blue-electric">{observatoryData.publishedStories}</span>
+                <span className="font-mono text-[10px] text-blue-electric/70 uppercase tracking-widest">Histoires publiables identifiées</span>
+              </div>
             </div>
-            <div className="flex flex-col gap-2 col-span-2 md:col-span-1 border-t border-cream/10 md:border-none pt-4 md:pt-0">
-              <span className="font-display text-4xl sm:text-5xl text-blue-electric">{observatoryData.publishedStories}</span>
-              <span className="font-mono text-[10px] text-blue-electric/70 uppercase tracking-widest">Histoires publiables identifiées</span>
-            </div>
-          </div>
+          )}
 
           {/* Flux brut récent : maquette uniquement en mode démo.
               Les vraies traces apparaissent sur /observatoire. */}

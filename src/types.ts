@@ -95,6 +95,7 @@ export type MatchTrackedSubject = {
   type: "match" | "team" | "player" | "coach" | "tournament";
   label: string;
   reason: string;
+  languageCode?: string;
 };
 
 export type MatchPublishedStory = {

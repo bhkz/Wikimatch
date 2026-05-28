@@ -51,7 +51,6 @@ export default function EditorialWorldMap({
           <FilterChip label="Un fait entre" active={activeFilter === "fact_entry"} onClick={() => setActiveFilter("fact_entry")} />
           <FilterChip label="Convergence" active={activeFilter === "language_convergence"} onClick={() => setActiveFilter("language_convergence")} />
           <FilterChip label="Divergence" active={activeFilter === "language_divergence"} onClick={() => setActiveFilter("language_divergence")} />
-          <FilterChip label="Sous le radar" active={activeFilter === "under_radar"} onClick={() => setActiveFilter("under_radar")} />
         </div>
 
         {filteredAnchors.length === 0 ? (

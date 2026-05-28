@@ -15,7 +15,7 @@ export default function ExplorerIntro() {
           <p className="font-sans text-xl text-navy/70 leading-relaxed font-light mt-4">
             {isLiveMode
               ? "Explorer organise uniquement les histoires publiees depuis la base live : sujets cartographies, editions comparees et chronologies editoriales. Les traces non publiees restent dans l'Observatoire."
-              : "Explorer organise uniquement des histoires fictives supposees publiees dans cette demonstration : un fait entre dans Wikipedia, une divergence entre editions, un article instable ou un sujet sous le radar."}
+              : "Explorer organise uniquement des histoires fictives supposees publiees dans cette demonstration : un fait entre dans Wikipedia, une divergence entre editions ou un article instable."}
           </p>
         </div>
 

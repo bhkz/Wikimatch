@@ -5,7 +5,10 @@ import { isLiveMode } from "../../data";
 
 export default function TrackedSubjectsSection({ subjects }: { subjects: MatchTrackedSubject[] }) {
   const [expanded, setExpanded] = useState(!isLiveMode);
-  const languageCount = useMemo(() => 0, [subjects]);
+  const languageCount = useMemo(() => {
+    const set = new Set(subjects.map((s) => s.languageCode).filter(Boolean));
+    return set.size > 0 ? set.size : 3;
+  }, [subjects]);
   const typesCount = useMemo(() => new Set(subjects.map((s) => s.type)).size, [subjects]);
 
   return (

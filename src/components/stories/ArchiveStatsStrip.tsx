@@ -3,6 +3,7 @@ import { StoriesArchiveStats } from "../../types";
 import { isDemoMode } from "../../data";
 
 export default function ArchiveStatsStrip({ stats }: { stats: StoriesArchiveStats }) {
+  if (!isDemoMode) return null;
   const total = stats.storyCount + stats.matchCount + stats.languageCount + stats.sourceCount;
   if (total === 0) return null;
 
