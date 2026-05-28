@@ -44,20 +44,22 @@ export default function Explorer() {
     timelineEvents,
   } = state.data;
 
+  const hasStories = anchors.length > 0;
+
   return (
     <div className="min-h-screen bg-cream selection:bg-blue-electric selection:text-white pb-0">
       <SiteHeader />
 
       <main className="relative pt-[72px]">
-        <ExplorerHero />
-        <ExplorerIntro />
+        <ExplorerHero hasStories={hasStories} />
+        <ExplorerIntro hasStories={hasStories} />
         
-        {anchors.length === 0 ? (
+        {!hasStories ? (
           <section className="py-24 px-4 md:px-8 bg-navy text-cream border-b border-cream/10 relative overflow-hidden">
             <div className="w-full max-w-screen-xl mx-auto text-center py-16 flex flex-col items-center gap-6">
               <div className="w-12 h-[1px] bg-blue-electric/50" />
               <h2 className="font-display text-4xl sm:text-5xl uppercase tracking-wide text-white">
-                Aucune observation vérifiée publiée pour le moment
+                AUCUNE OBSERVATION VÉRIFIÉE PUBLIÉE POUR LE MOMENT
               </h2>
               <p className="font-sans text-base md:text-lg text-cream/70 leading-relaxed font-light max-w-2xl">
                 L’explorateur affichera les comparaisons et chronologies uniquement lorsqu’elles pourront être reliées à des modifications sources consultables. Le match test PSG — Arsenal est préparé. La collecte dédiée n’est pas encore activée.
