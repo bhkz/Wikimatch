@@ -8,18 +8,13 @@ import {
   type ApiResponse,
 } from "../../../_lib/http.js";
 import { storyTypeLabel } from "../../../_lib/labels.js";
-
-const REHEARSAL_MATCH_SLUG = "2026-ucl-final-psg-arsenal";
-
-// Only Level 2 auto-observations are publishable during the rehearsal
-// (docs/v2/STORY_PUBLICATION_CONTRACT.md §4 + §7.1). Any other story_type
-// goes to manual review; the public detail endpoint returns 404 for them.
-const PUBLISHABLE_STORY_TYPES = new Set<string>(["language_convergence"]);
-
-// Public marker for new Level 2 observations. Older auto_template_v1 rows
-// — even on the canonical match — must NOT be exposed publicly, hence the
-// strict methodology_version gate.
-const REHEARSAL_LEVEL2_METHODOLOGY_VERSION = "rehearsal_level2_auto_v1";
+import {
+  REHEARSAL_LEVEL2_BADGE,
+  REHEARSAL_LEVEL2_METHODOLOGY_VERSION,
+  REHEARSAL_LEVEL2_PIPELINE,
+  REHEARSAL_LEVEL2_STORY_TYPE,
+  REHEARSAL_MATCH_SLUG,
+} from "../_lib/publicLevel2Observation.js";
 
 export default async function handler(
   request: ApiRequest,
@@ -82,11 +77,11 @@ export default async function handler(
       sendNotFound(response);
       return;
     }
-    if (!PUBLISHABLE_STORY_TYPES.has(story.story_type)) {
+    if (story.story_type !== REHEARSAL_LEVEL2_STORY_TYPE) {
       sendNotFound(response);
       return;
     }
-    if (story.published_by_pipeline !== "auto_template_v1") {
+    if (story.published_by_pipeline !== REHEARSAL_LEVEL2_PIPELINE) {
       sendNotFound(response);
       return;
     }
@@ -163,7 +158,7 @@ export default async function handler(
         slug: story.slug,
         type: story.story_type,
         categoryLabel: storyTypeLabel(story.story_type),
-        badgeLabel: "OBSERVATION AUTOMATIQUE · SOURCES CONSULTABLES",
+        badgeLabel: REHEARSAL_LEVEL2_BADGE,
         title: story.title,
         excerpt: story.excerpt || "",
         observation: story.observation_text || "",

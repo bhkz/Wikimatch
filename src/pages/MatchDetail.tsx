@@ -13,6 +13,7 @@ import TrackedSubjectsSection from "../components/match/TrackedSubjectsSection";
 import MatchSourcesSection from "../components/match/MatchSourcesSection";
 import MatchShareCardPreview from "../components/match/MatchShareCardPreview";
 import MatchFinalCTA from "../components/match/MatchFinalCTA";
+import MatchAutomaticObservations from "../components/match/MatchAutomaticObservations";
 import { MatchPageState } from "../types";
 import { dataProvider, isDemoMode, useAsyncData } from "../data";
 
@@ -56,7 +57,12 @@ export default function MatchDetail() {
     comparison: matchComparison,
     instability,
     trackedSubjects,
+    automaticObservations,
+    rehearsalMonitoring,
   } = state.data;
+
+  const observations = automaticObservations ?? [];
+  const monitoring = rehearsalMonitoring ?? null;
 
   // Create a copy of the match object with the current state applied
   const matchState = (match.state as MatchPageState) ?? "pre_match";
@@ -95,6 +101,10 @@ export default function MatchDetail() {
 
         {matchState === "live" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 bg-cream min-h-screen pb-24">
+            <MatchAutomaticObservations
+              observations={observations}
+              monitoring={monitoring}
+            />
 
             {/* Live Observation Banner */}
             <div className="w-full bg-navy text-white px-4 md:px-8 py-8 border-b-4 border-red-signal shadow-inner">
@@ -169,6 +179,10 @@ export default function MatchDetail() {
 
         {matchState === "pre_match" && (
            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 bg-cream min-h-screen">
+             <MatchAutomaticObservations
+               observations={observations}
+               monitoring={monitoring}
+             />
              <TrackedSubjectsSection subjects={trackedSubjects} />
 
              <section className="py-24 px-4 md:px-8 max-w-screen-xl mx-auto">

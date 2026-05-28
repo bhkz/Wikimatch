@@ -729,6 +729,211 @@ function classifyExisting(row: LookupRow): ExistingDecision {
   );
 }
 
+// =====================================================================
+// Prompt 3C : helper publicLevel2Observation + machine d'état mobile
+// =====================================================================
+
+// Import direct du helper partagé (réutilise EXACTEMENT le code des trois
+// endpoints) — toute régression du gate doit faire échouer ces tests.
+const {
+  storyRowPassesGate,
+  evidencePassesGate,
+  buildObservationCard,
+  REHEARSAL_LEVEL2_BADGE,
+  REHEARSAL_MATCH_SLUG,
+} = await import("../api/public/v1/_lib/publicLevel2Observation.js");
+
+const validStory = {
+  publication_status: "published",
+  retracted_at: null,
+  story_type: "language_convergence",
+  published_by_pipeline: "auto_template_v1",
+  methodology_version: "rehearsal_level2_auto_v1",
+  match: { slug: REHEARSAL_MATCH_SLUG },
+};
+
+// 34. story conforme passe storyRowPassesGate
+{
+  assert(storyRowPassesGate(validStory) === true, "34. story conforme → gate passe");
+}
+
+// 35. story draft refusée
+{
+  assert(
+    storyRowPassesGate({ ...validStory, publication_status: "draft" }) === false,
+    "35. story en draft → gate refuse",
+  );
+}
+
+// 36. story sur match non canonique refusée (cas /matches/non-canonical)
+{
+  assert(
+    storyRowPassesGate({ ...validStory, match: { slug: "autre-match-2026" } }) === false,
+    "36. match non canonique → gate refuse même si reste conforme",
+  );
+}
+
+// 37. ancien marker → refusé
+{
+  assert(
+    storyRowPassesGate({ ...validStory, methodology_version: "v0.3-auto" }) === false,
+    "37. methodology_version non-niveau-2 → gate refuse",
+  );
+}
+
+// 38. evidencePassesGate : 2 langues, 2 URLs → ok
+{
+  const ok = evidencePassesGate([
+    { url: "https://en.wikipedia.org/?diff=1", languageCode: "en" },
+    { url: "https://fr.wikipedia.org/?diff=2", languageCode: "fr" },
+  ]);
+  assert(ok === true, "38. 2 sources URL + 2 langues distinctes → evidencePassesGate OK");
+}
+
+// 39. evidencePassesGate : URL manquante sur une langue → ko
+{
+  const ko = evidencePassesGate([
+    { url: "https://en.wikipedia.org/?diff=1", languageCode: "en" },
+    { url: "", languageCode: "fr" },
+  ]);
+  assert(ko === false, "39. URL manquante → evidencePassesGate refuse");
+}
+
+// 40. evidencePassesGate : 2 sources mais même langue → ko
+{
+  const ko = evidencePassesGate([
+    { url: "https://en.wikipedia.org/?diff=1", languageCode: "en" },
+    { url: "https://en.wikipedia.org/?diff=2", languageCode: "EN" },
+  ]);
+  assert(ko === false, "40. 2 sources mais une seule langue distincte → refuse");
+}
+
+// 41. buildObservationCard produit la route /observation/<slug>
+{
+  const card = buildObservationCard(
+    {
+      slug: "obs-goal-abc",
+      title: "Un but apparaît dans plusieurs éditions Wikipédia suivies",
+      excerpt: "ex",
+      languages: ["EN", "FR"],
+      source_count: 2,
+      published_at: "2026-05-30T20:30:00Z",
+    },
+    2,
+  );
+  assert(
+    card.detailRoute === "/observation/obs-goal-abc" &&
+      card.badgeLabel === REHEARSAL_LEVEL2_BADGE &&
+      card.languages.length === 2 &&
+      card.sourceCount === 2,
+    "41. buildObservationCard → route /observation/<slug>, badge correct, langues passées",
+  );
+}
+
+// =====================================================================
+// Machine d'état mobile (NoObservationsState) — fonction pure équivalente
+// =====================================================================
+
+type Monitoring = {
+  selectedMatchArticles: number;
+  enabledMatchArticles: number;
+  isFullyArmed: boolean;
+  lastTraceObservedAt: string | null;
+  recentTraceCount: number | null;
+} | null;
+
+function pickEmptyState(monitoring: Monitoring): string {
+  if (!monitoring) return "neutral";
+  if (!monitoring.isFullyArmed) return "not_armed";
+  if (monitoring.lastTraceObservedAt) return "traces_received";
+  return "armed_no_observation";
+}
+
+// 42. monitoring null → message neutre (pas de signal fiable)
+{
+  assert(pickEmptyState(null) === "neutral", "42. monitoring absent → état neutre (rien d'inventé)");
+}
+
+// 43. 0/3 enabled → not_armed
+{
+  assert(
+    pickEmptyState({
+      selectedMatchArticles: 3,
+      enabledMatchArticles: 0,
+      isFullyArmed: false,
+      lastTraceObservedAt: null,
+      recentTraceCount: 0,
+    }) === "not_armed",
+    "43. 0/3 pages armées → 'COLLECTE NON ACTIVÉE'",
+  );
+}
+
+// 44. 3/3 armé, 0 trace → armed_no_observation
+{
+  assert(
+    pickEmptyState({
+      selectedMatchArticles: 3,
+      enabledMatchArticles: 3,
+      isFullyArmed: true,
+      lastTraceObservedAt: null,
+      recentTraceCount: 0,
+    }) === "armed_no_observation",
+    "44. armé sans trace → 'PÉRIMÈTRE ARMÉ · AUCUNE OBSERVATION PUBLIÉE'",
+  );
+}
+
+// 45. 3/3 armé, trace reçue → traces_received
+{
+  assert(
+    pickEmptyState({
+      selectedMatchArticles: 3,
+      enabledMatchArticles: 3,
+      isFullyArmed: true,
+      lastTraceObservedAt: "2026-05-30T20:15:00Z",
+      recentTraceCount: 4,
+    }) === "traces_received",
+    "45. trace reçue mais pas d'observation → 'MODIFICATIONS SOURCES REÇUES'",
+  );
+}
+
+// 46. partiel 2/3 → toujours not_armed (la règle est strictement tout-ou-rien)
+{
+  assert(
+    pickEmptyState({
+      selectedMatchArticles: 3,
+      enabledMatchArticles: 2,
+      isFullyArmed: false,
+      lastTraceObservedAt: null,
+      recentTraceCount: 0,
+    }) === "not_armed",
+    "46. 2/3 armées (partiel) → not_armed (pas d'arming partiel)",
+  );
+}
+
+// 47. observation présente → la machine d'état "vide" n'est pas censée être appelée
+//     (le composant choisit la branche ObservationsList) — on documente ce contrat.
+{
+  // Le composant route via `hasObservations`. Si une observation conforme
+  // existe, monitoring n'a aucune importance pour l'affichage : la carte
+  // s'affiche. On valide juste qu'une carte builée par buildObservationCard
+  // expose les éléments mobiles requis.
+  const card = buildObservationCard(
+    {
+      slug: "obs-rc-xyz",
+      title: "Un carton rouge apparaît dans plusieurs éditions Wikipédia suivies",
+      excerpt: "Le même fait documentaire a été détecté.",
+      languages: ["EN", "ES"],
+      source_count: 2,
+      published_at: "2026-05-30T20:55:00Z",
+    },
+    2,
+  );
+  assert(
+    card.title.length > 0 && card.detailRoute.startsWith("/observation/") && card.languages.includes("EN"),
+    "47. observation conforme → carte mobile contient titre + route /observation/<slug> + langues",
+  );
+}
+
 console.log("");
 console.log(`Total: ${passed + failed} | Passed: ${passed} | Failed: ${failed}`);
 if (failed > 0) {

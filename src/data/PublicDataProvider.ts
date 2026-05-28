@@ -67,6 +67,25 @@ export type StoryDetailPageData = {
 
 // --- Match detail ------------------------------------------------------------
 
+export type MatchAutomaticObservationCard = {
+  slug: string;
+  badgeLabel: "OBSERVATION AUTOMATIQUE · SOURCES CONSULTABLES";
+  title: string;
+  excerpt: string;
+  publishedAt: string;
+  languages: string[];
+  sourceCount: number;
+  detailRoute: string;
+};
+
+export type MatchRehearsalMonitoring = {
+  selectedMatchArticles: number;
+  enabledMatchArticles: number;
+  isFullyArmed: boolean;
+  lastTraceObservedAt: string | null;
+  recentTraceCount: number | null;
+};
+
 export type MatchDetailPageData = {
   match: MatchContext;
   recap: MatchRecap;
@@ -75,6 +94,8 @@ export type MatchDetailPageData = {
   comparison: MatchLanguageComparison;
   instability: ArticleInstabilityCase;
   trackedSubjects: MatchTrackedSubject[];
+  automaticObservations?: MatchAutomaticObservationCard[];
+  rehearsalMonitoring?: MatchRehearsalMonitoring | null;
 };
 
 // --- Entity detail -----------------------------------------------------------

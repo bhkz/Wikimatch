@@ -7,9 +7,12 @@ import {
 } from "../../../_lib/http.js";
 import { countDistinctMonitoredLanguages, storyTypeLabel } from "../../../_lib/labels.js";
 
-const REHEARSAL_MATCH_SLUG = "2026-ucl-final-psg-arsenal";
-const PUBLISHABLE_STORY_TYPES = new Set<string>(["language_convergence"]);
-const REHEARSAL_LEVEL2_METHODOLOGY_VERSION = "rehearsal_level2_auto_v1";
+import {
+  REHEARSAL_LEVEL2_METHODOLOGY_VERSION,
+  REHEARSAL_LEVEL2_PIPELINE,
+  REHEARSAL_LEVEL2_STORY_TYPE,
+  REHEARSAL_MATCH_SLUG,
+} from "../_lib/publicLevel2Observation.js";
 
 export default async function handler(
   _request: ApiRequest,
@@ -57,13 +60,14 @@ export default async function handler(
       )
       .in("publication_status", ["published", "corrected"])
       .is("retracted_at", null)
-      .eq("published_by_pipeline", "auto_template_v1")
+      .eq("published_by_pipeline", REHEARSAL_LEVEL2_PIPELINE)
       .eq("methodology_version", REHEARSAL_LEVEL2_METHODOLOGY_VERSION)
+      .eq("story_type", REHEARSAL_LEVEL2_STORY_TYPE)
       .order("published_at", { ascending: false });
     if (storiesError) throw storiesError;
 
     const conformingStories = (storiesData ?? []).filter((s: any) => {
-      if (!PUBLISHABLE_STORY_TYPES.has(s.story_type)) return false;
+      if (s.story_type !== REHEARSAL_LEVEL2_STORY_TYPE) return false;
       if (s.match?.slug !== REHEARSAL_MATCH_SLUG) return false;
       const evidences = Array.isArray(s.evidence) ? s.evidence : [];
       const sourcedLanguages = new Set<string>();
