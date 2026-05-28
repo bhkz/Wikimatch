@@ -79,7 +79,6 @@ export default function StoriesFilterBar({ filters, activeFilterId, onSelectFilt
                  <button className="text-left text-navy/50 hover:text-blue-electric transition-colors">Tous les matchs</button>
                  <button className="text-left text-navy">Match précis</button>
                  <button className="text-left text-navy/50 hover:text-blue-electric transition-colors">Divergence</button>
-                 <button className="text-left text-navy/50 hover:text-blue-electric transition-colors">Sous le radar</button>
                  <button className="text-left text-navy/50 hover:text-blue-electric transition-colors">Article instable</button>
                </div>
                <div className="flex flex-col gap-3">

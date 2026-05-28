@@ -54,7 +54,7 @@ export default function StoriesArchiveHero() {
               transition={{ delay: 0.8, duration: 0.8 }}
               className="max-w-xl font-sans text-lg md:text-xl text-cream/70 leading-relaxed font-light"
             >
-              Résultats ajoutés, versions divergentes, articles instables, récits de match : WikiMatch rassemble les histoires documentées qui méritent réellement d'être racontées.
+              Résultats ajoutés, formulations différentes ou passages réécrits : WikiMatch ne publiera ici que les observations reliées à un match réel et vérifiables dans les modifications sources.
             </motion.p>
             <motion.div 
               initial={{ opacity: 0 }}

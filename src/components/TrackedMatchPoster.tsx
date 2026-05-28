@@ -86,7 +86,7 @@ export default function TrackedMatchPoster({
                 to={isDemoMode ? "/match/demo-france-belgique" : "/matches"}
                 className="mt-12 bg-cream text-navy px-6 py-4 font-medium uppercase font-display tracking-widest text-lg hover:bg-blue-electric hover:text-white transition-colors w-full text-center"
               >
-                {isDemoMode ? "Voir comment un match sera raconté" : "Voir tous les matchs surveillés"}
+                {isDemoMode ? "Voir comment un match sera raconté" : "Voir les matchs"}
               </Link>
             </div>
           </div>
