@@ -41,33 +41,89 @@ interface PublishResult {
     | "publication_disabled"
     | "manual_review_required"
     | "rehearsal_disabled"
-    | "level2_not_eligible";
+    | "level2_not_eligible"
+    | "evidence_write_failed";
   storyId?: string;
   reason?: string;
 }
 
-async function isLevel2ObservationAlreadyPublished(
+type ExistingObservation =
+  | { kind: "none" }
+  | { kind: "recoverable_draft"; id: string }
+  | { kind: "already_published"; id: string };
+
+/**
+ * Cherche une story déjà connue pour ce slug d'observation.
+ *
+ *  - Si elle est `published` ou `corrected` (et non rétractée), on considère
+ *    le fait déjà publié et on retourne `already_published`.
+ *  - Si elle existe en `draft` (création précédente où l'écriture des
+ *    evidences avait échoué), on retourne `recoverable_draft` pour que
+ *    l'appelant complète puis bascule à `published`. Ce chemin évite le
+ *    faux silence décrit dans le contrat (Prompt 3B bis).
+ *  - Si elle est `retracted`, on retourne `already_published` : une
+ *    rétractation est intentionnelle, le worker ne doit pas la « réparer ».
+ *
+ * Cette fonction est non atomique. Le garde-fou final reste la contrainte
+ * UNIQUE published_stories.slug en base : si deux workers passent ici
+ * simultanément, un seul INSERT en draft réussira ; l'autre verra 23505
+ * et sera redirigé vers la branche « reprise » (cf. handler 23505 dans
+ * `publish()`).
+ */
+async function findExistingObservation(
   observationSlug: string,
-): Promise<boolean> {
-  // Dédup stricte fondée sur l'identité documentaire stable du fait (slug
-  // dérivé de match_slug + proposition_type + strict_claim_key). Toute
-  // redétection du même but / carton rouge — même avec proposition_ids
-  // différents ou une 3e langue — renvoie ici true et n'écrit rien.
-  // En cas de course concurrente (deux workers détectent simultanément),
-  // la contrainte UNIQUE published_stories.slug fait office de second
-  // garde-fou : l'INSERT lève 23505 et est traité comme already_published
-  // plus bas (cf. handler 23505 dans publish()).
+): Promise<ExistingObservation> {
   const { data, error } = await supabase
     .from("published_stories")
-    .select("id")
+    .select("id, publication_status, retracted_at")
     .eq("slug", observationSlug)
-    .is("retracted_at", null)
     .maybeSingle();
   if (error) {
     console.error("[publisher] dedup check failed:", error.message);
-    return false;
+    return { kind: "none" };
   }
-  return Boolean(data?.id);
+  if (!data?.id) return { kind: "none" };
+  if (data.retracted_at) {
+    return { kind: "already_published", id: data.id as string };
+  }
+  if (data.publication_status === "published" || data.publication_status === "corrected") {
+    return { kind: "already_published", id: data.id as string };
+  }
+  // "draft" (ou tout autre statut non public) → reprise possible.
+  return { kind: "recoverable_draft", id: data.id as string };
+}
+
+/**
+ * Écriture idempotente des preuves sur une story (en draft). Avant
+ * d'insérer le nouveau lot, on supprime les rows existantes pour ce
+ * story_id : c'est sans risque puisque la story n'est pas publique
+ * (statut draft, masqué par RLS et par les filtres API).
+ */
+async function rewriteStoryEvidence(
+  storyId: string,
+  rows: Array<{
+    story_id: string;
+    trace_id: string;
+    evidence_type: "trace";
+    public_label: string;
+    display_order: number;
+  }>,
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const { error: deleteError } = await supabase
+    .from("story_evidence")
+    .delete()
+    .eq("story_id", storyId);
+  if (deleteError) {
+    return { ok: false, reason: `evidence cleanup failed: ${deleteError.message}` };
+  }
+  if (!rows.length) {
+    return { ok: false, reason: "no evidence rows to insert" };
+  }
+  const { error: insertError } = await supabase.from("story_evidence").insert(rows);
+  if (insertError) {
+    return { ok: false, reason: `evidence insert failed: ${insertError.message}` };
+  }
+  return { ok: true };
 }
 
 function formatEvidenceLabel(row: EvidenceRow): string {
@@ -195,11 +251,20 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
     };
   }
 
-  if (await isLevel2ObservationAlreadyPublished(level2.slug)) {
+  // Identité publique stable, dérivée du fait documentaire (match canonique
+  // + proposition_type + strict_claim_key). Ne dépend pas de Date.now()
+  // ni des proposition_ids → collision-free et idempotent.
+  const slug = level2.slug;
+
+  // 8. Reprise possible : si une story existe déjà en draft (écriture
+  //    précédente où les evidences avaient échoué), on la récupère ; sinon
+  //    on l'a « déjà publiée » / « déjà rétractée » et on sort.
+  const existing = await findExistingObservation(slug);
+  if (existing.kind === "already_published") {
     console.log(
-      `[publisher] ALREADY_PUBLISHED — observation_slug=${level2.slug} (stable identity, skip republish)`,
+      `[publisher] ALREADY_PUBLISHED — observation_slug=${slug} (stable identity, skip republish)`,
     );
-    return { status: "already_published" };
+    return { status: "already_published", storyId: existing.id };
   }
 
   if (!safety.passed) {
@@ -218,55 +283,109 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
     return { status: "blocked_safety", reason: safety.reason };
   }
 
-  // Identité publique stable, dérivée du fait documentaire (match canonique
-  // + proposition_type + strict_claim_key). Ne dépend pas de Date.now()
-  // ni des proposition_ids → collision-free et idempotent.
-  const slug = level2.slug;
+  // 9. Story en DRAFT (statut non public, exclu par RLS et par les filtres
+  //    API — cf. v_public_stories.publication_status in ('published',
+  //    'corrected')). Aucune fenêtre publique sur une story sans preuves.
+  let storyId: string;
+  let recovered = false;
+  if (existing.kind === "recoverable_draft") {
+    storyId = existing.id;
+    recovered = true;
+    console.log(
+      `[publisher] RECOVER_DRAFT — reusing draft story_id=${storyId} slug=${slug} (previous evidence write incomplete)`,
+    );
+  } else {
+    const { data: storyRow, error: storyError } = await supabase
+      .from("published_stories")
+      .insert({
+        slug,
+        story_type: pattern.pattern_type,
+        title: tmpl.title,
+        excerpt: tmpl.excerpt,
+        observation_text: tmpl.observation_text,
+        interpretation_text: tmpl.interpretation_text,
+        limitation_text: tmpl.limitation_text,
+        entity_id: pattern.entity_id,
+        match_id: pattern.match_id,
+        publication_status: "draft",
+        published_at: null,
+        methodology_version: REHEARSAL_LEVEL2_METHODOLOGY_VERSION,
+        languages: tmpl.languages,
+        source_count: tmpl.source_count,
+        published_by_pipeline: "auto_template_v1",
+      })
+      .select("id")
+      .single();
 
-  // 1. Insert published_stories — methodology_version marque sans ambiguïté
-  //    une observation niveau 2 rehearsal (rejetée par l'API publique si
-  //    absente, cf. STORY_PUBLICATION_CONTRACT.md §7.1 / Prompt 3B fix).
-  const { data: storyRow, error: storyError } = await supabase
-    .from("published_stories")
-    .insert({
-      slug,
-      story_type: pattern.pattern_type,
-      title: tmpl.title,
-      excerpt: tmpl.excerpt,
-      observation_text: tmpl.observation_text,
-      interpretation_text: tmpl.interpretation_text,
-      limitation_text: tmpl.limitation_text,
-      entity_id: pattern.entity_id,
-      match_id: pattern.match_id,
-      publication_status: "published",
-      published_at: new Date().toISOString(),
-      methodology_version: REHEARSAL_LEVEL2_METHODOLOGY_VERSION,
-      languages: tmpl.languages,
-      source_count: tmpl.source_count,
-      published_by_pipeline: "auto_template_v1",
-    })
-    .select("id")
-    .single();
-
-  if (storyError || !storyRow) {
-    // Postgres unique_violation (slug already taken). La contrainte UNIQUE
-    // sur published_stories.slug (cf. supabase/migrations/202605260001 :
-    // `slug text unique not null`) garantit que deux workers ne peuvent pas
-    // publier deux stories pour le même fait. On traite cette collision
-    // comme une redétection idempotente, pas comme une erreur.
-    if (storyError?.code === "23505") {
-      console.log(
-        `[publisher] ALREADY_PUBLISHED (unique_violation race) — observation_slug=${slug}`,
-      );
-      return { status: "already_published" };
+    if (storyError || !storyRow) {
+      // 23505 = collision UNIQUE sur le slug. Cas de course : un autre
+      // worker vient de créer la même story (en draft). On la retrouve
+      // et on bascule en mode reprise au lieu d'échouer.
+      if (storyError?.code === "23505") {
+        const recheck = await findExistingObservation(slug);
+        if (recheck.kind === "already_published") {
+          console.log(
+            `[publisher] ALREADY_PUBLISHED (unique_violation race) — observation_slug=${slug}`,
+          );
+          return { status: "already_published", storyId: recheck.id };
+        }
+        if (recheck.kind === "recoverable_draft") {
+          storyId = recheck.id;
+          recovered = true;
+          console.log(
+            `[publisher] RECOVER_DRAFT (after 23505) — reusing draft story_id=${storyId} slug=${slug}`,
+          );
+        } else {
+          console.error("[publisher] 23505 but row vanished, slug=", slug);
+          return { status: "error", reason: "unique_violation but row not found" };
+        }
+      } else {
+        console.error("[publisher] published_stories insert failed:", storyError?.message);
+        return { status: "error", reason: storyError?.message };
+      }
+    } else {
+      storyId = storyRow.id as string;
     }
-    console.error("[publisher] published_stories insert failed:", storyError?.message);
-    return { status: "error", reason: storyError?.message };
   }
 
-  const storyId = storyRow.id as string;
+  // 10. Evidences — idempotent (DELETE puis INSERT, sans risque puisque la
+  //     story est en draft, donc invisible publiquement).
+  const evidenceRows = pattern.evidenceRows.map((row, idx) => ({
+    story_id: storyId,
+    trace_id: row.trace_id,
+    evidence_type: "trace" as const,
+    public_label: formatEvidenceLabel(row),
+    display_order: idx,
+  }));
+  const evidenceWrite = await rewriteStoryEvidence(storyId, evidenceRows);
+  if (evidenceWrite.ok === false) {
+    console.error(
+      `[publisher] EVIDENCE_WRITE_FAILED — story_id=${storyId} slug=${slug} reason=${evidenceWrite.reason} (story stays in draft, will retry on next detection)`,
+    );
+    return { status: "evidence_write_failed", storyId, reason: evidenceWrite.reason };
+  }
 
-  // 2. Insert detected_patterns avec lien vers la story
+  // 11. Flip vers published seulement maintenant. Si l'étape 10 échouait,
+  //     la story restait en draft, invisible mais réparable.
+  const { error: flipError } = await supabase
+    .from("published_stories")
+    .update({
+      publication_status: "published",
+      published_at: new Date().toISOString(),
+      languages: tmpl.languages,
+      source_count: tmpl.source_count,
+    })
+    .eq("id", storyId)
+    .eq("publication_status", "draft"); // garde-fou : ne pas écraser un éventuel état futur
+  if (flipError) {
+    console.error(
+      `[publisher] FLIP_TO_PUBLISHED failed — story_id=${storyId} slug=${slug} reason=${flipError.message} (evidences écrites ; réessaiera au prochain pattern)`,
+    );
+    return { status: "evidence_write_failed", storyId, reason: flipError.message };
+  }
+
+  // 12. Insert detected_patterns avec lien vers la story (après flip pour
+  //     que les exports analytiques ne référencent pas de story draft).
   await supabase.from("detected_patterns").insert({
     pattern_type: pattern.pattern_type,
     proposition_ids: pattern.proposition_ids,
@@ -279,29 +398,14 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
     published_story_id: storyId,
   });
 
-  // 3. Insert story_evidence — un label lisible par evidence (langue, page, heure)
-  //    pour que le frontend public puisse afficher la liste des sources sans
-  //    requête supplémentaire (STORY_PUBLICATION_CONTRACT.md §8.1).
-  const evidenceRows = pattern.evidenceRows.map((row, idx) => ({
-    story_id: storyId,
-    trace_id: row.trace_id,
-    evidence_type: "trace" as const,
-    public_label: formatEvidenceLabel(row),
-    display_order: idx,
-  }));
-  if (evidenceRows.length) {
-    const { error: evError } = await supabase.from("story_evidence").insert(evidenceRows);
-    if (evError) console.error("[publisher] story_evidence insert:", evError.message);
-  }
-
-  // 4. Mark traces as published_evidence
+  // 13. Mark traces as published_evidence
   await supabase
     .from("revision_traces")
     .update({ ingest_status: "published_evidence", public_status: "linked_to_story" })
     .in("id", pattern.trace_ids);
 
   console.log(
-    `[publisher] ✅ published Level 2 observation pattern=${pattern.pattern_type} prop=${pattern.proposition_type} story_id=${storyId} slug=${slug}`,
+    `[publisher] ✅ published Level 2 observation pattern=${pattern.pattern_type} prop=${pattern.proposition_type} story_id=${storyId} slug=${slug}${recovered ? " (recovered draft)" : ""}`,
   );
   return { status: "published", storyId };
 }

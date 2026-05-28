@@ -430,7 +430,7 @@ Exemples :
   * `strictConvergenceClaimKey` rempli (déjà imposé — interdit `match_result`
     seul) ;
   * `proposition_type` ∈ whitelist §7.1 (`goal_scored` ou `red_card` ;
-    `qualification` si éligible — voir §7.1) ;
+    `qualification` est explicitement exclu pour la finale — voir §7.1) ;
   * `story_evidence` non vide avec un `source_revision_url` (ou
     `source_diff_url`) par langue attestée ;
   * `safety_checks_passed=true` (PII, vocabulaire interdit, causalité,
@@ -586,7 +586,7 @@ extractor.ts:38-52` pour la liste close des `proposition_type`, et
 | --- | --- | --- | --- |
 | `goal_scored` | `scorer` + `minute` | **SUPPORTÉ ACTUELLEMENT** (`matchers.ts:87-92`) | **AUTORISÉ** si attesté dans ≥2 éditions et sources consultables |
 | `red_card` | `player` (+ `minute`) | **SUPPORTÉ ACTUELLEMENT** (`matchers.ts:93-98`) | **AUTORISÉ** si attesté dans ≥2 éditions et sources consultables |
-| `qualification` | `team` + `stage_reached` | **SUPPORTÉ ACTUELLEMENT** (`matchers.ts:112-117`) | **AUTORISÉ** pour le titre/victoire finale, **À CONFIRMER en log** que l'extracteur produit réellement `team` + `stage_reached` non vides sur ce match |
+| `qualification` | `team` + `stage_reached` | **SUPPORTÉ ACTUELLEMENT** (`matchers.ts:112-117`) | **REFUSÉ** pour la finale rehearsal v1 : les deux clubs sont déjà qualifiés pour cette finale, un fait `qualification` ajouté dans la fenêtre serait probablement contextuel (qualification antérieure, palmarès) ou ambigu, donc non auto-publiable. Reste détectable et loggable côté pipeline |
 | `sanction` | `target` + `kind` | **SUPPORTÉ ACTUELLEMENT** (`matchers.ts:118-123`) mais sémantique ambiguë | **REFUSÉ** pour le rehearsal : trop ouvert (suspension/avertissement/blessure ?) sans vérification humaine |
 | `record` ou distinction | — | **NON SUPPORTÉ ACTUELLEMENT** : ni `record` ni `distinction` ne figurent dans la liste close ; le plus proche est `performance`, qui n'a **pas** de claim structurée dans `strictConvergenceClaimKey` | **REFUSÉ** pour le rehearsal |
 
@@ -652,8 +652,7 @@ même s'ils sont techniquement détectés :
 
 * **Niveau** : **3 — Candidat éditorial interprétatif** par défaut, ou
   **2 — Observation automatique** si tous les faits constitutifs du récap
-  appartiennent à la whitelist §7.1 (`goal_scored`, `red_card`,
-  `qualification`).
+  appartiennent à la whitelist §7.1 (`goal_scored`, `red_card`).
 * **Preuve minimale** : ≥3 propositions substantielles whitelistées
   rattachées au même `match_id` après `scheduled_at`, chacune sourcée.
 * **Automatisable actuellement** : **non** (template absent dans
@@ -692,13 +691,13 @@ Titre factuel (templates.ts, max 500 char, sans émotion, sans classement) :
   Exemple : "Un but apparaît dans deux éditions Wikipédia suivies"
 
 Résumé descriptif (1 à 2 phrases) :
-  - rappelle le fait whitelisté détecté (but, carton rouge, qualification) ;
+  - rappelle le fait whitelisté détecté (but, carton rouge) ;
   - indique le nombre d'éditions distinctes concernées ;
   - indique la fenêtre temporelle observée.
 
 Métadonnées :
   - match concerné (lien /match/2026-ucl-final-psg-arsenal) ;
-  - type de fait détecté (goal_scored | red_card | qualification) ;
+  - type de fait détecté (goal_scored | red_card) ;
   - éditions linguistiques attestées (EN, FR, ES — codes upper-case) ;
   - fenêtre temporelle (observed_window_start → observed_window_end UTC).
 
@@ -881,12 +880,25 @@ canonique uniquement, avec garde-fous mécaniques sur la whitelist §7.1.
      `2026-ucl-final-psg-arsenal` ;
    * `AUTO_PUBLICATION_ENABLED` global reste à `false` jusqu'à nouvel ordre.
 
-2. **Whitelist de claims auto-publiables** appliquée à `language_convergence` :
+2. **Whitelist de claims auto-publiables** appliquée à `language_convergence`
+   pour la finale rehearsal v1 :
    * `goal_scored` (avec `scorer` + `minute`) ;
    * `red_card` (avec `player`) ;
-   * `qualification` (avec `team` + `stage_reached`) — à confirmer en log
-     que l'extracteur produit des champs non vides ;
-   * tout autre `proposition_type` : refus auto.
+   * tout autre `proposition_type` : refus auto, y compris
+     `qualification` (cf. §7.1 — explicitement exclu pour cette finale).
+
+   Auto-refusés en plus de la whitelist : `qualification`, `match_result`
+   brut, `substitution`, `yellow_card`, `sanction`, `lineup_change`,
+   `transfer`, `biographical_fact`, `performance`, `other`, `noise`, et
+   tous les patterns hors `language_convergence` (`under_radar`,
+   `article_instability`, `language_divergence`, volume seul, mono-langue).
+
+   **Limite assumée du rehearsal v1** : la finale ne publiera
+   automatiquement ni vainqueur, ni score final, ni titre remporté tant
+   qu'un type structuré spécifique (par ex. `title_won`, `final_result`)
+   n'aura pas été conçu, supporté par l'extracteur, et validé hors ligne.
+   L'absence de publication sur le résultat final est une conséquence
+   directe et acceptée du niveau de preuve choisi.
 
 3. **Exigence de minimum deux langues distinctes** parmi les pages
    sélectionnées du match canonique (EN/FR/ES), avec `article_type='match'`.

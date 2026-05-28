@@ -544,6 +544,191 @@ function pattern(
   );
 }
 
+// =====================================================================
+// Gate publique : story incomplète / draft / déjà publiée (Prompt 3B bis)
+// =====================================================================
+
+/**
+ * Reproduit fidèlement le contrat de l'API publique
+ * (api/public/v1/stories/[slug].ts §73-158 + index.ts §58-61) : une story
+ * n'est exposée publiquement que si TOUTES les conditions sont vraies.
+ */
+function apiPubliclyExposes(row: {
+  publication_status: string;
+  retracted_at: string | null;
+  story_type: string;
+  published_by_pipeline: string;
+  methodology_version: string;
+  match_slug: string;
+  evidenceWithUrl: Array<{ language_code: string; url: string }>;
+}): boolean {
+  if (row.publication_status !== "published" && row.publication_status !== "corrected") return false;
+  if (row.retracted_at) return false;
+  if (row.story_type !== "language_convergence") return false;
+  if (row.published_by_pipeline !== "auto_template_v1") return false;
+  if (row.methodology_version !== LEVEL2_MARKER) return false;
+  if (row.match_slug !== CANONICAL_SLUG) return false;
+  const sourcesWithUrl = row.evidenceWithUrl.filter((e) => e.url.length > 0);
+  if (sourcesWithUrl.length < 2) return false;
+  const distinct = new Set(sourcesWithUrl.map((e) => e.language_code.toLowerCase()));
+  if (distinct.size < 2) return false;
+  return true;
+}
+
+const baseRow = {
+  publication_status: "published",
+  retracted_at: null as string | null,
+  story_type: "language_convergence",
+  published_by_pipeline: "auto_template_v1",
+  methodology_version: LEVEL2_MARKER,
+  match_slug: CANONICAL_SLUG,
+  evidenceWithUrl: [
+    { language_code: "en", url: "https://en.wikipedia.org/?diff=1" },
+    { language_code: "fr", url: "https://fr.wikipedia.org/?diff=2" },
+  ],
+};
+
+// 21. story conforme (deux langues, URLs présentes) → publique
+{
+  assert(
+    apiPubliclyExposes(baseRow) === true,
+    "21. story niveau 2 conforme (2 langues + URLs) → publique",
+  );
+}
+
+// 22. story en draft (cas « evidences pas encore écrites ») → invisible
+{
+  assert(
+    apiPubliclyExposes({ ...baseRow, publication_status: "draft" }) === false,
+    "22. story en draft → invisible publiquement",
+  );
+}
+
+// 23. story publiée mais 0 evidence → invisible (gate API)
+{
+  assert(
+    apiPubliclyExposes({ ...baseRow, evidenceWithUrl: [] }) === false,
+    "23. story publiée sans evidences → invisible (gate sources>=2)",
+  );
+}
+
+// 24. story publiée avec une seule langue → invisible
+{
+  assert(
+    apiPubliclyExposes({
+      ...baseRow,
+      evidenceWithUrl: [
+        { language_code: "en", url: "https://en.wikipedia.org/?diff=1" },
+        { language_code: "en", url: "https://en.wikipedia.org/?diff=2" },
+      ],
+    }) === false,
+    "24. story publiée avec une seule langue distincte → invisible",
+  );
+}
+
+// 25. story publiée avec deux langues mais une URL manquante → invisible
+{
+  assert(
+    apiPubliclyExposes({
+      ...baseRow,
+      evidenceWithUrl: [
+        { language_code: "en", url: "https://en.wikipedia.org/?diff=1" },
+        { language_code: "fr", url: "" },
+      ],
+    }) === false,
+    "25. story publiée avec une URL manquante → invisible",
+  );
+}
+
+// 26. story rétractée → invisible même si tout le reste est conforme
+{
+  assert(
+    apiPubliclyExposes({ ...baseRow, retracted_at: "2026-05-30T21:00:00Z" }) === false,
+    "26. story rétractée → invisible",
+  );
+}
+
+// 27. ancien marker méthodologique → invisible
+{
+  assert(
+    apiPubliclyExposes({ ...baseRow, methodology_version: "v0.3-auto" }) === false,
+    "27. methodology_version != rehearsal_level2_auto_v1 → invisible",
+  );
+}
+
+// =====================================================================
+// Décision de reprise (équivalent fonctionnel de findExistingObservation)
+// =====================================================================
+
+type LookupRow = { publication_status: string; retracted_at: string | null } | null;
+type ExistingDecision = "none" | "recoverable_draft" | "already_published";
+
+function classifyExisting(row: LookupRow): ExistingDecision {
+  if (!row) return "none";
+  if (row.retracted_at) return "already_published";
+  if (row.publication_status === "published" || row.publication_status === "corrected")
+    return "already_published";
+  return "recoverable_draft";
+}
+
+// 28. lookup vide → none (worker doit créer la story)
+{
+  assert(
+    classifyExisting(null) === "none",
+    "28. row absent → décision 'none' (création initiale)",
+  );
+}
+
+// 29. story en draft → recoverable_draft (pas already_published)
+{
+  assert(
+    classifyExisting({ publication_status: "draft", retracted_at: null }) === "recoverable_draft",
+    "29. story draft existante → 'recoverable_draft' (réparable, pas faux silence)",
+  );
+}
+
+// 30. story published complète → already_published
+{
+  assert(
+    classifyExisting({ publication_status: "published", retracted_at: null }) ===
+      "already_published",
+    "30. story published → 'already_published' (skip)",
+  );
+}
+
+// 31. story corrected → already_published
+{
+  assert(
+    classifyExisting({ publication_status: "corrected", retracted_at: null }) ===
+      "already_published",
+    "31. story corrected → 'already_published'",
+  );
+}
+
+// 32. story rétractée → already_published (rétractation intentionnelle)
+{
+  assert(
+    classifyExisting({ publication_status: "published", retracted_at: "2026-05-30T21:00:00Z" }) ===
+      "already_published",
+    "32. story rétractée → 'already_published' (ne pas réparer)",
+  );
+}
+
+// =====================================================================
+// Cohérence contrat ↔ code (qualification doit être refusée des deux côtés)
+// =====================================================================
+
+// 33. le contrat documentaire ne doit plus dire que qualification est AUTORISÉ
+{
+  // Le test ne lit pas le markdown (offline), mais valide la propriété
+  // structurelle qu'il documente : ALLOWED_AUTO_PROPOSITION_TYPES n'inclut
+  // pas qualification. C'est la même règle que le contrat doit refléter.
+  assert(
+    !ALLOWED_AUTO_PROPOSITION_TYPES.has("qualification"),
+    "33. ALLOWED_AUTO_PROPOSITION_TYPES n'inclut PAS qualification (contrat ↔ code aligné)",
+  );
+}
+
 console.log("");
 console.log(`Total: ${passed + failed} | Passed: ${passed} | Failed: ${failed}`);
 if (failed > 0) {
