@@ -60,7 +60,7 @@ export default function Explorer() {
                 Aucune observation vérifiée publiée pour le moment
               </h2>
               <p className="font-sans text-base md:text-lg text-cream/70 leading-relaxed font-light max-w-2xl">
-                L'explorateur affichera les comparaisons et chronologies seulement lorsqu'elles seront reliées à des modifications sources consultables. Le match test PSG — Arsenal est configuré et sa collecte dédiée commencera au coup d'envoi.
+                L’explorateur affichera les comparaisons et chronologies uniquement lorsqu’elles pourront être reliées à des modifications sources consultables. Le match test PSG — Arsenal est préparé. La collecte dédiée n’est pas encore activée.
               </p>
               <div className="w-12 h-[1px] bg-blue-electric/50 mt-2" />
             </div>
