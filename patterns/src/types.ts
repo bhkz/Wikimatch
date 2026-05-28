@@ -38,16 +38,23 @@ export interface PropositionRow {
 /**
  * Evidence row carried alongside a DetectedPattern so the publisher can
  * write meaningful public_label entries (language · page · timestamp)
- * and so the Level 2 validator can check sources exist per language.
+ * and so the Level 2 validator can check sources exist per language,
+ * articles belong to the canonical match watchlist with role='match',
+ * and the strict claim key matches across all evidences.
  */
 export interface EvidenceRow {
   trace_id: string;
+  article_id: string;
   language_code: string;
   page_title: string;
+  article_type: string;
+  watchlist_role: string | null;
+  watchlist_match_id: string | null;
   revision_timestamp: string;
   source_diff_url: string | null;
   source_revision_url: string | null;
   proposition_type: string;
+  strict_claim_key: string | null;
 }
 
 export interface DetectedPattern {
@@ -59,6 +66,10 @@ export interface DetectedPattern {
   match_slug: string | null;
   article_id: string | null;
   proposition_type: string | null;
+  // Strict claim key shared by all evidence rows in this pattern. Stable
+  // identifier of the documentary fact (e.g. `goal_scored:vitinha:23`).
+  // Used to build observationKey, slug, and dedupe across redetections.
+  strict_claim_key: string | null;
   evidenceRows: EvidenceRow[];
   templateContext: TemplateContext;
 }

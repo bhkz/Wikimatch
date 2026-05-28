@@ -74,7 +74,7 @@ function normalizeClaimMinute(value: unknown): string | null {
   return compact;
 }
 
-function strictConvergenceClaimKey(p: PropositionRow): string | null {
+export function strictConvergenceClaimKey(p: PropositionRow): string | null {
   const payload = p.normalized_payload ?? {} as any;
   switch (p.proposition_type) {
     case "match_result": {
@@ -134,9 +134,17 @@ function strictConvergenceClaimKey(p: PropositionRow): string | null {
  * Retourne `{ id, slug }` ou `null`. Le slug est indispensable pour valider
  * qu'une observation niveau 2 pointe bien vers le match canonique du rehearsal.
  */
+interface ResolvedMatch {
+  id: string;
+  slug: string;
+  // articleId → watchlist role within THIS match. Empty if no enabled link
+  // (which makes the article ineligible for Level 2 publication).
+  articleRoles: Map<string, string>;
+}
+
 async function resolveUniqueMatchForRows(
   rows: PropositionRow[],
-): Promise<{ id: string; slug: string } | null> {
+): Promise<ResolvedMatch | null> {
   const articleIds = [...new Set(rows.map((row) => row.trace.article_id))];
   if (articleIds.length === 0) return null;
 
@@ -150,7 +158,7 @@ async function resolveUniqueMatchForRows(
 
   const { data: watchlistLinks, error: watchlistError } = await supabase
     .from("match_watchlist")
-    .select("match_id,article_id")
+    .select("match_id,article_id,role")
     .eq("enabled", true)
     .in("article_id", articleIds);
 
@@ -199,18 +207,39 @@ async function resolveUniqueMatchForRows(
     return null;
   }
 
-  return { id: candidates[0].id, slug: candidates[0].slug };
+  const matchId = candidates[0].id;
+  const articleRoles = new Map<string, string>();
+  for (const link of watchlistLinks as Array<{ match_id: string; article_id: string; role: string }>) {
+    if (link.match_id !== matchId) continue;
+    // If a single article happens to carry multiple roles within this match,
+    // prefer 'match' (the strictest perimeter for Level 2 publication).
+    const current = articleRoles.get(link.article_id);
+    if (!current || link.role === "match") {
+      articleRoles.set(link.article_id, link.role);
+    }
+  }
+
+  return { id: matchId, slug: candidates[0].slug, articleRoles };
 }
 
-function evidenceRowFromProposition(p: PropositionRow): import("./types.js").EvidenceRow {
+function evidenceRowFromProposition(
+  p: PropositionRow,
+  match: ResolvedMatch | null,
+): import("./types.js").EvidenceRow {
+  const role = match?.articleRoles.get(p.trace.article_id) ?? null;
   return {
     trace_id: p.trace.id,
+    article_id: p.trace.article_id,
     language_code: p.trace.article.language_code,
     page_title: p.trace.article.page_title,
+    article_type: p.trace.article.article_type,
+    watchlist_role: role,
+    watchlist_match_id: match?.id ?? null,
     revision_timestamp: p.trace.revision_timestamp,
     source_diff_url: p.trace.source_diff_url ?? null,
     source_revision_url: p.trace.source_revision_url ?? null,
     proposition_type: p.proposition_type,
+    strict_claim_key: strictConvergenceClaimKey(p),
   };
 }
 
@@ -321,7 +350,8 @@ async function detectInstability(rows: PropositionRow[]): Promise<DetectedPatter
       match_slug: match?.slug ?? null,
       article_id: articleId,
       proposition_type: first.proposition_type,
-      evidenceRows: group.map(evidenceRowFromProposition),
+      strict_claim_key: strictConvergenceClaimKey(first),
+      evidenceRows: group.map((g) => evidenceRowFromProposition(g, match)),
       templateContext: {
         language_codes: [article.language_code],
         language_codes_substantive: [article.language_code],
@@ -376,7 +406,8 @@ async function detectConvergence(rows: PropositionRow[]): Promise<DetectedPatter
       match_slug: match?.slug ?? null,
       article_id: null,
       proposition_type: first.proposition_type,
-      evidenceRows: group.map(evidenceRowFromProposition),
+      strict_claim_key: strictConvergenceClaimKey(first),
+      evidenceRows: group.map((g) => evidenceRowFromProposition(g, match)),
       templateContext: {
         language_codes: Array.from(distinctLangs),
         language_codes_substantive: Array.from(distinctLangs),
@@ -437,7 +468,8 @@ async function detectUnderRadar(rows: PropositionRow[]): Promise<DetectedPattern
       match_slug: match?.slug ?? null,
       article_id: article.id,
       proposition_type: first.proposition_type,
-      evidenceRows: group.map(evidenceRowFromProposition),
+      strict_claim_key: strictConvergenceClaimKey(first),
+      evidenceRows: group.map((g) => evidenceRowFromProposition(g, match)),
       templateContext: {
         language_codes: [presentLang, ...absentLangs],
         language_codes_substantive: [presentLang],

@@ -16,6 +16,11 @@ const REHEARSAL_MATCH_SLUG = "2026-ucl-final-psg-arsenal";
 // goes to manual review; the public detail endpoint returns 404 for them.
 const PUBLISHABLE_STORY_TYPES = new Set<string>(["language_convergence"]);
 
+// Public marker for new Level 2 observations. Older auto_template_v1 rows
+// — even on the canonical match — must NOT be exposed publicly, hence the
+// strict methodology_version gate.
+const REHEARSAL_LEVEL2_METHODOLOGY_VERSION = "rehearsal_level2_auto_v1";
+
 export default async function handler(
   request: ApiRequest,
   response: ApiResponse,
@@ -47,6 +52,7 @@ export default async function handler(
         publication_status,
         retracted_at,
         published_by_pipeline,
+        methodology_version,
         match_id,
         match:matches!published_stories_match_id_fkey (
           slug,
@@ -81,6 +87,13 @@ export default async function handler(
       return;
     }
     if (story.published_by_pipeline !== "auto_template_v1") {
+      sendNotFound(response);
+      return;
+    }
+    if (story.methodology_version !== REHEARSAL_LEVEL2_METHODOLOGY_VERSION) {
+      // Fail closed: any older auto_template_v1 row without the explicit
+      // Level 2 methodology marker stays hidden, even if it happens to be
+      // attached to the canonical match.
       sendNotFound(response);
       return;
     }
@@ -130,6 +143,16 @@ export default async function handler(
       .filter((s: any) => s.url);
 
     if (sources.length < 2) {
+      sendNotFound(response);
+      return;
+    }
+
+    const distinctLanguages = new Set(
+      sources
+        .map((s: any) => String(s.languageCode || "").toLowerCase())
+        .filter((c: string) => c.length > 0),
+    );
+    if (distinctLanguages.size < 2) {
       sendNotFound(response);
       return;
     }

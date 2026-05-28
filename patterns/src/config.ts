@@ -18,6 +18,12 @@ export const REHEARSAL_AUTO_PUBLICATION_ENABLED =
 // Canonical rehearsal match. Level 2 auto-publication is restricted to this slug.
 export const CANONICAL_REHEARSAL_MATCH_SLUG = "2026-ucl-final-psg-arsenal";
 
+// Public marker for Level 2 rehearsal observations. Written into
+// published_stories.methodology_version (free-text field, no schema change
+// required) and read back by the public API to distinguish new contract-
+// conformant observations from any legacy auto_template_v1 row.
+export const REHEARSAL_LEVEL2_METHODOLOGY_VERSION = "rehearsal_level2_auto_v1";
+
 // Fenêtres temporelles (minutes) — bornées pour rester conservatrices.
 export const INSTABILITY_WINDOW_MIN = Number(
   process.env.PATTERNS_INSTABILITY_WINDOW_MIN ?? 30,

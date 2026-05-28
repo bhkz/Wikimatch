@@ -16,6 +16,7 @@ import {
   AUTO_PUBLICATION_ENABLED,
   PATTERNS_DRY_RUN,
   REHEARSAL_AUTO_PUBLICATION_ENABLED,
+  REHEARSAL_LEVEL2_METHODOLOGY_VERSION,
   TEMPLATE_VERSION,
 } from "./config.js";
 import {
@@ -26,7 +27,7 @@ import {
 } from "./rehearsalLevel2.js";
 import { runSafetyChecks } from "./safety.js";
 import { supabase } from "./supabase.js";
-import { generate, generateLevel2Observation, methodologyVersion } from "./templates.js";
+import { generate, generateLevel2Observation } from "./templates.js";
 import type { DetectedPattern, EvidenceRow } from "./types.js";
 
 interface PublishResult {
@@ -45,19 +46,25 @@ interface PublishResult {
   reason?: string;
 }
 
-async function isAlreadyPublished(pattern: DetectedPattern): Promise<boolean> {
-  // Considère qu'un pattern_type sur la même clef (entity_id|article_id) avec
-  // au moins une proposition en commun a déjà été publié récemment.
+async function isLevel2ObservationAlreadyPublished(
+  observationSlug: string,
+): Promise<boolean> {
+  // Dédup stricte fondée sur l'identité documentaire stable du fait (slug
+  // dérivé de match_slug + proposition_type + strict_claim_key). Toute
+  // redétection du même but / carton rouge / qualification — même avec
+  // proposition_ids différents ou une 3e langue — renvoie ici true et
+  // n'écrit rien.
   const { data, error } = await supabase
-    .from("detected_patterns")
-    .select("proposition_ids")
-    .eq("pattern_type", pattern.pattern_type)
-    .not("published_story_id", "is", null);
-  if (error || !data) return false;
-  return data.some((row) => {
-    const ids: string[] = row.proposition_ids ?? [];
-    return ids.some((id) => pattern.proposition_ids.includes(id));
-  });
+    .from("published_stories")
+    .select("id")
+    .eq("slug", observationSlug)
+    .is("retracted_at", null)
+    .maybeSingle();
+  if (error) {
+    console.error("[publisher] dedup check failed:", error.message);
+    return false;
+  }
+  return Boolean(data?.id);
 }
 
 function formatEvidenceLabel(row: EvidenceRow): string {
@@ -138,6 +145,9 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
         match_id: pattern.match_id,
         level2_eligible: level2.eligible,
         level2_reason: level2.eligible === false ? level2.reason : null,
+        observation_slug: level2.eligible ? level2.slug : null,
+        observation_key: level2.eligible ? level2.observationKey : null,
+        methodology_version: REHEARSAL_LEVEL2_METHODOLOGY_VERSION,
         manual_review_reason: reviewReason,
         automatic_publication_eligible:
           safety.passed && reviewReason === null && level2.eligible,
@@ -182,7 +192,10 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
     };
   }
 
-  if (await isAlreadyPublished(pattern)) {
+  if (await isLevel2ObservationAlreadyPublished(level2.slug)) {
+    console.log(
+      `[publisher] ALREADY_PUBLISHED — observation_slug=${level2.slug} (stable identity, skip republish)`,
+    );
     return { status: "already_published" };
   }
 
@@ -202,9 +215,14 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
     return { status: "blocked_safety", reason: safety.reason };
   }
 
-  const slug = `${tmpl.slug_seed}-${Date.now().toString(36)}`;
+  // Identité publique stable, dérivée du fait documentaire (match canonique
+  // + proposition_type + strict_claim_key). Ne dépend pas de Date.now()
+  // ni des proposition_ids → collision-free et idempotent.
+  const slug = level2.slug;
 
-  // 1. Insert published_stories
+  // 1. Insert published_stories — methodology_version marque sans ambiguïté
+  //    une observation niveau 2 rehearsal (rejetée par l'API publique si
+  //    absente, cf. STORY_PUBLICATION_CONTRACT.md §7.1 / Prompt 3B fix).
   const { data: storyRow, error: storyError } = await supabase
     .from("published_stories")
     .insert({
@@ -219,7 +237,7 @@ export async function publish(pattern: DetectedPattern): Promise<PublishResult> 
       match_id: pattern.match_id,
       publication_status: "published",
       published_at: new Date().toISOString(),
-      methodology_version: methodologyVersion(),
+      methodology_version: REHEARSAL_LEVEL2_METHODOLOGY_VERSION,
       languages: tmpl.languages,
       source_count: tmpl.source_count,
       published_by_pipeline: "auto_template_v1",

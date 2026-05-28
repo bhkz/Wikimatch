@@ -9,6 +9,7 @@ import { countDistinctMonitoredLanguages, storyTypeLabel } from "../../../_lib/l
 
 const REHEARSAL_MATCH_SLUG = "2026-ucl-final-psg-arsenal";
 const PUBLISHABLE_STORY_TYPES = new Set<string>(["language_convergence"]);
+const REHEARSAL_LEVEL2_METHODOLOGY_VERSION = "rehearsal_level2_auto_v1";
 
 export default async function handler(
   _request: ApiRequest,
@@ -18,7 +19,12 @@ export default async function handler(
     const supabase = createServerSupabaseClient();
 
     // 1. Liste stricte des observations niveau 2 conformes :
-    //    auto_template_v1 + story_type whitelisté + match canonique + ≥2 sources.
+    //    - publication_status published/corrected, non retractée
+    //    - story_type language_convergence
+    //    - published_by_pipeline auto_template_v1
+    //    - methodology_version = rehearsal_level2_auto_v1 (marker explicite)
+    //    - rattachée au match canonique
+    //    - ≥2 langues distinctes côté evidences (vérifié après fetch)
     const { data: storiesData, error: storiesError } = await supabase
       .from("published_stories")
       .select(
@@ -34,21 +40,42 @@ export default async function handler(
         publication_status,
         retracted_at,
         published_by_pipeline,
+        methodology_version,
         match:matches!published_stories_match_id_fkey (
           slug
+        ),
+        evidence:story_evidence!story_evidence_story_id_fkey (
+          trace:revision_traces!story_evidence_trace_id_fkey (
+            source_diff_url,
+            source_revision_url,
+            article:wiki_articles!inner (
+              language_code
+            )
+          )
         )
       `,
       )
       .in("publication_status", ["published", "corrected"])
       .is("retracted_at", null)
       .eq("published_by_pipeline", "auto_template_v1")
+      .eq("methodology_version", REHEARSAL_LEVEL2_METHODOLOGY_VERSION)
       .order("published_at", { ascending: false });
     if (storiesError) throw storiesError;
 
     const conformingStories = (storiesData ?? []).filter((s: any) => {
       if (!PUBLISHABLE_STORY_TYPES.has(s.story_type)) return false;
-      const matchSlug = s.match?.slug ?? null;
-      return matchSlug === REHEARSAL_MATCH_SLUG;
+      if (s.match?.slug !== REHEARSAL_MATCH_SLUG) return false;
+      const evidences = Array.isArray(s.evidence) ? s.evidence : [];
+      const sourcedLanguages = new Set<string>();
+      for (const ev of evidences) {
+        const trace = ev?.trace;
+        if (!trace) continue;
+        const url = (trace.source_diff_url || trace.source_revision_url || "").trim();
+        if (!url) continue;
+        const lang = String(trace.article?.language_code || "").toLowerCase();
+        if (lang.length > 0) sourcedLanguages.add(lang);
+      }
+      return sourcedLanguages.size >= 2;
     });
 
     // 2. Real counts only

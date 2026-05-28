@@ -8,6 +8,7 @@
  * pouvoir être testée hors ligne pendant le rehearsal.
  */
 
+import { createHash } from "node:crypto";
 import { CANONICAL_REHEARSAL_MATCH_SLUG } from "./config.js";
 import type { DetectedPattern, EvidenceRow } from "./types.js";
 
@@ -18,6 +19,13 @@ export const ALLOWED_AUTO_PROPOSITION_TYPES = new Set<string>([
 ]);
 
 export const ALLOWED_AUTO_LANGUAGE_CODES = new Set<string>(["en", "fr", "es"]);
+
+// Seules les pages de rôle "match" alimentent une observation niveau 2
+// pendant ce rehearsal. Les pages club / joueur / compétition restent
+// collectables mais ne déclenchent pas une publication automatique live.
+// Cf. STORY_PUBLICATION_CONTRACT.md §7.1 + correction Prompt 3B.
+export const ALLOWED_AUTO_WATCHLIST_ROLE = "match";
+export const ALLOWED_AUTO_ARTICLE_TYPE = "match";
 
 const FORBIDDEN_PATTERN_TYPES = new Set<string>([
   "article_instability",
@@ -40,7 +48,13 @@ const FORBIDDEN_PROPOSITION_TYPES = new Set<string>([
 ]);
 
 export type Level2Result =
-  | { eligible: true; languages: string[] }
+  | {
+      eligible: true;
+      languages: string[];
+      observationKey: string;
+      slug: string;
+      strictClaimKey: string;
+    }
   | { eligible: false; reason: string };
 
 function evidenceHasConsultableSource(row: EvidenceRow): boolean {
@@ -58,21 +72,49 @@ export function isForbiddenPropositionType(propType: string | null | undefined):
   return FORBIDDEN_PROPOSITION_TYPES.has(propType);
 }
 
+function stableShortHash(input: string): string {
+  // SHA-256 truncated to 10 hex chars: 40 bits of entropy is enough to make
+  // an accidental collision astronomically unlikely within a single match
+  // window, while keeping slugs short and readable.
+  return createHash("sha256").update(input).digest("hex").slice(0, 10);
+}
+
+/**
+ * Identité stable d'une observation niveau 2 : ne dépend ni de l'ordre des
+ * langues, ni du nombre de redétections, ni des `proposition_ids` extraits
+ * par l'IA. Repose uniquement sur le fait documentaire normalisé.
+ */
+export function buildObservationKey(
+  matchSlug: string,
+  propositionType: string,
+  strictClaimKey: string,
+): string {
+  return `${matchSlug}:${propositionType}:${strictClaimKey}`;
+}
+
+export function buildObservationSlug(
+  propositionType: string,
+  observationKey: string,
+): string {
+  return `observation-${propositionType.replace(/_/g, "-")}-${stableShortHash(observationKey)}`;
+}
+
 /**
  * Décide si un pattern détecté peut être publié automatiquement comme
  * observation niveau 2 pendant le rehearsal PSG — Arsenal.
  *
- * Critères cumulatifs (cf. contrat §4 + §7.1) :
+ * Critères cumulatifs (cf. contrat §4 + §7.1 + correction Prompt 3B) :
  *  1. pattern_type === "language_convergence"
  *  2. match_slug === slug canonique du rehearsal
  *  3. match_id non nul
  *  4. proposition_type ∈ {goal_scored, red_card, qualification}
- *  5. ≥2 langues distinctes parmi {en, fr, es}
- *  6. ≥2 evidence rows avec source diff/revision consultable
- *  7. toutes les evidence rows partagent ce proposition_type
- *  8. aucune evidence row hors articles du match (vérifié en amont par
- *     resolveUniqueMatchForRows — si match_id est non nul, la watchlist
- *     du match a déjà filtré les articles)
+ *  5. claim key strict non null et identique sur toutes les preuves
+ *  6. ≥2 langues distinctes parmi {en, fr, es}
+ *  7. ≥2 evidence rows avec source diff/revision consultable
+ *  8. toutes les evidence rows partagent le proposition_type du pattern
+ *  9. toutes les evidence rows appartiennent au match canonique
+ *     (watchlist_match_id === match_id), avec watchlist_role === "match"
+ *     et article_type === "match".
  */
 export function isLevel2AutoPublishable(pattern: DetectedPattern): Level2Result {
   if (pattern.pattern_type !== "language_convergence") {
@@ -98,6 +140,14 @@ export function isLevel2AutoPublishable(pattern: DetectedPattern): Level2Result 
     };
   }
 
+  const strictClaimKey = pattern.strict_claim_key;
+  if (!strictClaimKey) {
+    return {
+      eligible: false,
+      reason: "strict_claim_key is null — claim cannot be normalised",
+    };
+  }
+
   if (!pattern.evidenceRows || pattern.evidenceRows.length === 0) {
     return { eligible: false, reason: "no evidence rows" };
   }
@@ -107,6 +157,30 @@ export function isLevel2AutoPublishable(pattern: DetectedPattern): Level2Result 
       return {
         eligible: false,
         reason: `evidence proposition_type mismatch: ${row.proposition_type} vs ${propType}`,
+      };
+    }
+    if (row.strict_claim_key !== strictClaimKey) {
+      return {
+        eligible: false,
+        reason: `evidence strict_claim_key mismatch: ${row.strict_claim_key ?? "null"} vs ${strictClaimKey}`,
+      };
+    }
+    if (row.watchlist_match_id !== pattern.match_id) {
+      return {
+        eligible: false,
+        reason: `evidence article ${row.article_id} is not in the canonical match watchlist`,
+      };
+    }
+    if (row.watchlist_role !== ALLOWED_AUTO_WATCHLIST_ROLE) {
+      return {
+        eligible: false,
+        reason: `evidence article ${row.article_id} has watchlist_role=${row.watchlist_role ?? "null"} (only role=match is eligible)`,
+      };
+    }
+    if (row.article_type !== ALLOWED_AUTO_ARTICLE_TYPE) {
+      return {
+        eligible: false,
+        reason: `evidence article ${row.article_id} has article_type=${row.article_type} (only article_type=match is eligible)`,
       };
     }
   }
@@ -140,5 +214,19 @@ export function isLevel2AutoPublishable(pattern: DetectedPattern): Level2Result 
     }
   }
 
-  return { eligible: true, languages: distinctLanguages };
+  distinctLanguages.sort();
+  const observationKey = buildObservationKey(
+    CANONICAL_REHEARSAL_MATCH_SLUG,
+    propType,
+    strictClaimKey,
+  );
+  const slug = buildObservationSlug(propType, observationKey);
+
+  return {
+    eligible: true,
+    languages: distinctLanguages,
+    observationKey,
+    slug,
+    strictClaimKey,
+  };
 }
