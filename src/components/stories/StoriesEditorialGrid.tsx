@@ -18,7 +18,7 @@ export default function StoriesEditorialGrid({ stories, activeFilter, isFilterin
             href="/matches"
             className="font-mono text-xs uppercase tracking-widest px-6 py-3 border border-navy/20 text-navy hover:bg-navy hover:text-cream transition-all duration-300 inline-block"
           >
-            Voir les matchs observés
+            Voir les matchs
           </a>
         </div>
       </section>
