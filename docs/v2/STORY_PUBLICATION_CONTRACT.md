@@ -41,15 +41,35 @@ durablement la crédibilité du produit.
 
 Ce document définit donc :
 
-1. La taxonomie des sorties : **trace** → **signal** → **candidat** → **story**.
-2. Les patterns rejetés comme stories publiques autonomes, même détectables.
-3. La checklist universelle qu'une story doit passer pour être publiable.
-4. Le contrat de rendu public minimal.
-5. Les critères d'échec du test PSG — Arsenal.
-6. Les écarts critiques entre le pipeline actuel et ce contrat.
+1. La taxonomie à cinq niveaux : **trace** → **signal interne** →
+   **observation automatique publiable** → **candidat éditorial
+   interprétatif** → **story éditoriale validée**.
+2. La whitelist stricte des faits autorisés à devenir publics automatiquement.
+3. Les patterns rejetés comme stories publiques autonomes, même détectables.
+4. La checklist universelle qu'une publication doit passer.
+5. Le contrat de rendu public minimal (mobile-first).
+6. Les critères de succès et d'échec du test PSG — Arsenal du samedi 30 mai 2026.
+7. Les écarts critiques entre le pipeline actuel et ce contrat.
 
 Le document ne décrit pas comment l'implémenter. Il sert à dire **non** à une
-story médiocre, même si elle a passé tous les filtres techniques.
+story médiocre, même si elle a passé tous les filtres techniques — **et à
+dire oui**, automatiquement et sans validation humaine préalable, à une
+observation factuelle simple, multi-sources et sourcée.
+
+### Contrainte opérationnelle du rehearsal PSG — Arsenal
+
+Le match test a lieu le **samedi 30 mai 2026**. Le propriétaire du produit
+ne sera pas devant un ordinateur pendant le match : il consultera le site
+depuis son téléphone, comme un lecteur extérieur. Il ne pourra donc pas
+effectuer une validation humaine de chaque candidat avant publication.
+
+L'objectif du rehearsal est précisément de vérifier qu'une **publication
+publique automatique, prudente, sourcée** peut fonctionner en situation
+réelle. La règle correcte n'est pas « tout doit être manuel ». Elle est :
+
+> **publier automatiquement uniquement ce qui est mécaniquement prouvable,
+> sobre et sourcé ; bloquer automatiquement tout ce qui demande une
+> interprétation.**
 
 ---
 
@@ -247,7 +267,12 @@ sont candidats, **aucun rattachement n'est effectué** (`match_id=null`).
 
 ---
 
-## 4. Les quatre niveaux
+## 4. Les cinq niveaux
+
+La taxonomie sépare ce qui peut devenir public **automatiquement** de ce qui
+exige une revue humaine. Les niveaux 0-1 ne sont jamais publics. Le niveau 2
+est **publiable automatiquement** sous conditions strictes. Les niveaux 3-4
+restent bloqués sans validation humaine.
 
 ### Niveau 0 — Trace brute
 
@@ -256,58 +281,103 @@ sont candidats, **aucun rattachement n'est effectué** (`match_id=null`).
 * Représentation DB : `revision_traces` + `trace_private_content`.
 * Usage : observatoire technique interne, debug, métrique de collecte.
 * Public : **jamais publiée comme story**. Peut au mieux être citée comme
-  source à l'appui d'une story validée, via `story_evidence`.
+  source à l'appui d'une observation ou story validée, via `story_evidence`.
 
 ### Niveau 1 — Signal interne
 
 > Plusieurs éditions ont modifié des pages liées au match dans une fenêtre courte.
+> Une page est modifiée plusieurs fois.
+> Une langue mentionne quelque chose, les autres non.
 
-* Représentation DB : agrégats internes (volume d'éditions, écarts entre langues,
-  patterns sans claim strict).
-* Usage : aide à examiner les diffs ; priorité de revue.
+* Représentation DB : agrégats internes (volume d'éditions, écarts entre
+  langues, patterns sans claim strict), `detected_patterns` non liés à un
+  `published_story_id`.
+* Usage : aide à examiner les diffs ; priorité de revue interne.
 * Public : **jamais publié comme histoire autonome**. N'apparaît dans aucun
   endpoint `/api/public/v1/*`.
 
-### Niveau 2 — Candidat éditorial
+### Niveau 2 — Observation automatique publiable
 
-> Le résultat final semble avoir été ajouté dans EN, FR et ES à quelques minutes d'intervalle.
+Définition canonique :
 
-* Représentation DB : `detected_patterns` (toutes lignes non liées à
-  `published_story_id`), `story_candidates`.
-* Conditions pour devenir candidat :
-  * `match_id` résolu de façon non ambiguë (`resolveUniqueMatchIdForRows`
-    retourne un id) ;
-  * `strictConvergenceClaimKey` rempli (pas `match_result` seul) ;
-  * `safety_checks_passed=true` ;
-  * `manual_review_reason=null`.
-* Usage : revue humaine (Desk). Doit exposer les diffs et les traces sources.
-* Public : **non public tant que non validé**. Visible uniquement côté Desk.
+> Une observation automatique publiable décrit un fait documentaire simple,
+> détecté dans les pages réellement rattachées au match canonique, attesté
+> par plusieurs traces sources consultables, sans interprétation éditoriale.
 
-### Niveau 3 — Story publiable
+Conditions cumulatives obligatoires :
 
-> **EXEMPLE HYPOTHÉTIQUE.** Le but de Vitinha en première mi-temps est entré
-> dans trois éditions de Wikipédia en moins de 12 minutes.
+* liée au match canonique `2026-ucl-final-psg-arsenal` ;
+* issue **uniquement** des 12 articles sélectionnés via `match_watchlist`
+  (`enabled=true`) pour ce `match_id` ;
+* `match_id` unique et non ambigu (`resolveUniqueMatchIdForRows` retourne un
+  id, pas `null`) ;
+* événement appartenant à la **whitelist stricte** définie en §7.1 ;
+* même claim structurée (`strictConvergenceClaimKey` non null) attestée dans
+  **au moins 2 éditions linguistiques distinctes** parmi EN / FR / ES ;
+* au moins un lien `source_revision_url` **ou** `source_diff_url` Wikimedia
+  consultable pour **chaque** preuve annoncée ;
+* titre et résumé descriptifs, sans interprétation, sans qualificatif
+  émotionnel, sans classement entre langues ;
+* bloc visible obligatoire `Ce que l'on ne peut pas conclure` ;
+* badge public explicite : `OBSERVATION AUTOMATIQUE · SOURCES CONSULTABLES`.
+
+Publication :
+
+* **peut** être publique automatiquement pendant le rehearsal, uniquement
+  après implémentation technique conforme au Prompt 3B et activation
+  contrôlée du flag dédié ;
+* ne nécessite **pas** de validation humaine avant affichage ;
+* doit pouvoir être consultée depuis mobile pendant le match.
+
+Représentation DB :
+
+* `published_stories.publication_status='published'`,
+  `published_by_pipeline='auto_template_v1'`, rattachée à
+  `detected_patterns.published_story_id`, avec `story_evidence` non vide
+  pointant vers les `revision_traces` sources (au moins une par langue
+  annoncée).
+
+Exemple hypothétique (texte attendu sur mobile) :
+
+> **OBSERVATION AUTOMATIQUE · SOURCES CONSULTABLES**
 >
-> L'article anglais du match a inscrit le but à la 23e minute du temps réel
-> ([diff EN](https://example/diff?lang=en)), l'article français quatre minutes
-> plus tard ([diff FR](https://example/diff?lang=fr)), l'article espagnol après
-> sept minutes supplémentaires ([diff ES](https://example/diff?lang=es)).
+> *Un but ajouté dans deux éditions Wikipédia suivies de PSG — Arsenal.*
 >
-> Observation : les trois pages ont enregistré le même couple
-> `(buteur, minute)` après l'évènement réel du match.
+> Le but attribué à Vitinha (23e minute) apparaît dans l'article anglais du
+> match et dans l'article français dans une fenêtre de 6 minutes.
 >
-> Limite : cet ordre d'apparition ne permet pas de conclure à une hiérarchie
-> entre communautés linguistiques, ni à une qualité différente entre les
-> rédactions. Les diffs ne sont pas comparés littéralement.
+> Ce que l'on peut observer :
+> - article anglais — diff `https://en.wikipedia.org/?diff=...` — 22:09 UTC ;
+> - article français — diff `https://fr.wikipedia.org/?diff=...` — 22:15 UTC.
 >
-> Sources : trois diffs Wikipédia consultables ; aucune comparaison de passage
-> textuelle n'est affichée tant qu'aucun extrait modéré n'a été publié.
+> Ce que l'on ne peut pas conclure :
+> Cet ordre d'apparition décrit la mise à jour des articles, pas la
+> réaction des publics. Les phrases exactes ne sont pas comparées.
 
-* Représentation DB : `published_stories.publication_status='published'`,
-  rattachée à `detected_patterns.published_story_id`, avec
-  `story_evidence` non vide pointant vers les `revision_traces` sources.
-* Conditions : toute la checklist universelle §6.
-* Public : visible via `/api/public/v1/stories/*` et la home magazine.
+### Niveau 3 — Candidat éditorial interprétatif
+
+Exemples :
+
+* différence de formulation entre langues sur le même évènement ;
+* réécriture ou contestation d'un passage ;
+* convergence complexe sur un fait non whitelisté ;
+* instabilité d'article qui semble significative mais exige la lecture des
+  diffs.
+
+* Représentation DB : `detected_patterns` sans `published_story_id`,
+  optionnellement `story_candidates`.
+* Usage : peut être enregistré en interne, exposé au Desk.
+* Public : **ne peut pas être publié automatiquement pendant le rehearsal.**
+  Doit attendre une revue humaine explicite.
+
+### Niveau 4 — Story éditoriale validée
+
+* Récit enrichi, comparatif, ou narratif vérifié après lecture humaine des
+  sources.
+* Représentation DB : `published_stories` avec
+  `published_by_pipeline='manual'` et trace de revue dans `editorial_reviews`.
+* **Hors objectif opérationnel obligatoire du test live** : ce niveau n'est
+  pas nécessaire pour valider le fonctionnement de samedi.
 
 ---
 
@@ -354,15 +424,19 @@ sont candidats, **aucun rattachement n'est effectué** (`match_id=null`).
 * **Risque de surinterprétation** : modéré. Le mot « équivalente » doit rester
   méthodologiquement strict (claim structurée identique, pas phrase identique).
   Le template actuel précise déjà cette limite (`templates.ts:88-91`).
-* **Décision** : **ÉLIGIBLE À PUBLICATION APRÈS PREUVES**, c'est-à-dire :
+* **Décision** : **AUTO-PUBLIABLE NIVEAU 2** pendant le rehearsal, à condition
+  stricte cumulative :
   * `match_id` unique exigé (déjà imposé pour publication auto) ;
-  * `strictConvergenceClaimKey` rempli (déjà imposé) ;
-  * au moins une `goal_scored | red_card | substitution | qualification`
-    (pas `match_result` seul, déjà bloqué) ;
-  * `story_evidence` non vide avec un `source_revision_url` par langue ;
-  * pendant le rehearsal PSG — Arsenal : `manual_review_required` malgré tout
-    (cf. §8). C'est le seul pattern qui peut, à terme, justifier un
-    automatisme contrôlé hors rehearsal.
+  * `strictConvergenceClaimKey` rempli (déjà imposé — interdit `match_result`
+    seul) ;
+  * `proposition_type` ∈ whitelist §7.1 (`goal_scored` ou `red_card` ;
+    `qualification` si éligible — voir §7.1) ;
+  * `story_evidence` non vide avec un `source_revision_url` (ou
+    `source_diff_url`) par langue attestée ;
+  * `safety_checks_passed=true` (PII, vocabulaire interdit, causalité,
+    tension nationale).
+* C'est le **seul** pattern autorisé à passer en publication automatique
+  pendant le rehearsal. Tous les autres restent bloqués.
 
 ### 5.3 `under_radar`
 
@@ -472,14 +546,21 @@ RÉDACTION
 - respecte les safety filters (PII, vocabulaire interdit, causalité interdite,
   tension nationale interdite) ; cf. patterns/src/safety.ts.
 
-VALIDATION
-- pendant le rehearsal PSG — Arsenal, manual_review_required reste imposé
-  pour tous les patterns sans exception ;
-- AUTO_PUBLICATION_ENABLED reste à false sur Render pendant tout le rehearsal ;
-- une story rejetée, incomplète ou non validée reste invisible publiquement
-  (publication_status ∈ {'draft'}, ou rétractée via retracted_at) ;
-- toute publication post-rehearsal exige un commit explicite côté patterns
-  documenté dans docs/v2/RUNBOOK_GO_LIVE.md.
+VALIDATION (rehearsal PSG — Arsenal, samedi 30 mai 2026)
+- les observations automatiques de niveau 2 conformes à la whitelist §7.1 et
+  aux exigences de preuve peuvent être publiées automatiquement, sans
+  validation humaine préalable ;
+- les candidats éditoriaux de niveau 3 (interprétatifs) restent bloqués sans
+  validation humaine, même pendant le rehearsal ;
+- les stories éditoriales enrichies de niveau 4 ne sont pas nécessaires pour
+  valider le fonctionnement live ;
+- aucune activation publique n'est autorisée avant que le Prompt 3B ait
+  implémenté les garde-fous techniques, les preuves visibles et un test
+  contrôlé avant match sur une fenêtre courte ;
+- un interrupteur de sécurité (kill switch) doit permettre de désactiver la
+  publication automatique sans supprimer les traces ;
+- une story rétractée (`retracted_at IS NOT NULL`) reste invisible
+  publiquement via la vue `v_public_stories`.
 ```
 
 Cette checklist est cumulative avec les contrôles déjà codés. Elle ne se
@@ -487,190 +568,282 @@ substitue pas aux `runSafetyChecks` ni à `manualReviewReason` : elle s'y ajoute
 
 ---
 
-## 7. Types de stories autorisés pour le test PSG — Arsenal
+## 7. Publication automatique autorisée pendant le rehearsal
 
-### 7.1 Propagation d'un fait de match — `language_convergence`
+### 7.1 Whitelist stricte — faits auto-publiables
 
-* **Faits éligibles** :
-  * `goal_scored` avec `scorer` + `minute` renseignés ;
-  * `red_card` avec `player` (+ minute si disponible) ;
-  * `substitution` avec `player_in` + `player_out` + `minute` ;
-  * `qualification` (titre remporté) avec `team` + `stage`.
-* **Faits non éligibles pour ce test** :
-  * `match_result` (score brut) seul → bloqué par
-    `strictConvergenceClaimKey` qui retourne `null` pour ce type.
-* **Intérêt football** : élevé (chronologie réelle d'un fait du match).
-* **Intérêt Wikipédia** : élevé (vitesse de propagation entre éditions).
-* **Intérêt data** : élevé (timestamps + diffs vérifiables).
-* **Preuve minimale** : ≥2 `revision_traces` dans des `language_code` distincts,
-  `source_revision_url` consultables, claim structurée identique.
-* **Automatisable actuellement** : **partiellement**. Le pipeline détecte. La
-  publication doit rester `manual_review_required` pour le rehearsal.
-* **Validation humaine obligatoire pendant le rehearsal** : **oui**.
-* **Décision rehearsal** : **CANDIDAT MANUEL UNIQUEMENT** (revue Desk
-  obligatoire). Pas de publication auto, même si tous les filtres passent.
+Un fait n'est auto-publiable comme **observation automatique de niveau 2** que
+s'il appartient à la liste ci-dessous **et** s'il est attesté dans ≥2
+éditions linguistiques distinctes (EN/FR/ES) sur un article
+`article_type='match'` rattaché au `match_id` unique du match canonique.
 
-### 7.2 Réécriture ou instabilité d'un passage — `article_instability`
+Le statut de chaque type est évalué contre le code réel (`analyzer/src/
+extractor.ts:38-52` pour la liste close des `proposition_type`, et
+`patterns/src/matchers.ts:77-127` pour les claims structurées acceptées par
+`strictConvergenceClaimKey`).
 
-* **Intérêt football** : faible sans inspection des passages réels.
-* **Intérêt Wikipédia** : potentiellement élevé, mais conditionné à
-  l'affichage de passages comparables (impossible sans
-  `public_trace_excerpts.safe_to_publish=true`).
-* **Intérêt data** : moyen.
-* **Preuve minimale** : ≥3 traces dont signes de `size_delta` opposés, plus
-  identification d'un passage commun (impossible automatiquement aujourd'hui).
-* **Automatisable actuellement** : **non** pour publication. Détection oui.
-* **Validation humaine obligatoire** : **oui, systématiquement**.
-* **Décision rehearsal** : **CANDIDAT MANUEL UNIQUEMENT**. Sortie utilisée
-  comme fiche de revue interne, jamais publiée telle quelle.
+| `proposition_type` | Claim structurée exigée | Support code actuel | Décision rehearsal |
+| --- | --- | --- | --- |
+| `goal_scored` | `scorer` + `minute` | **SUPPORTÉ ACTUELLEMENT** (`matchers.ts:87-92`) | **AUTORISÉ** si attesté dans ≥2 éditions et sources consultables |
+| `red_card` | `player` (+ `minute`) | **SUPPORTÉ ACTUELLEMENT** (`matchers.ts:93-98`) | **AUTORISÉ** si attesté dans ≥2 éditions et sources consultables |
+| `qualification` | `team` + `stage_reached` | **SUPPORTÉ ACTUELLEMENT** (`matchers.ts:112-117`) | **AUTORISÉ** pour le titre/victoire finale, **À CONFIRMER en log** que l'extracteur produit réellement `team` + `stage_reached` non vides sur ce match |
+| `sanction` | `target` + `kind` | **SUPPORTÉ ACTUELLEMENT** (`matchers.ts:118-123`) mais sémantique ambiguë | **REFUSÉ** pour le rehearsal : trop ouvert (suspension/avertissement/blessure ?) sans vérification humaine |
+| `record` ou distinction | — | **NON SUPPORTÉ ACTUELLEMENT** : ni `record` ni `distinction` ne figurent dans la liste close ; le plus proche est `performance`, qui n'a **pas** de claim structurée dans `strictConvergenceClaimKey` | **REFUSÉ** pour le rehearsal |
 
-### 7.3 Formulation différente d'un même évènement — `language_divergence`
+### 7.2 Refusés automatiquement
 
-* **Intérêt football** : faible.
-* **Intérêt Wikipédia** : très élevé si bien fait.
-* **Intérêt data** : élevé si bien sourcé.
-* **Preuve minimale** : passages comparables publiés en clair sous licence
-  CC BY-SA 4.0 via `public_trace_excerpts`.
-* **Automatisable actuellement** : **non**. Aucun pipeline ne peuple aujourd'hui
-  `public_trace_excerpts` ; le template n'existe pas (`templates.ts:140-144`).
-* **Validation humaine obligatoire** : **oui**.
-* **Décision rehearsal** : **REJETÉ POUR LE TEST**. À reconsidérer uniquement
-  une fois qu'un workflow de modération de passages est implémenté et testé.
+Les signaux suivants ne peuvent jamais devenir publics pendant le rehearsal,
+même s'ils sont techniquement détectés :
 
-### 7.4 Récap documentaire post-match — `match_recap`
+* `substitution` seule, même multi-sources : trop banale pour une publication
+  live (claim techniquement supportée via `matchers.ts:105-111`, décision
+  produit : **REFUSÉ**) ;
+* `yellow_card` seul : trop fréquent, faible valeur éditoriale (claim
+  supportée, décision produit : **REFUSÉ**) ;
+* `match_result` brut : `strictConvergenceClaimKey` retourne déjà `null`
+  (`matchers.ts:80-86`) ; **bloqué par construction** ;
+* `lineup_change`, `transfer`, `biographical_fact`, `performance`, `other`,
+  `noise` : aucune claim structurée dans `strictConvergenceClaimKey`,
+  **bloqués par construction** ;
+* `under_radar` (absence dans d'autres éditions) : **REJETÉ** — signal
+  interne uniquement ;
+* `article_instability` (réécriture / volume) : **REJETÉ** — fiche de revue
+  interne uniquement, jamais publiée telle quelle ;
+* `language_divergence` : **BLOQUÉ** — exige des extraits publics
+  comparables (`public_trace_excerpts.safe_to_publish=true`), aucun pipeline
+  ne les produit aujourd'hui ;
+* volume d'éditions élevé sans claim structurée : **signal interne** ;
+* absence dans une langue : **rejeté comme story** ;
+* toute claim attestée par une seule édition : **rejeté** ;
+* toute comparaison de formulation sans extraits publics sûrs : **bloqué**.
 
-* **Intérêt football** : moyen à élevé selon les faits captés.
-* **Intérêt Wikipédia** : élevé (chronologie de la fabrique).
+### 7.3 Récapitulatif par catégorie de story
+
+#### 7.3.1 Propagation d'un fait de match (`language_convergence` + whitelist §7.1)
+
+* **Niveau** : **2 — Observation automatique publiable**.
+* **Intérêt football** : élevé.
+* **Intérêt Wikipédia** : élevé.
 * **Intérêt data** : élevé.
-* **Preuve minimale** : ≥3 propositions substantielles rattachées au même
-  `match_id` après `scheduled_at`, chacune sourcée.
-* **Automatisable actuellement** : **non** (template absent), mais le format
-  est le plus robuste à implémenter au Prompt 3B en cas d'échec des autres
-  patterns.
-* **Validation humaine obligatoire pendant le rehearsal** : **oui**.
-* **Décision rehearsal** : **CANDIDAT MANUEL UNIQUEMENT** si implémenté à
-  temps ; sinon **REJETÉ POUR LE TEST**.
+* **Preuve minimale** : ≥2 `revision_traces` dans des `language_code`
+  distincts, `source_revision_url` ou `source_diff_url` consultables, claim
+  structurée identique appartenant à la whitelist §7.1.
+* **Décision rehearsal** : **AUTORISÉ EN PUBLICATION AUTOMATIQUE** sans
+  validation humaine préalable, sous toutes les conditions du Niveau 2.
 
-### 7.5 Signaux explicitement rejetés comme stories publiques
+#### 7.3.2 Réécriture ou instabilité d'un passage (`article_instability`)
+
+* **Niveau** : **3 — Candidat éditorial interprétatif**.
+* **Preuve minimale** : ≥3 traces avec signes de `size_delta` opposés, plus
+  identification d'un passage commun (impossible automatiquement aujourd'hui
+  faute de `public_trace_excerpts.safe_to_publish=true`).
+* **Décision rehearsal** : **REJETÉ EN PUBLICATION AUTOMATIQUE**. Conservé
+  comme fiche de revue interne.
+
+#### 7.3.3 Formulation différente d'un même évènement (`language_divergence`)
+
+* **Niveau** : **3 — Candidat éditorial interprétatif** (et template absent).
+* **Preuve minimale** : passages comparables publiés en clair sous licence
+  CC BY-SA 4.0 via `public_trace_excerpts.safe_to_publish=true`.
+* **Décision rehearsal** : **REJETÉ** — le pipeline ne peuple pas
+  `public_trace_excerpts` aujourd'hui.
+
+#### 7.3.4 Récap documentaire post-match (`match_recap`)
+
+* **Niveau** : **3 — Candidat éditorial interprétatif** par défaut, ou
+  **2 — Observation automatique** si tous les faits constitutifs du récap
+  appartiennent à la whitelist §7.1 (`goal_scored`, `red_card`,
+  `qualification`).
+* **Preuve minimale** : ≥3 propositions substantielles whitelistées
+  rattachées au même `match_id` après `scheduled_at`, chacune sourcée.
+* **Automatisable actuellement** : **non** (template absent dans
+  `patterns/src/templates.ts:140-144`).
+* **Décision rehearsal** : **HORS PÉRIMÈTRE** — à évaluer après rehearsal
+  comme format de repli si la convergence ne suffit pas.
+
+### 7.4 Signaux explicitement rejetés comme stories publiques
 
 * Toute story bâtie sur `under_radar` seul.
-* Toute story bâtie sur un seul `match_result` avec score brut (sans claim
-  structurée vérifiable côté équipes / ordre / scénario).
+* Toute story bâtie sur un `match_result` brut (déjà bloqué par construction).
 * Toute story bâtie sur un volume d'éditions élevé sans claim structurée.
-* Toute story bâtie sur une absence détectée par le pipeline (« cette page n'a
-  pas été modifiée ») — l'absence d'edit ≠ absence de contenu.
+* Toute story bâtie sur une absence détectée (« cette page n'a pas été
+  modifiée ») — l'absence d'edit ≠ absence de contenu.
 * Toute story rattachée à un match avec `match_id=null` ou ambigu.
 * Toute story dont les langues annoncées ne correspondent pas exactement aux
   traces fournies dans `story_evidence`.
 * Toute story qui attribue une intention, une opinion, un biais ou un
   sentiment à une « communauté » linguistique ou nationale.
+* Toute story `substitution` ou `yellow_card` isolée.
 
 ---
 
-## 8. Contrat minimal de rendu public
+## 8. Contrat minimal de rendu public (mobile-first)
 
-Lorsque (et seulement lorsque) une story sera autorisée à être publique, la
-page détail story doit afficher ces blocs et seulement ceux-ci :
+Le rendu d'une **observation automatique de niveau 2** doit être lisible et
+utile depuis un téléphone, en lecture seule, sans interaction complexe.
+
+### 8.1 Bloc d'observation automatique — contenu obligatoire
 
 ```text
-- Titre factuel (templates.ts, max 500 char, sans emoji marketing) ;
-- Résumé compréhensible par un non-expert Wikipédia (excerpt) ;
-- Match concerné (lien vers /match/{slug} canonique pinné) ;
-- Type de story (story_type humain : convergence linguistique / récap / …) ;
-- Moment ou fenêtre temporelle observée (observed_window_start →
-  observed_window_end en UTC) ;
-- Articles / éditions concernés : liste des wiki_articles sources avec
-  page_title exact, language_code, canonical_url ;
-- Observation (observation_text) ;
-- Ce que l'on ne peut pas conclure (limitation_text) — bloc obligatoire ;
-- Sources vérifiables : pour chaque story_evidence, afficher
-  language_code + page_title + revision_timestamp + lien
-  source_revision_url et/ou source_diff_url ;
-- Comparaison ou timeline UNIQUEMENT si toutes les sources nécessaires
-  existent réellement.
+Badge supérieur (toujours visible) :
+  OBSERVATION AUTOMATIQUE · SOURCES CONSULTABLES
+
+Titre factuel (templates.ts, max 500 char, sans émotion, sans classement) :
+  Exemple : "Un but apparaît dans deux éditions Wikipédia suivies"
+
+Résumé descriptif (1 à 2 phrases) :
+  - rappelle le fait whitelisté détecté (but, carton rouge, qualification) ;
+  - indique le nombre d'éditions distinctes concernées ;
+  - indique la fenêtre temporelle observée.
+
+Métadonnées :
+  - match concerné (lien /match/2026-ucl-final-psg-arsenal) ;
+  - type de fait détecté (goal_scored | red_card | qualification) ;
+  - éditions linguistiques attestées (EN, FR, ES — codes upper-case) ;
+  - fenêtre temporelle (observed_window_start → observed_window_end UTC).
+
+Bloc "Ce que l'on peut observer" (obligatoire) :
+  Pour chaque story_evidence :
+  - titre exact de page (page_title) ;
+  - langue (language_code) ;
+  - timestamp révision (revision_timestamp en UTC) ;
+  - lien Wikimédia consultable (source_diff_url > source_revision_url).
+
+Bloc "Ce que l'on ne peut pas conclure" (obligatoire, jamais vide) :
+  Phrase descriptive issue de limitation_text, par exemple :
+  "Cet ordre d'apparition décrit la mise à jour des articles, pas la réaction
+  des publics. Les phrases exactes ne sont pas comparées."
 ```
 
-Interdictions explicites de rendu public :
+### 8.2 Interdictions explicites de rendu public
 
 ```text
-- CTA "Comparer les versions" sans public_trace_excerpts.safe_to_publish=true
-  pour CHACUNE des langues comparées ;
-- CTA "Voir les passages" si aucun extrait public modéré n'est rattaché à la
-  story ;
+- Toute phrase du type "les Wikipédia réagissent" ou "l'édition X réagit" ;
+- Tout classement implicite entre langues ("plus rapide", "en retard",
+  "en avance", "ignore", "silence") ;
+- Toute conclusion sur l'intérêt ou l'attention des publics ;
+- Toute comparaison de passages si public_trace_excerpts.safe_to_publish=true
+  n'existe pas pour CHACUNE des langues comparées ;
+- CTA "Comparer les versions" si aucune comparaison textuelle n'est
+  disponible ;
 - Carte chronologique avec cellules vides ou marquées "à confirmer" ;
 - Liste de "sujets suivis" sans entrée correspondante dans match_watchlist ;
 - Bandeau "Comparaison entre éditions" si comparison_snapshot_items est vide ;
-- Texte de template générique non rattaché à des revision_traces réelles
-  (le `auto_template_v1` doit toujours s'appuyer sur des story_evidence non
-  nuls) ;
-- Toute description impliquant une "communauté wikipédienne nationale" ou
-  une "édition X est en retard / en avance".
+- Texte de template générique non rattaché à des revision_traces réelles ;
+- Toute description impliquant une "communauté wikipédienne nationale".
 ```
 
-L'API publique (`api/public/v1/stories/[slug].ts`) reste sur 404 strict tant
-que ce contrat n'est pas testé sur au moins une story réelle convergence
-validée manuellement post-rehearsal.
+### 8.3 États publics du match pendant le rehearsal
+
+La surface mobile doit permettre de distinguer quatre états lisibles à froid :
+
+* **Collecte non activée** : badge "COLLECTE NON ACTIVÉE" sur la page match ;
+  aucune observation publiée ; comportement pré-rehearsal.
+* **Collecte active, aucune observation publiable** : badge "COLLECTE EN
+  COURS" ; bloc "Aucune observation conforme à ce stade" ; pas de candidat
+  affiché.
+* **Observation automatique publiée** : carte conforme §8.1, accessible depuis
+  la page match **et** depuis la home magazine.
+* **Erreur de pipeline** : indicateur explicite (`COLLECTE INTERROMPUE` ou
+  équivalent), sans prétendre publier des observations.
+
+Ces quatre états doivent être clairement distinguables en un coup d'œil
+depuis un téléphone, même pour un lecteur qui n'a aucun contexte interne.
+
+### 8.4 État de l'API publique stories pendant le rehearsal
+
+La règle précédente « 404 strict jusqu'à validation manuelle d'une première
+story » **ne s'applique plus**. La nouvelle règle est :
+
+* `GET /api/public/v1/stories/{slug}` retourne 200 si et seulement si la
+  story référencée satisfait toutes les conditions du Niveau 2 (§4) **et**
+  appartient à la whitelist §7.1 **et** dispose de `story_evidence` non vides
+  pour chaque langue annoncée ;
+* dans tous les autres cas, l'endpoint retourne 404 (slug inexistant ou
+  contenu non conforme) ;
+* `GET /api/public/v1/stories` (liste) doit refléter strictement la vue
+  `v_public_stories` filtrée sur les stories conformes au Niveau 2.
 
 ---
 
-## 9. Critères d'échec du test PSG — Arsenal
+## 9. Critères de succès et d'échec du rehearsal PSG — Arsenal
 
-Le test n'est pas « réussi par défaut ». Les critères suivants déclenchent une
-décision produit explicite.
+Le rehearsal du samedi 30 mai 2026 a une vocation opérationnelle : vérifier,
+depuis un téléphone, qu'une publication publique automatique prudente
+fonctionne. Il n'exige pas qu'une story spectaculaire soit produite.
 
-### 9.1 Indicateurs d'échec absolu
+### 9.1 Succès technique minimum
 
-* Aucune modification substantielle sur les 12 pages sélectionnées dans la
-  fenêtre `−6h / +48h` autour du coup d'envoi.
-* Uniquement des `proposition_type='noise'` ou `'other'` à confidence < 0.4
-  pendant tout le match.
-* Aucun `language_convergence` détecté avec `strictConvergenceClaimKey` non
-  null et `match_id` unique.
-* Aucun `revision_traces` rattachable au `match_id` PSG — Arsenal via
-  `match_watchlist`.
-* Tous les `DRY_RUN_CANDIDATE` loggés concernent `under_radar` ou
-  `article_instability`, qui sont déjà classés
-  CANDIDAT MANUEL / REJETÉ.
+Le test est techniquement réussi si, depuis un téléphone, le propriétaire
+peut constater **tous** les points suivants :
 
-### 9.2 Indicateurs d'échec qualitatif
+* la page match `/match/2026-ucl-final-psg-arsenal` reste accessible ;
+* l'état de collecte est correctement affiché (un des quatre états §8.3) ;
+* **au moins une observation automatique conforme** est publiée si un
+  événement whitelisté (§7.1) est effectivement détecté dans ≥2 éditions ;
+* chaque publication expose ses sources consultables (liens diff/revision
+  Wikimédia réellement cliquables) ;
+* **aucun signal interdit** n'est publié (pas de `under_radar`, pas de
+  `article_instability`, pas de `substitution` seule, pas de
+  `match_result` brut, pas de claim mono-langue, pas d'attribution
+  communautaire) ;
+* le kill switch permet, si nécessaire, de désactiver la publication
+  automatique sans supprimer les traces déjà collectées.
 
-* Une convergence est détectée mais la claim sous-jacente n'est pas un fait
-  vérifiable (ex. `match_result` qui passerait sans équipes nominées — déjà
-  bloqué, mais à surveiller en log).
-* Les preuves Wikipédia sont consultables mais le contenu modifié n'est pas
+**Important** — l'absence de publication n'est **pas** automatiquement un
+échec technique si aucun événement n'atteint les critères de preuve. Le site
+doit dans ce cas afficher l'un des trois états lisibles :
+
+* aucune trace collectée ;
+* traces collectées mais aucun signal publiable (Niveau 1) ;
+* erreur de pipeline.
+
+### 9.2 Succès produit
+
+Le test produit est encourageant si **au moins une** observation
+automatique publiée paraît réellement intéressante à lire depuis mobile pour
+un lecteur extérieur (pas seulement pour l'auteur du produit).
+
+Critère subjectif assumé : la carte est lisible en 30 secondes sur
+téléphone, les sources sont cliquables, le lecteur comprend ce qui s'est
+passé sans nécessiter de contexte WikiMatch.
+
+### 9.3 Indicateurs d'échec qualitatif
+
+* Une observation est publiée mais le contenu modifié sous-jacent n'est pas
   reconnaissable comme un fait du match (ex. ajout de wikilien, mise à jour
-  de bandeau).
-* Une story candidat est techniquement publiable mais reste indigeste, non
-  lisible pour un fan non spécialiste.
-* Le travail manuel nécessaire pour transformer un candidat en story
-  publiable dépasse 30 minutes de revue par story (signe d'un produit qui
-  n'apporte pas de valeur scalable).
+  de bandeau de palmarès) → réglage de la whitelist ou du seuil de
+  confiance.
+* Un signal interdit (under_radar, instability, substitution, mono-langue)
+  apparaît publiquement → **échec grave** : kill switch immédiat, rétraction,
+  audit sécurité.
+* Plusieurs observations doublonnées sur le même fait → réglage de la
+  déduplication côté publisher (`isAlreadyPublished`).
+* La surface mobile ne distingue pas correctement les quatre états §8.3.
 
-### 9.3 Décision après répétition
+### 9.4 Décision après répétition
 
 ```text
 CONTINUER si :
-- ≥1 language_convergence avec claim strict (goal_scored | red_card |
-  substitution | qualification) détectée sur un article match avec match_id
-  unique, sources consultables, et candidat lisible par un fan non
-  technicien après ≤30 min de revue Desk ;
-- les autres patterns restent silencieux ou clairement classés "signal
-  interne" sans tentative de publication.
+- au moins une observation automatique de niveau 2 a été publiée
+  conformément à la whitelist §7.1 ET au contrat de rendu §8 ;
+- aucun signal interdit n'a fui publiquement ;
+- la carte publiée est jugée lisible et intéressante depuis mobile.
 
-PIVOTER si :
-- aucun convergence strict mais 1+ candidat de type match_recap
-  documentaire utile, suggérant que le format chronologique sourcé est plus
-  réaliste que la promesse "story live" ;
-- alors : implémenter match_recap au Prompt 3B comme format prioritaire,
-  rétrograder convergence en candidat documentaire.
+PIVOTER vers un observatoire / récap documentaire si :
+- le pipeline collecte correctement mais aucune observation automatique
+  n'a assez d'intérêt live ;
+- ET les traces accumulées permettent de construire, après match, un récap
+  chronologique sourcé utile (`match_recap` documentaire).
+  Alors : implémenter match_recap au Prompt suivant comme format prioritaire
+  post-match, sans prétendre publier en direct.
 
 ABANDONNER LA PROMESSE DE STORIES LIVE si :
-- aucun pattern utile n'émerge ;
-- ET les sorties les plus robustes se limitent à une chronologie technique
-  d'éditions sans intérêt footballistique ;
-- ET la friction manuelle pour publier une story dépasse durablement la
-  valeur ajoutée pour le lecteur.
-- alors : reconfigurer WikiMatch comme observatoire technique des éditions
+- aucune sortie automatique intéressante n'émerge ;
+- OU obtenir une publication intéressante exige systématiquement une
+  interprétation humaine approfondie incompatible avec un test mobile ;
+- OU plusieurs signaux interdits ont fui malgré les filtres.
+  Alors : reconfigurer WikiMatch comme observatoire technique des éditions
   Wikipédia liées au sport, sans promesse de stories autonomes, et
   retravailler le positionnement public en conséquence.
 ```
@@ -681,58 +854,99 @@ ABANDONNER LA PROMESSE DE STORIES LIVE si :
 
 | # | Constat | Écart | Statut |
 | - | ------- | ----- | ------ |
-| 1 | `language_convergence` peut publier auto si `AUTO_PUBLICATION_ENABLED=true` | Le contrat exige `manual_review_required` pour TOUS les patterns pendant le rehearsal, sans exception | **À durcir au Prompt 3B** : `manualReviewReason` doit retourner une raison non-null pour `language_convergence` tant que `REHEARSAL_MODE=true` ou tant que `AUTO_PUBLICATION_ENABLED=false` |
+| 1 | `manualReviewReason` bloque actuellement `article_instability` et `under_radar`, et `language_convergence` sans `match_id` unique (`publisher.ts:51-58`) | Le contrat exige un **mode rehearsal explicite** où `language_convergence` whitelisté (§7.1) passe en auto, et où tous les autres patterns restent bloqués par construction | **À durcir au Prompt 3B** : introduire un flag `REHEARSAL_AUTO_PUBLICATION_ENABLED` distinct de `AUTO_PUBLICATION_ENABLED`, et raffiner `manualReviewReason` pour bloquer aussi `language_convergence` dont la claim n'est pas dans la whitelist §7.1 (ex. `substitution`, `yellow_card`) |
 | 2 | `article_instability` template publie un texte « ACTIVITÉ À VÉRIFIER » | Le contrat classe ce pattern comme fiche interne | **À retraiter au Prompt 3B** : soit le template est explicitement marqué comme fiche Desk, soit il est retiré de `templates.ts` |
 | 3 | `under_radar` template existe | Le contrat rejette ce pattern comme story publique autonome | **À retirer au Prompt 3B** ou conserver uniquement comme fiche de priorisation Desk |
-| 4 | `public_trace_excerpts.safe_to_publish=true` n'est jamais produit | Le contrat exige cet état pour autoriser tout rendu « comparaison de passages » | **Bloquant** pour `language_divergence`, `article_instability` publics, et tout CTA « comparer » |
-| 5 | `match_recap` template absent | Le contrat le désigne comme format de repli le plus robuste | **À évaluer au Prompt 3B** selon résultat rehearsal |
-| 6 | `resolveUniqueMatchIdForRows` peut retourner `null` silencieusement | Le contrat impose `match_id` non-null pour publication | ✅ Déjà appliqué par `manualReviewReason` sur `language_convergence` |
-| 7 | `story_evidence.public_label` est généré comme `Trace 1`, `Trace 2`… | Le contrat impose un label lisible : langue + page exacte + horodatage | **À durcir au Prompt 3B** côté publisher avant publication réelle |
+| 4 | `public_trace_excerpts.safe_to_publish=true` n'est jamais produit | Le contrat exige cet état pour autoriser tout rendu « comparaison de passages » | **Cohérent** : aucun CTA « comparer » n'est autorisé pendant le rehearsal ; `language_divergence` reste bloqué |
+| 5 | `match_recap` template absent | Le contrat le désigne comme format de repli post-match, pas comme priorité du rehearsal | **À évaluer après rehearsal** selon le pivot §9.4 |
+| 6 | `resolveUniqueMatchIdForRows` peut retourner `null` silencieusement | Le contrat impose `match_id` non-null pour publication automatique | ✅ Déjà appliqué par `manualReviewReason` sur `language_convergence` |
+| 7 | `story_evidence.public_label` est généré comme `Trace 1`, `Trace 2`… (`publisher.ts:171`) | Le contrat impose un label lisible : langue + page exacte + horodatage | **À durcir au Prompt 3B** côté publisher avant publication réelle |
 | 8 | Aucun pipeline n'écrit dans `comparison_snapshots` / `article_instability_cases` | Le contrat interdit l'affichage de comparaison / instabilité publique sans ces données | **Cohérent** : ne pas afficher ces blocs tant que les pipelines correspondants n'existent pas |
-| 9 | `api/public/v1/stories/[slug].ts` retourne 404 | Cohérent avec le contrat tant qu'aucune story n'a passé revue manuelle | **À conserver** jusqu'à ce qu'une première story convergence soit validée manuellement |
-| 10 | `safety.ts` n'inclut pas d'interdiction explicite sur « édition X plus rapide que édition Y » | Le contrat interdit toute attribution de hiérarchie entre communautés linguistiques | **À envisager au Prompt 3B** : ajout d'un check de vocabulaire « plus rapide / en retard / en avance / silence de » sur les champs publics |
+| 9 | `api/public/v1/stories/[slug].ts` retourne 404 systématique (`stories/[slug].ts:14-23`) | Le contrat exige 200 dès qu'une observation conforme au Niveau 2 et à la whitelist §7.1 existe | **À câbler au Prompt 3B** : remplacer le 404 strict par une lecture stricte de `v_public_stories` filtrée sur les stories whitelistées |
+| 10 | `safety.ts` n'inclut pas d'interdiction explicite sur « édition X plus rapide » / « silence de » / « réaction de » | Le contrat interdit toute attribution de hiérarchie ou de réaction entre communautés linguistiques | **À ajouter au Prompt 3B** : nouvelle famille de regex dans `safety.ts` (`plus rapide|en retard|en avance|silence|ignore|réaction|réagit`) appliquée à tous les champs publics |
+| 11 | Le frontend ne distingue pas explicitement les 4 états (collecte non activée / active sans signal / observation publiée / erreur) | Le contrat §8.3 exige ces 4 états lisibles sur mobile | **À câbler au Prompt 3B** : exposer un état structuré côté API matches/[slug] et côté surface mobile |
+| 12 | Aucun kill switch « désactiver publication sans supprimer traces » exposé simplement | Le contrat §9.1 l'exige | **À câbler au Prompt 3B** : la valeur `REHEARSAL_AUTO_PUBLICATION_ENABLED=false` doit suffire à stopper toute nouvelle publication sans interrompre le worker |
 
 ---
 
 ## 11. Recommandations pour le Prompt 3B (sans implémentation)
 
-Le Prompt 3B ne doit pas réintroduire de templates publics génériques. Il doit
-au contraire :
+Le Prompt 3B doit coder un **mode de répétition automatique sûr** : publication
+automatique désactivée par défaut, activable explicitement pour le match
+canonique uniquement, avec garde-fous mécaniques sur la whitelist §7.1.
 
-1. **Renforcer les verrous existants** plutôt que les desserrer :
-   * `manualReviewReason` doit explicitement bloquer `language_convergence`
-     tant que `REHEARSAL_MODE=true` (ou un flag équivalent) — pas seulement
-     en cas de `match_id=null`.
-   * `AUTO_PUBLICATION_ENABLED` doit rester `false` sur Render.
+1. **Flag dédié rehearsal**, distinct du flag global :
+   * `REHEARSAL_AUTO_PUBLICATION_ENABLED=false` par défaut ;
+   * activable uniquement pour le `match_id` canonique
+     `2026-ucl-final-psg-arsenal` ;
+   * `AUTO_PUBLICATION_ENABLED` global reste à `false` jusqu'à nouvel ordre.
 
-2. **Retraiter les patterns rejetés** :
-   * `under_radar` : retirer le template public ou le marquer explicitement
-     comme fiche Desk interne (renommer `internal_review_card`).
-   * `article_instability` : même traitement.
+2. **Whitelist de claims auto-publiables** appliquée à `language_convergence` :
+   * `goal_scored` (avec `scorer` + `minute`) ;
+   * `red_card` (avec `player`) ;
+   * `qualification` (avec `team` + `stage_reached`) — à confirmer en log
+     que l'extracteur produit des champs non vides ;
+   * tout autre `proposition_type` : refus auto.
 
-3. **Préparer le format de repli** : prévoir un squelette `match_recap`
-   uniquement comme **chronologie documentaire sourcée**, sans interprétation,
-   à activer seulement si le test échoue qualitativement sur `convergence`.
+3. **Exigence de minimum deux langues distinctes** parmi les pages
+   sélectionnées du match canonique (EN/FR/ES), avec `article_type='match'`.
 
-4. **Durcir les labels de preuve** : `story_evidence.public_label` doit
-   contenir le `language_code` + `page_title` exact + `revision_timestamp`.
+4. **Preuve publique obligatoire** par observation :
+   * langue (`language_code`) ;
+   * `page_title` exact ;
+   * `revision_timestamp` (UTC) ;
+   * lien `source_diff_url` (ou `source_revision_url` à défaut) Wikimédia.
+   `story_evidence.public_label` doit composer ces éléments lisiblement, pas
+   « Trace 1 ».
 
-5. **Ne pas implémenter `language_divergence`** tant qu'un workflow
-   `public_trace_excerpts` modéré n'existe pas. Le mot « divergence »
-   implique une obligation textuelle que le pipeline ne tient pas aujourd'hui.
+5. **Blocage absolu par construction** dans `manualReviewReason` (ou
+   équivalent) :
+   * `under_radar` ;
+   * `article_instability` ;
+   * `language_divergence` ;
+   * volume d'éditions / activité seule ;
+   * `substitution` seule, `yellow_card` seul ;
+   * événement attesté dans une seule langue ;
+   * `language_convergence` dont la claim n'est pas dans la whitelist §7.1.
 
-6. **Ajouter à `safety.ts`** une liste d'expressions interdites sur le
-   ranking entre éditions linguistiques (« plus rapide », « en retard »,
-   « en avance », « silence », « ignore ») et tester via `runSafetyChecks`.
+6. **Surface mobile** distinguant explicitement les quatre états §8.3 :
+   * collecte non activée ;
+   * collecte active mais aucune observation publiable ;
+   * observation automatique publiée ;
+   * erreur de pipeline.
+   Le card pattern Niveau 2 (§8.1) doit être lisible en 30 secondes sur
+   téléphone.
 
-7. **Conserver l'API `/api/public/v1/stories/[slug].ts` en 404 strict**
-   jusqu'à ce qu'une première story convergence ait été manuellement validée
-   après rehearsal.
+7. **Kill switch** : la valeur `REHEARSAL_AUTO_PUBLICATION_ENABLED=false`
+   doit suffire à stopper toute nouvelle publication sans interrompre le
+   worker, sans supprimer les traces déjà collectées.
 
-8. **Documenter le scénario d'abandon** : si le rehearsal échoue selon §9.3
-   branche `ABANDONNER LA PROMESSE DE STORIES LIVE`, prévoir un Prompt 4
-   « repositionnement en observatoire technique » au lieu d'un Prompt 3C
-   « publication ».
+8. **Protocole d'activation avant match** :
+   * test contrôlé sur une fenêtre courte (par ex. une rencontre antérieure
+     ou un match en cours non-canonique) ;
+   * vérification que les filtres §7.2 bloquent bien les signaux interdits ;
+   * vérification depuis mobile que les quatre états §8.3 sont lisibles ;
+   * après validation, activation pour le match canonique sans intervention
+     pendant le match.
+
+9. **API publique stories** : remplacer le 404 strict de
+   `api/public/v1/stories/[slug].ts` par une lecture stricte de
+   `v_public_stories` filtrée sur les observations conformes au Niveau 2
+   (whitelist §7.1, `match_id` non-null, `story_evidence` non vides).
+   Slug inexistant ou non conforme : 404. Slug conforme : 200.
+
+10. **`safety.ts`** : ajouter une famille de regex interdites sur le ranking
+    et la réaction attribués aux éditions linguistiques
+    (`plus rapide|en retard|en avance|silence|ignore|réaction|réagit`),
+    appliquée à tous les champs publics, en plus des familles existantes.
+
+11. **Ne pas implémenter `language_divergence`** tant qu'un workflow
+    `public_trace_excerpts.safe_to_publish=true` n'existe pas.
+
+12. **Scénario d'abandon** : si le rehearsal déclenche §9.4 branche
+    `ABANDONNER LA PROMESSE DE STORIES LIVE`, prévoir un Prompt 4
+    « repositionnement en observatoire technique » plutôt qu'un Prompt 3C
+    « publication enrichie ».
 
 ---
 
@@ -742,6 +956,20 @@ Ce document n'implémente rien. Il ne modifie aucun code, aucune migration,
 aucun seed, aucune route API, aucune story, aucune configuration de worker,
 d'analyzer ou de pattern matcher. Il ne réactive aucun mode démo. Il ne
 publie aucune story.
+
+### Révision rehearsal (28 mai 2026)
+
+La version initiale du contrat (commit `8d5a442`) imposait
+`manual_review_required` pour tous les patterns pendant le rehearsal, et
+l'API stories en 404 strict. Cette règle était incompatible avec la
+contrainte opérationnelle réelle : le test du samedi 30 mai 2026 doit être
+vérifiable depuis un téléphone, sans validation humaine pendant le match.
+
+La révision actuelle introduit le Niveau 2 (observation automatique
+publiable) avec une whitelist stricte (§7.1) et un contrat de rendu
+mobile-first (§8). La règle gardienne reste la même : **publier
+automatiquement uniquement ce qui est mécaniquement prouvable, sobre et
+sourcé ; bloquer automatiquement tout ce qui demande une interprétation.**
 
 Toute prochaine étape (Prompt 3B) doit citer explicitement la section de ce
 contrat qu'elle implémente ou qu'elle modifie. Toute dérogation doit faire
