@@ -175,16 +175,16 @@ export default function MatchDetail() {
                <h2 className="font-display text-4xl sm:text-5xl uppercase text-navy mb-12">CE QUE WIKIMATCH CHERCHERA</h2>
                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                  <div className="bg-white p-8 shadow-sm border border-navy/10 hover:border-navy/30 transition-colors">
-                   <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-blue-electric mb-4">UN FAIT ENTRE</div>
-                   <p className="font-sans text-sm font-light leading-relaxed text-navy/80">Résultat, qualification, record ou palmarès.</p>
+                   <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-blue-electric mb-4">Propagation d'un fait</div>
+                   <p className="font-sans text-sm font-light leading-relaxed text-navy/80">Un score, un résultat ou un incident entre dans plusieurs éditions.</p>
                  </div>
                  <div className="bg-white p-8 shadow-sm border border-navy/10 hover:border-navy/30 transition-colors">
-                   <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#A8B227] mb-4">LES ÉDITIONS DIFFÈRENT</div>
-                   <p className="font-sans text-sm font-light leading-relaxed text-navy/80">Un même épisode apparaît différemment selon les articles.</p>
+                   <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#A8B227] mb-4">Formulation différente</div>
+                   <p className="font-sans text-sm font-light leading-relaxed text-navy/80">Un même événement du match est décrit différemment selon les éditions.</p>
                  </div>
                  <div className="bg-white p-8 shadow-sm border border-navy/10 hover:border-navy/30 transition-colors">
-                   <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-red-signal mb-4">UN ARTICLE DEVIENT INSTABLE</div>
-                   <p className="font-sans text-sm font-light leading-relaxed text-navy/80">Un passage est ajouté, retiré puis restauré.</p>
+                   <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-red-signal mb-4">Réécriture observable</div>
+                   <p className="font-sans text-sm font-light leading-relaxed text-navy/80">Un passage lié au match est modifié ou retiré plusieurs fois.</p>
                  </div>
                </div>
              </section>

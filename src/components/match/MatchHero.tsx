@@ -9,12 +9,18 @@ export default function MatchHero({ match }: { match: MatchContext }) {
     ? "WikiMatch affiche uniquement les donnees publiees par le pipeline live : articles suivis, traces observees et histoires validees."
     : "Resultat integre, editions comparees, incident raconte differemment : voici les histoires fictives publiees autour de cette rencontre.";
 
+  const isRehearsalMatch = match.slug === "2026-ucl-final-psg-arsenal";
+
   if (match.state === "live") {
     title = "COMMENT CE MATCH\nENTRE DANS WIKIPEDIA.";
     subtitle = "WikiMatch observe les articles suivis. Aucune nouvelle histoire n'est publiee tant qu'un changement substantiel n'est pas verifie.";
   } else if (match.state === "pre_match") {
     title = "COMMENT CE MATCH\nSERA SUIVI\nSUR WIKIPEDIA.";
-    subtitle = "Le dispositif de surveillance est pret. Les modifications Wikimedia rattachees aux articles suivis apparaitront automatiquement apres ingestion.";
+    subtitle = match.isDemo
+      ? "Le dispositif de surveillance est pret. Les modifications Wikimedia rattachees aux articles suivis apparaitront automatiquement apres ingestion."
+      : isRehearsalMatch
+      ? "Le périmètre d'observation est préparé. Douze articles en français, anglais et espagnol ont été sélectionnés pour suivre le match, les deux clubs et la compétition. La collecte dédiée sera activée au moment du test."
+      : "Cette page rassemble les observations vérifiables rattachées aux articles suivis pour ce match.";
   }
 
   return (
@@ -39,7 +45,13 @@ export default function MatchHero({ match }: { match: MatchContext }) {
           <div className="flex flex-col gap-4 items-start">
             <MatchDemoBadge />
             <div className="font-mono text-[10px] sm:text-xs text-blue-electric uppercase tracking-widest font-bold">
-              DOSSIER MATCH · COUPE DU MONDE 2026 {match.state === "live" && "· EN COURS"} {match.state === "pre_match" && "· A VENIR"}
+              {match.isDemo ? (
+                `DOSSIER MATCH · COUPE DU MONDE 2026 ${match.state === "live" ? "· EN COURS" : match.state === "pre_match" ? "· A VENIR" : ""}`
+              ) : isRehearsalMatch ? (
+                `MATCH TEST · ${match.competitionLabel?.toUpperCase() || "UEFA CHAMPIONS LEAGUE 2025/26"} ${match.state === "live" ? "· EN COURS" : match.state === "pre_match" ? "· À VENIR · COLLECTE NON ACTIVÉE" : ""}`
+              ) : (
+                `DOSSIER MATCH · ${match.competitionLabel?.toUpperCase()} ${match.state === "live" ? "· EN COURS" : match.state === "pre_match" ? "· À VENIR" : ""}`
+              )}
             </div>
           </div>
 

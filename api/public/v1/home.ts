@@ -71,19 +71,22 @@ export default async function handler(
     // affiche un empty state honnête au lieu d'un placeholder maquillé.
     const nextMatch = matchData ? {
       id: matchData.id,
+      slug: matchData.slug,
       teams: [
         matchData.home?.canonical_label ?? "À confirmer",
         matchData.away?.canonical_label ?? "À confirmer",
       ],
       stage: matchData.stage_label || "Phase de groupes",
       dateLabel: matchData.scheduled_at
-        ? new Date(matchData.scheduled_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }).toUpperCase()
+        ? new Date(matchData.scheduled_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" }).toUpperCase()
         : "DATE À CONFIRMER",
       timeLabel: matchData.scheduled_at
-        ? new Date(matchData.scheduled_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+        ? new Date(matchData.scheduled_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }) + " CEST"
         : "",
       status: matchData.status || "upcoming",
-      trackedPagesLabel: "Match · Sélections · Joueurs",
+      trackedPagesLabel: matchData.slug === "2026-ucl-final-psg-arsenal"
+        ? "Match · Clubs · Compétition (FR · EN · ES)"
+        : "Match · Sélections · Joueurs",
       isDemo: false,
     } : null;
 

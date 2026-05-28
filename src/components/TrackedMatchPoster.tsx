@@ -63,11 +63,23 @@ export default function TrackedMatchPoster({
             <div className="w-full md:w-[400px] p-8 md:p-12 flex flex-col justify-between bg-navy/95 backdrop-blur-sm">
               <div className="flex flex-col gap-6">
                 <p className="font-sans text-sm md:text-base leading-relaxed text-cream/70 font-light">
-                  Au coup d’envoi, WikiMatch suivra les pages du match, des deux sélections, des joueurs concernés et du tournoi pour documenter ce qui entre réellement dans Wikipédia.
+                  {nextMatch.isDemo ? (
+                    "Au coup d’envoi, WikiMatch suivra les pages du match, des deux sélections, des joueurs concernés et du tournoi pour documenter ce qui entre réellement dans Wikipédia."
+                  ) : nextMatch.slug === "2026-ucl-final-psg-arsenal" ? (
+                    "Au coup d’envoi, WikiMatch suivra les pages du match, des deux clubs (Paris Saint-Germain, Arsenal) et de la compétition en français, anglais et espagnol pour documenter ce qui entre réellement dans Wikipédia."
+                  ) : (
+                    "WikiMatch observera les pages sélectionnées pour ce match et publiera uniquement des observations vérifiables dans les modifications sources."
+                  )}
                 </p>
                 <div className="flex flex-col gap-2 mt-4">
                   <span className="font-mono text-[10px] text-cream/40 uppercase">Pages suivies</span>
-                  <span className="font-mono text-xs uppercase text-cream border-t border-cream/10 pt-2">{nextMatch.trackedPagesLabel}</span>
+                  <span className="font-mono text-xs uppercase text-cream border-t border-cream/10 pt-2">
+                    {nextMatch.isDemo
+                      ? nextMatch.trackedPagesLabel
+                      : nextMatch.slug === "2026-ucl-final-psg-arsenal"
+                      ? "Match · Clubs · Compétition (FR, EN, ES)"
+                      : nextMatch.trackedPagesLabel}
+                  </span>
                 </div>
               </div>
               <Link

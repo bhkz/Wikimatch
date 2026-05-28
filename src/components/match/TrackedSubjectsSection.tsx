@@ -5,8 +5,23 @@ import { isLiveMode } from "../../data";
 
 export default function TrackedSubjectsSection({ subjects }: { subjects: MatchTrackedSubject[] }) {
   const [expanded, setExpanded] = useState(!isLiveMode);
-  const languageCount = useMemo(() => 0, [subjects]);
-  const typesCount = useMemo(() => new Set(subjects.map((s) => s.type)).size, [subjects]);
+  const languages = useMemo(() => {
+    const codes = subjects
+      .map((s) => s.languageCode?.toUpperCase())
+      .filter(Boolean);
+    return Array.from(new Set(codes)).sort();
+  }, [subjects]);
+
+  const languageCount = languages.length;
+
+  const subjectsCount = useMemo(() => {
+    const keys = subjects.map((sub) => {
+      if (sub.type === "match") return "match";
+      if (sub.type === "tournament") return "tournament";
+      return sub.label;
+    });
+    return new Set(keys).size;
+  }, [subjects]);
 
   return (
     <section className="py-24 px-4 md:px-8 bg-cream-dark border-b border-navy/10">
@@ -23,14 +38,31 @@ Ces articles sont surveillés par le pipeline. Leur présence ici ne signifie pa
 
         <div className="lg:col-span-8 flex flex-col gap-4">
           {isLiveMode && (
-            <div className="bg-white border border-navy/10 p-4 md:p-6">
+            <div className="bg-white border border-navy/10 p-4 md:p-6 shadow-sm">
               <div className="font-mono text-[10px] uppercase tracking-widest text-navy/50">ARTICLES OBSERVÉS POUR CE MATCH</div>
-              <div className="mt-3 grid grid-cols-3 gap-4">
-                <div><div className="font-display text-3xl text-navy">{subjects.length}</div><div className="font-mono text-[10px] uppercase text-navy/50">articles</div></div>
-                <div><div className="font-display text-3xl text-navy">{languageCount}</div><div className="font-mono text-[10px] uppercase text-navy/50">éditions</div></div>
-                <div><div className="font-display text-3xl text-navy">{typesCount}</div><div className="font-mono text-[10px] uppercase text-navy/50">types</div></div>
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="flex flex-col">
+                  <div className="font-display text-3xl text-navy">{subjects.length}</div>
+                  <div className="font-mono text-[10px] uppercase text-navy/50 tracking-wider mt-1">Articles observés</div>
+                </div>
+                <div className="flex flex-col">
+                  <div className="font-display text-2xl md:text-3xl text-navy">
+                    {languageCount > 0 ? `${languageCount} ÉDITIONS` : "ÉDITIONS À CONFIRMER"}
+                  </div>
+                  <div className="font-mono text-[10px] uppercase text-navy/50 tracking-wider mt-1">
+                    {languageCount > 0 ? languages.join(" · ") : "Langues suivies"}
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <div className="font-display text-3xl text-navy">
+                    {subjectsCount}
+                  </div>
+                  <div className="font-mono text-[10px] uppercase text-navy/50 tracking-wider mt-1">
+                    Sujets suivis
+                  </div>
+                </div>
               </div>
-              <button onClick={() => setExpanded((v) => !v)} className="mt-4 font-mono text-[10px] uppercase font-bold tracking-widest text-blue-electric">{expanded ? "Masquer les articles surveillés" : "Voir les articles surveillés"}</button>
+              <button onClick={() => setExpanded((v) => !v)} className="mt-6 font-mono text-[10px] uppercase font-bold tracking-widest text-blue-electric border-t border-navy/5 pt-4 w-full text-left">{expanded ? "Masquer les articles surveillés" : "Voir les articles surveillés"}</button>
             </div>
           )}
 

@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { ExplorerStats } from "../../types";
 
 export default function ExplorerStatsStrip({ stats }: { stats: ExplorerStats }) {
+  if (!stats.isDemo) return null;
   return (
     <section className="py-12 px-4 md:px-8 border-b border-navy/10 bg-white relative z-20">
       <div className="w-full max-w-screen-2xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-16">

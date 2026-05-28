@@ -84,6 +84,7 @@ export default async function handler(
         type: row.role === "home_team" || row.role === "away_team" ? "team" : row.role,
         label: entity?.canonical_label || article?.page_title || "",
         reason: row.monitoring_reason || entityTypeLabel(entity?.type),
+        languageCode: article?.language_code || "",
       };
     });
 
@@ -210,10 +211,10 @@ export default async function handler(
         competitionLabel: match.competition_label || "Coupe du Monde 2026",
         stageLabel: match.stage_label || "",
         dateLabel: scheduledAt
-          ? scheduledAt.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }).toUpperCase()
+          ? scheduledAt.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" }).toUpperCase()
           : "DATE À CONFIRMER",
         timeLabel: scheduledAt
-          ? scheduledAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+          ? scheduledAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }) + " CEST"
           : "",
         venueLabel: "",
         homeTeam: {

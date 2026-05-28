@@ -33,11 +33,6 @@ export const archiveFilters: StoryArchiveFilter[] = [
     type: "article_instability"
   },
   {
-    id: "under_radar",
-    label: "Sous le radar",
-    type: "under_radar"
-  },
-  {
     id: "match_recap",
     label: "Récaps match",
     type: "match_recap"

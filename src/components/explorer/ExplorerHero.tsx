@@ -83,7 +83,6 @@ export default function ExplorerHero() {
           transition={{ delay: 1.5 }}
           className="flex flex-wrap gap-4 mt-8 md:mt-16 font-mono text-[9px] uppercase font-bold tracking-widest"
         >
-          <span className="text-[#2a9d8f] border border-[#2a9d8f]/20 bg-[#2a9d8f]/5 px-3 py-1.5">SOUS LE RADAR</span>
           <span className="text-[#e63946] border border-[#e63946]/20 bg-[#e63946]/5 px-3 py-1.5">DIVERGENCE</span>
           <span className="text-blue-electric border border-blue-electric/20 bg-blue-electric/5 px-3 py-1.5">MISE A JOUR CONVERGENTE</span>
           <span className="text-navy/50 border border-navy/20 bg-navy/5 px-3 py-1.5">ARTICLE INSTABLE</span>
