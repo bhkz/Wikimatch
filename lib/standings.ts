@@ -115,6 +115,6 @@ function breakTie(block: StandingRow[], matches: GroupMatchInput[]): StandingRow
  * Meilleurs troisièmes (spec §6.2) : 8 qualifiés parmi les 12 troisièmes.
  * Tri : points → diff → buts ; égalité résiduelle marquée.
  */
-export function rankThirds(thirds: StandingRow[]): StandingRow[] {
+export function rankThirds<T extends StandingRow>(thirds: T[]): T[] {
   return [...thirds].sort((a, b) => compareBasic(a, b) || a.code.localeCompare(b.code));
 }

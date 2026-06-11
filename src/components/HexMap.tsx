@@ -1,5 +1,5 @@
 /**
- * Rendu SVG de la carte hexagonale (pointy-top, axial) — spec §4, DA DESIGN.md.
+ * Rendu SVG de la carte hexagonale (pointy-top, axial), spec §4, DA DESIGN.md.
  * Composant pur et réutilisable : Home (P0), replay (P2), embed, map-preview.
  */
 
@@ -34,7 +34,7 @@ type Props = {
 
 const NEUTRAL_FILL = "#B8B2A2"; // sable grisé, recule derrière les nations
 const RUINS_FILL = "#3A3F4D";
-const MEMORIAL_FILL = "#C9A227"; // or — sanctuaire
+const MEMORIAL_FILL = "#C9A227"; // or, sanctuaire
 
 export default function HexMap({ hexes, nations, size = 10, onHexClick, highlightIds, liveOwners }: Props) {
   const [hovered, setHovered] = useState<MapHex | null>(null);

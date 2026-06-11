@@ -61,7 +61,7 @@ export function overextension(
   cfg: GameConfig,
 ): { finalGain: number; mOverext: number } {
   const tWinner = territorySize(state, winner);
-  if (tWinner <= 0) throw new Error(`overextension: ${winner} sans territoire — état incohérent.`);
+  if (tWinner <= 0) throw new Error(`overextension: ${winner} sans territoire : état incohérent.`);
   const m = clamp(medianAliveTerritory(state) / tWinner, cfg.overextMin, cfg.overextMax);
   const finalGain = clamp(Math.round(base * m), 1, cfg.hardCap);
   return { finalGain, mOverext: Math.round(m * 100) / 100 };

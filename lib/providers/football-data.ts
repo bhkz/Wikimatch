@@ -27,14 +27,14 @@ export type FdRawMatch = {
 
 export class UnknownStageError extends Error {
   constructor(stage: string, matchId: number) {
-    super(`Stage inconnu "${stage}" (match ${matchId}) — refus de normaliser, vérifier stage_mapping.`);
+    super(`Stage inconnu "${stage}" (match ${matchId}) : refus de normaliser, vérifier stage_mapping.`);
     this.name = "UnknownStageError";
   }
 }
 
 export class UnknownTeamError extends Error {
   constructor(fdTeamId: number, matchId: number) {
-    super(`fd_team_id ${fdTeamId} inconnu (match ${matchId}) — vérifier le mapping des 48 équipes.`);
+    super(`fd_team_id ${fdTeamId} inconnu (match ${matchId}) : vérifier le mapping des 48 équipes.`);
     this.name = "UnknownTeamError";
   }
 }

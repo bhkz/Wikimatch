@@ -10,7 +10,7 @@ import SiteFooter from "../components/SiteFooter";
 import SectionLabel from "../components/SectionLabel";
 import MatchChip from "../components/MatchChip";
 import { FlagEmoji } from "../components/FlagEmoji";
-import { computeStandings, type StandingRow } from "../../lib/standings";
+import { computeStandings, rankThirds, type StandingRow } from "../../lib/standings";
 import { nationStyles, useAtlasData, type AtlasData } from "../lib/atlas";
 
 const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
@@ -34,7 +34,7 @@ function groupStandings(data: AtlasData, letter: string): StandingRow[] {
 }
 
 function QualifyBar({ p }: { p: number | undefined }) {
-  if (p === undefined) return <span className="text-navy/30">—</span>;
+  if (p === undefined) return <span className="text-navy/30">n/d</span>;
   const pct = Math.round(p * 100);
   return (
     <span className="inline-flex items-center gap-2" title={`Probabilité de qualification : ${pct} %`}>
@@ -43,6 +43,64 @@ function QualifyBar({ p }: { p: number | undefined }) {
       </span>
       <span className="tabular-nums">{pct}%</span>
     </span>
+  );
+}
+
+function ThirdsTable({ data }: { data: AtlasData }) {
+  const rows = rankThirds(
+    LETTERS.map((letter) => {
+      const third = groupStandings(data, letter)[2];
+      return { ...third, group: letter };
+    }),
+  );
+  const styles = nationStyles(data.nations);
+  const probs = data.sim?.probs;
+
+  return (
+    <section className="mt-12">
+      <h2 className="font-display text-2xl md:text-4xl uppercase tracking-wide mb-4">
+        Classement des troisièmes
+      </h2>
+      <div className="max-w-3xl border border-navy/10 bg-cream p-5">
+        <table className="w-full font-mono text-xs">
+          <thead>
+            <tr className="text-[10px] uppercase tracking-widest text-navy/40 text-right">
+              <th className="text-left font-medium py-1">Rang</th>
+              <th className="text-left font-medium">Équipe</th>
+              <th className="font-medium">Gr.</th>
+              <th className="font-medium">Pts</th>
+              <th className="font-medium">+/-</th>
+              <th className="font-medium">Qualif</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, index) => {
+              const s = styles.get(row.code);
+              return (
+                <tr key={`${row.group}-${row.code}`} className="border-b border-navy/10 last:border-b-0">
+                  <td className={`py-2 text-left ${index < 8 ? "text-blue-electric" : "text-navy/35"}`}>
+                    {index + 1}
+                  </td>
+                  <td className="text-left">
+                    <Link to={`/n/${row.code}`} className="inline-flex items-center gap-2 hover:text-blue-electric">
+                      {s && <FlagEmoji flag={s.flag} />}
+                      {s?.name ?? row.code}
+                    </Link>
+                  </td>
+                  <td>{row.group}</td>
+                  <td>{row.points}</td>
+                  <td>{row.gd > 0 ? `+${row.gd}` : row.gd}</td>
+                  <td><QualifyBar p={probs?.[row.code]?.p_qualify} /></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-navy/40 mt-4">
+          Ligne de coupe après le 8e rang.
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -66,7 +124,7 @@ function StandingsTable({ rows, data, compact }: { rows: StandingRow[]; data: At
       <tbody>
         {rows.map((r, i) => {
           const s = styles.get(r.code);
-          // Top 2 qualifiés directs ; 3e : repêchable (8 meilleurs) — spec §6.2.
+          // Top 2 qualifiés directs ; 3e : repêchable (8 meilleurs), spec §6.2.
           const zone = i < 2 ? "border-l-2 border-blue-electric" : i === 2 ? "border-l-2 border-navy/30" : "border-l-2 border-transparent";
           return (
             <tr key={r.code} className={`${zone} border-b border-navy/10 last:border-b-0`}>
@@ -176,18 +234,21 @@ export default function Groups() {
         {!data && <p className="font-light text-navy/70">Chargement…</p>}
 
         {data && !upper && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-navy/10 border border-navy/10">
-            {LETTERS.map((l) => (
-              <div key={l} className="bg-cream p-6">
-                <Link to={`/groupes/${l}`} className="font-display text-3xl uppercase tracking-wide hover:text-blue-electric">
-                  Groupe {l} →
-                </Link>
-                <div className="mt-4">
-                  <StandingsTable rows={groupStandings(data, l)} data={data} compact />
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-navy/10 border border-navy/10">
+              {LETTERS.map((l) => (
+                <div key={l} className="bg-cream p-6">
+                  <Link to={`/groupes/${l}`} className="font-display text-3xl uppercase tracking-wide hover:text-blue-electric">
+                    Groupe {l} →
+                  </Link>
+                  <div className="mt-4">
+                    <StandingsTable rows={groupStandings(data, l)} data={data} compact />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            <ThirdsTable data={data} />
+          </>
         )}
 
         {data && upper && (

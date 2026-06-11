@@ -3,19 +3,28 @@
  * P0 : avant/après via le récit de résolution + hexes pris en surbrillance.
  */
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import SectionLabel from "../components/SectionLabel";
 import HexMap from "../components/HexMap";
+import BeforeAfterMap from "../components/BeforeAfterMap";
 import { STAGE_LABELS, isLive, kickoffLabel, nationStyles, useAtlasData } from "../lib/atlas";
 import { FlagEmoji, TextWithFlags } from "../components/FlagEmoji";
 import DramaGauge from "../components/DramaGauge";
 
+type ProvisionalPreview = {
+  would_gain: number;
+  hex_ids: number[];
+  inherited_hex_ids: number[];
+  narrative_preview: string;
+};
+
 export default function MatchPage() {
   const { id } = useParams();
   const { data, error } = useAtlasData();
+  const [preview, setPreview] = useState<ProvisionalPreview | null>(null);
   const matchId = Number(id);
 
   const styles = useMemo(() => (data ? nationStyles(data.nations) : new Map()), [data]);
@@ -23,12 +32,57 @@ export default function MatchPage() {
   const resolution = data?.resolutions.find((r) => r.match_id === matchId);
   const stake = data?.stakes.find((s) => s.match_id === matchId);
   const highlight = useMemo(
-    () => new Set<number>([...(resolution?.hexes_taken ?? []), ...(resolution?.inherited_hexes ?? [])]),
-    [resolution],
+    () =>
+      new Set<number>([
+        ...(resolution?.hexes_taken ?? []),
+        ...(resolution?.inherited_hexes ?? []),
+        ...(preview?.hex_ids ?? []),
+        ...(preview?.inherited_hex_ids ?? []),
+      ]),
+    [resolution, preview],
   );
+  const matchEvents = useMemo(
+    () => (data?.events ?? []).filter((event) => event.match_id === matchId),
+    [data, matchId],
+  );
+  const beforeHexes = useMemo(() => {
+    if (!data || matchEvents.length === 0) return data?.hexes ?? [];
+    const byHex = new Map(matchEvents.map((event) => [event.hex_id, event]));
+    return data.hexes.map((hex) => {
+      const event = byHex.get(hex.id);
+      return event ? { ...hex, owner: event.from_owner, state: event.from_state } : hex;
+    });
+  }, [data, matchEvents]);
+  const hexById = useMemo(() => new Map((data?.hexes ?? []).map((hex) => [hex.id, hex])), [data]);
 
   const home = match?.home ? styles.get(match.home) : null;
   const away = match?.away ? styles.get(match.away) : null;
+
+  useEffect(() => {
+    if (!match || resolution || match.home === null || match.away === null) {
+      setPreview(null);
+      return;
+    }
+    const currentMatch = match;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    async function load() {
+      try {
+        const response = await fetch(`/api/v1/matches/${currentMatch.id}/provisional?outcome=home`);
+        if (!response.ok) throw new Error("preview unavailable");
+        const payload = (await response.json()) as ProvisionalPreview;
+        if (!cancelled) setPreview(payload);
+      } catch {
+        if (!cancelled) setPreview(null);
+      }
+      if (!cancelled && isLive(currentMatch)) timer = setTimeout(load, 60_000);
+    }
+    load();
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [match, resolution]);
 
   return (
     <div className="min-h-screen bg-cream text-navy flex flex-col">
@@ -49,9 +103,11 @@ export default function MatchPage() {
             <div className="mt-6 mb-10 flex flex-wrap items-center gap-x-8 gap-y-4">
               <h1 className="font-display text-4xl md:text-7xl uppercase leading-[0.9] tracking-wide">
                 {home ? <><FlagEmoji flag={home.flag} /> {home.name}</> : "À déterminer"}
+                {" "}
                 <span className="text-navy/30 mx-4">
-                  {match.score_home !== null ? `${match.score_home} – ${match.score_away}` : "VS"}
+                  {match.score_home !== null ? `${match.score_home}-${match.score_away}` : "VS"}
                 </span>
+                {" "}
                 {away ? <><FlagEmoji flag={away.flag} /> {away.name}</> : "À déterminer"}
               </h1>
               {isLive(match) && (
@@ -63,7 +119,7 @@ export default function MatchPage() {
             </div>
             {match.duration === "PENALTY_SHOOTOUT" && match.pens_home !== null && (
               <p className="font-mono text-xs uppercase tracking-widest text-navy/60 -mt-6 mb-8">
-                Tirs au but : {match.pens_home}–{match.pens_away}
+                Tirs au but : {match.pens_home}-{match.pens_away}
               </p>
             )}
 
@@ -89,22 +145,68 @@ export default function MatchPage() {
                   <p className="text-xl md:text-3xl font-light leading-relaxed"><TextWithFlags text={resolution.narrative} /></p>
                   <div className="font-mono text-[10px] uppercase tracking-widest text-navy/40 mt-4">
                     {resolution.is_draw
-                      ? "Match nul — chaque équipe grappille en terre neutre"
+                      ? "Match nul : chaque équipe grappille en terre neutre"
                       : `${resolution.final_gain} territoire(s) pris${resolution.inherited_hexes.length ? ` · ${resolution.inherited_hexes.length} hérité(s)` : ""}`}
                   </div>
                 </div>
               </section>
             ) : (
-              <p className="font-light text-navy/70 mb-10 max-w-2xl">
-                {match.status === "FINISHED"
-                  ? "Résolution en cours de confirmation (quelques minutes après le coup de sifflet final)."
-                  : "La carte bougera à la fin du match : le vainqueur prendra des territoires au vaincu."}
-              </p>
+              <section className="mb-10 max-w-3xl">
+                {preview ? (
+                  <div className="border-t-4 border-blue-electric bg-cream-dark p-6">
+                    <div className="font-mono text-[10px] uppercase font-bold tracking-widest text-navy/50 mb-2">
+                      Territoires en jeu
+                    </div>
+                    <p className="text-xl md:text-3xl font-light leading-relaxed">
+                      <TextWithFlags text={preview.narrative_preview} />
+                    </p>
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-navy/40 mt-4">
+                      Preview à 1-0 : {preview.would_gain} territoire(s)
+                    </div>
+                  </div>
+                ) : (
+                  <p className="font-light text-navy/70">
+                    {match.status === "FINISHED"
+                      ? "Résolution en cours de confirmation (quelques minutes après le coup de sifflet final)."
+                      : "La carte bougera à la fin du match : le vainqueur prendra des territoires au vaincu."}
+                  </p>
+                )}
+              </section>
             )}
 
-            <div className="border border-navy/10">
-              <HexMap hexes={data.hexes} nations={styles} highlightIds={highlight.size > 0 ? highlight : undefined} />
-            </div>
+            {resolution && matchEvents.length > 0 ? (
+              <BeforeAfterMap
+                before={beforeHexes}
+                after={data.hexes}
+                nations={styles}
+                highlightIds={highlight.size > 0 ? highlight : undefined}
+              />
+            ) : (
+              <div className="border border-navy/10">
+                <HexMap hexes={data.hexes} nations={styles} highlightIds={highlight.size > 0 ? highlight : undefined} />
+              </div>
+            )}
+
+            {matchEvents.length > 0 && (
+              <section className="mt-10 max-w-3xl">
+                <h2 className="font-display text-2xl md:text-4xl uppercase tracking-wide mb-4">
+                  Hexes transférés
+                </h2>
+                <ul className="divide-y divide-navy/10 border-y border-navy/10 font-mono text-xs uppercase tracking-widest">
+                  {matchEvents.slice(0, 16).map((event) => {
+                    const hex = hexById.get(event.hex_id);
+                    return (
+                      <li key={event.id} className="py-2 flex flex-wrap items-baseline justify-between gap-3">
+                        <span>{hex?.cityName ?? `Hex ${event.hex_id}`}</span>
+                        <span className="text-navy/45">
+                          {event.from_owner ?? "neutre"} vers {event.to_owner ?? event.to_state}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            )}
           </>
         )}
       </main>

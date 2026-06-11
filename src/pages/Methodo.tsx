@@ -1,6 +1,6 @@
 /**
  * /methodo (spec §12, §22) : les règles du jeu, honnêtes et complètes.
- * Texte statique relu à la main — vocabulaire sportif-ludique uniquement.
+ * Texte statique relu à la main : vocabulaire sportif-ludique uniquement.
  */
 
 import SiteHeader from "../components/SiteHeader";
@@ -10,7 +10,7 @@ import SectionLabel from "../components/SectionLabel";
 const RULES: Array<{ title: string; body: string }> = [
   {
     title: "Le principe",
-    body: "Chaque nation qualifiée démarre avec 10 territoires hexagonaux autour de sa vraie capitale, sur un planisphère stylisé de 682 hexes. Les résultats réels des matchs — et rien d'autre — redessinent les frontières. Aucun compte, aucun pari, aucun argent : un pur spectacle de données.",
+    body: "Chaque nation qualifiée démarre avec 10 territoires hexagonaux autour de sa vraie capitale, sur un planisphère stylisé de 682 hexes. Les résultats réels des matchs, et rien d'autre, redessinent les frontières. Aucun compte, aucun pari, aucun argent : un pur spectacle de données.",
   },
   {
     title: "Gains par victoire",
@@ -18,7 +18,7 @@ const RULES: Array<{ title: string; body: string }> = [
   },
   {
     title: "La surextension impériale",
-    body: "Le gain est multiplié par (territoire médian des nations en vie ÷ territoire du vainqueur), borné entre ×0,5 et ×2. Les petits prennent plus, les empires s'essoufflent — c'est la mécanique d'équilibre du jeu. Le gain final est toujours entre 1 et 12.",
+    body: "Le gain est multiplié par (territoire médian des nations en vie ÷ territoire du vainqueur), borné entre ×0,5 et ×2. Les petits prennent plus, les empires s'essoufflent : c'est la mécanique d'équilibre du jeu. Le gain final est toujours entre 1 et 12.",
   },
   {
     title: "Quels territoires changent de main ?",
@@ -46,7 +46,7 @@ const RULES: Array<{ title: string; body: string }> = [
   },
   {
     title: "Ce que ce site n'est pas",
-    body: "Une carte géopolitique. Les frontières, noms et couleurs sont un terrain de jeu graphique sans aucune lecture politique. Site indépendant, non affilié à la FIFA ni à aucune fédération. Aucune marque ni écusson officiel n'est utilisé — uniquement des drapeaux Unicode.",
+    body: "Une carte géopolitique. Les frontières, noms et couleurs sont un terrain de jeu graphique sans aucune lecture politique. Site indépendant, non affilié à la FIFA ni à aucune fédération. Aucune marque ni écusson officiel n'est utilisé : uniquement des drapeaux Unicode.",
   },
 ];
 

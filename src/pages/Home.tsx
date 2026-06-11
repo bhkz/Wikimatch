@@ -1,10 +1,12 @@
-import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import HexMap from "../components/HexMap";
 import MatchChip from "../components/MatchChip";
 import TimeScrubber from "../components/TimeScrubber";
+import FeedTicker from "../components/FeedTicker";
+import TerritorySidebar from "../components/TerritorySidebar";
 import { TextWithFlags } from "../components/FlagEmoji";
 import {
   liveOwners,
@@ -20,7 +22,8 @@ import {
 export default function Home() {
   const { data, error } = useAtlasData();
   const navigate = useNavigate();
-  const [selectedSnapshotDate, setSelectedSnapshotDate] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedSnapshotDate = searchParams.get("t");
 
   const styles = useMemo(() => (data ? nationStyles(data.nations) : new Map()), [data]);
   const stakesByMatch = useMemo(() => new Map((data?.stakes ?? []).map((s) => [s.match_id, s])), [data]);
@@ -50,6 +53,13 @@ export default function Home() {
   );
   const lastResolutions = data?.resolutions.slice(0, 6) ?? [];
 
+  function selectSnapshot(date: string | null) {
+    const next = new URLSearchParams(searchParams);
+    if (date) next.set("t", date);
+    else next.delete("t");
+    setSearchParams(next, { replace: true });
+  }
+
   return (
     <div className="min-h-screen bg-cream text-navy flex flex-col">
       <SiteHeader />
@@ -66,7 +76,7 @@ export default function Home() {
           {live.size > 0 && (
             <div className="font-mono text-xs uppercase tracking-widest text-red-signal flex items-center gap-2">
               <span className="inline-block w-2 h-2 rounded-full bg-red-signal animate-pulse" />
-              Match en cours — les territoires pulsent
+              Match en cours : les territoires pulsent
             </div>
           )}
         </div>
@@ -77,27 +87,31 @@ export default function Home() {
           </div>
         )}
 
-        <div className="border border-navy/10">
-          {data ? (
-            <HexMap
-              hexes={displayedHexes}
-              nations={styles}
-              liveOwners={selectedSnapshotDate ? undefined : live}
-              onHexClick={(hex) => hex.owner && navigate(`/n/${hex.owner}`)}
-            />
-          ) : (
-            <div className="aspect-[2/1] flex items-center justify-center font-mono text-xs uppercase tracking-widest text-navy/40 bg-navy/95 text-cream/40">
-              Chargement de la carte…
-            </div>
-          )}
+        <div className="grid xl:grid-cols-[1fr_360px] gap-6">
+          <div className="border border-navy/10">
+            {data ? (
+              <HexMap
+                hexes={displayedHexes}
+                nations={styles}
+                liveOwners={selectedSnapshotDate ? undefined : live}
+                onHexClick={(hex) => hex.owner && navigate(`/n/${hex.owner}`)}
+              />
+            ) : (
+              <div className="aspect-[2/1] flex items-center justify-center font-mono text-xs uppercase tracking-widest text-navy/40 bg-navy/95 text-cream/40">
+                Chargement de la carte…
+              </div>
+            )}
+          </div>
+          {data && <TerritorySidebar nations={data.nations} hexes={displayedHexes} snapshots={data.snapshots} />}
         </div>
+        <FeedTicker items={lastResolutions} />
 
         {/* Bandeau matchs du jour (§12) */}
         {data && (
           <TimeScrubber
             snapshots={data.snapshots}
             selectedDate={selectedSnapshotDate}
-            onSelect={setSelectedSnapshotDate}
+            onSelect={selectSnapshot}
           />
         )}
 
@@ -124,7 +138,7 @@ export default function Home() {
           <h2 className="font-display text-2xl md:text-4xl uppercase tracking-wide mb-4">La carte a bougé</h2>
           {lastResolutions.length === 0 ? (
             <p className="font-light text-navy/70">
-              Rien encore — le premier match redessinera les frontières.
+              Rien encore : le premier match redessinera les frontières.
             </p>
           ) : (
             <ul className="divide-y divide-navy/10 border-y border-navy/10">

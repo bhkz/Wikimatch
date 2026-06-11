@@ -36,6 +36,28 @@
       "destination": "/api/meta?path=/nuit/:date"
     },
     {
+      "source": "/snapshot/:date",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|facebookexternalhit|Twitterbot|WhatsApp|TelegramBot|Slackbot|Discordbot|LinkedInBot|Embedly|preview).*"
+        }
+      ],
+      "destination": "/api/meta?path=/snapshot/:date"
+    },
+    {
+      "source": "/fin",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|facebookexternalhit|Twitterbot|WhatsApp|TelegramBot|Slackbot|Discordbot|LinkedInBot|Embedly|preview).*"
+        }
+      ],
+      "destination": "/api/meta?path=/fin"
+    },
+    {
       "source": "/feed.xml",
       "destination": "/api/feed"
     },

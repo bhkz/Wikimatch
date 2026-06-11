@@ -35,7 +35,7 @@ export default function SiteFooter() {
             Site indépendant de visualisation, non affilié à la FIFA ni à aucune fédération.
             <br className="hidden md:block" /> Données : football-data.org. Aucun pari, aucun argent réel.
           </span>
-          <span>© 2026 — L'ATLAS DU MONDIAL</span>
+          <span>© 2026 · L'ATLAS DU MONDIAL</span>
         </div>
       </div>
       

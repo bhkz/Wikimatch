@@ -1,5 +1,5 @@
 /**
- * /nuit et /nuit/:date (spec §8, §12) : "pendant que tu dormais" — ce que les
+ * /nuit et /nuit/:date (spec §8, §12) : "pendant que tu dormais", ce que les
  * matchs de la journée Atlas ont changé. P1.1 : dérivé en direct des
  * résolutions ; le recap éditorial généré (sections riches) arrive avec le
  * job recap du worker.

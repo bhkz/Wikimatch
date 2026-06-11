@@ -84,6 +84,19 @@ export type SnapshotSummary = {
   deltas: Record<string, { gained: number; lost: number }>;
 };
 
+export type HexEvent = {
+  id: number;
+  hex_id: number;
+  match_id: number | null;
+  type: string;
+  from_owner: string | null;
+  to_owner: string | null;
+  from_state: MapHex["state"];
+  to_state: MapHex["state"];
+  narrative: string | null;
+  created_at: string;
+};
+
 export const STAGE_LABELS: Record<Match["stage"], string> = {
   GROUP: "Groupes",
   R32: "16es de finale",
@@ -183,6 +196,16 @@ export async function fetchResolutions(): Promise<Resolution[]> {
   return (data ?? []) as Resolution[];
 }
 
+export async function fetchHexEvents(): Promise<HexEvent[]> {
+  const { data, error } = await atlas
+    .from("hex_events")
+    .select("id, hex_id, match_id, type, from_owner, to_owner, from_state, to_state, narrative, created_at")
+    .order("id", { ascending: false })
+    .limit(5000);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as HexEvent[];
+}
+
 /* --------------------------------- Helpers -------------------------------- */
 
 export function nationStyles(nations: Nation[]): Map<string, NationStyle> {
@@ -235,6 +258,7 @@ export type AtlasData = {
   stakes: MatchStake[];
   conditions: QualificationCondition[];
   snapshots: SnapshotSummary[];
+  events: HexEvent[];
 };
 
 /**
@@ -251,7 +275,7 @@ export function useAtlasData(): { data: AtlasData | null; error: string | null }
 
     async function load() {
       try {
-        const [nations, hexes, matches, resolutions, sim, stakes, conditions, snapshots] = await Promise.all([
+        const [nations, hexes, matches, resolutions, sim, stakes, conditions, snapshots, events] = await Promise.all([
           fetchNations(),
           fetchHexes(),
           fetchMatches(),
@@ -260,9 +284,10 @@ export function useAtlasData(): { data: AtlasData | null; error: string | null }
           fetchMatchStakes(),
           fetchQualificationConditions(),
           fetchSnapshots(),
+          fetchHexEvents(),
         ]);
         if (cancelled) return;
-        setData({ nations, hexes, matches, resolutions, sim, stakes, conditions, snapshots });
+        setData({ nations, hexes, matches, resolutions, sim, stakes, conditions, snapshots, events });
         setError(null);
         timer = setTimeout(load, matches.some(isLive) ? 30_000 : 120_000);
       } catch (err) {

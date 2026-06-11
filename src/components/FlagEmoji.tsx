@@ -2,7 +2,7 @@
  * Drapeaux : Windows ne rend pas les emoji de drapeaux (lettres "FR" à la
  * place). On affiche le SVG Twemoji correspondant (CC-BY 4.0), avec repli
  * texte si le CDN est indisponible. Conforme spec §22 : aucun écusson, aucun
- * visuel FIFA — uniquement des drapeaux Unicode.
+ * visuel FIFA, uniquement des drapeaux Unicode.
  */
 
 import { type ReactNode, useState } from "react";

@@ -1,5 +1,5 @@
 /**
- * Client Supabase FRONT — clé anon, lecture seule (RLS, spec §15).
+ * Client Supabase FRONT : clé anon, lecture seule (RLS, spec §15).
  * Requiert dans .env : VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY.
  */
 
@@ -13,7 +13,7 @@ function getClient(): SupabaseClient {
   const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
   if (!url || !anonKey) {
     throw new Error(
-      "VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY manquants dans .env — clés publiques (anon), pas la service key.",
+      "VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY manquants dans .env : clés publiques (anon), pas la service key.",
     );
   }
   client = createClient(url, anonKey, { auth: { persistSession: false, autoRefreshToken: false } });

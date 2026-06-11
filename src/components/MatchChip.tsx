@@ -1,5 +1,5 @@
 /**
- * Carte compacte d'un match (bandeau du jour, calendrier) — DA brutale,
+ * Carte compacte d'un match (bandeau du jour, calendrier), DA brutale,
  * angles vifs, mono labels.
  */
 

@@ -1,5 +1,5 @@
 /**
- * /n/:code (spec §12) : fiche nation — statut, territoire, matchs, récits.
+ * /n/:code (spec §12) : fiche nation, statut, territoire, matchs, récits.
  */
 
 import { useMemo } from "react";
@@ -73,7 +73,7 @@ export default function NationPage() {
               )}
               {nation.status === "eliminated" && (
                 <span className="text-red-signal">
-                  Éliminée — sa capitale est entrée au memorial
+                  Éliminée : sa capitale est entrée au memorial
                   {nation.eliminated_by_match && (
                     <>
                       {" · "}

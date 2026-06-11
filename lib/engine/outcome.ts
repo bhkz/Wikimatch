@@ -14,7 +14,7 @@ export function outcome(m: NormalizedMatch): Outcome {
     throw new Error(`outcome: match ${m.providerId} non FINISHED (${m.status}).`);
   }
   if (m.scoreHome === null || m.scoreAway === null) {
-    throw new Error(`outcome: match ${m.providerId} FINISHED sans score — refus de résoudre.`);
+    throw new Error(`outcome: match ${m.providerId} FINISHED sans score : refus de résoudre.`);
   }
 
   // Score différent (prolongation incluse) → vainqueur, gd = |Δ|.
@@ -31,7 +31,7 @@ export function outcome(m: NormalizedMatch): Outcome {
   // Égalité au score : TAB → vainqueur des TAB, gd = 0.
   if (m.duration === "PENALTY_SHOOTOUT") {
     if (m.pensHome === null || m.pensAway === null || m.pensHome === m.pensAway) {
-      throw new Error(`outcome: match ${m.providerId} aux TAB sans détail exploitable — refus de résoudre.`);
+      throw new Error(`outcome: match ${m.providerId} aux TAB sans détail exploitable : refus de résoudre.`);
     }
     const homeWins = m.pensHome > m.pensAway;
     return {
@@ -44,7 +44,7 @@ export function outcome(m: NormalizedMatch): Outcome {
 
   // Nul : groupes uniquement (spec §5.2/§5.5).
   if (isKnockout(m.stage)) {
-    throw new Error(`outcome: match ${m.providerId} nul en phase KO sans TAB — données incohérentes.`);
+    throw new Error(`outcome: match ${m.providerId} nul en phase KO sans TAB : données incohérentes.`);
   }
   return { isDraw: true };
 }

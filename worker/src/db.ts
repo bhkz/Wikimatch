@@ -90,7 +90,7 @@ export async function loadEngineState(
     .order("id")
     .limit(2000);
   if (error) throw new Error(`hexes: ${error.message}`);
-  if (!data || data.length < 600) throw new Error(`hexes: ${data?.length ?? 0} lignes — seed manquant ?`);
+  if (!data || data.length < 600) throw new Error(`hexes: ${data?.length ?? 0} lignes : seed manquant ?`);
 
   const hexes = new Map(
     data.map((h) => [
@@ -131,7 +131,7 @@ export async function alert(message: string): Promise<void> {
     await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: `🌍 Atlas — ${message}` }),
+      body: JSON.stringify({ content: `🌍 Atlas : ${message}` }),
     });
   } catch (err) {
     console.error(`alert webhook KO: ${err instanceof Error ? err.message : err}`);

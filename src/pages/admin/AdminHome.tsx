@@ -111,7 +111,7 @@ export default function AdminHome() {
             <div className="font-mono text-[10px] uppercase tracking-widest text-navy/50 mt-1">Matchs terminés</div>
           </div>
           <div className="bg-cream p-6">
-            <div className="font-display text-5xl">{data?.resolutions.length ?? "—"}</div>
+            <div className="font-display text-5xl">{data?.resolutions.length ?? "n/d"}</div>
             <div className="font-mono text-[10px] uppercase tracking-widest text-navy/50 mt-1">Résolutions appliquées</div>
           </div>
           <div className={`p-6 ${pending.length > 0 ? "bg-red-signal/10" : "bg-cream"}`}>

@@ -4,7 +4,7 @@
  * courant). Écriture atomique via RPC atlas.apply_resolution (advisory lock).
  *
  * Sources de résultat, par priorité (spec §3.3) :
- * 1. match_overrides (admin) — résolution immédiate ;
+ * 1. match_overrides (admin) : résolution immédiate ;
  * 2. matches FINISHED depuis ≥ resolution_confirm_delay_s (anti-correction API).
  */
 
@@ -69,7 +69,7 @@ export async function resolveFinishedMatches(
       const seenAt = finishedSeen[String(raw.id)];
       if (confirmDelayS > 0 && (!seenAt || now - Date.parse(seenAt) < confirmDelayS * 1000)) continue;
       if (!raw.home || !raw.away) {
-        await alert(`Match ${raw.id} FINISHED avec équipe inconnue (TBD) — résolution bloquée.`);
+        await alert(`Match ${raw.id} FINISHED avec équipe inconnue (TBD) : résolution bloquée.`);
         continue;
       }
       normalized = {
@@ -98,7 +98,7 @@ export async function resolveFinishedMatches(
       const msg = err instanceof Error ? err.message : String(err);
       await alert(`resolve(${raw.id}) refusé : ${msg}`);
       await logJob(supabase, "resolve", false, { matchId: raw.id, error: msg });
-      continue; // jamais deviner — on passe, l'opérateur tranchera
+      continue; // jamais deviner : on passe, l'opérateur tranchera
     }
 
     const nationUpdates = [...state.nationStatus]

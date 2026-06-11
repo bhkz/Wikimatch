@@ -1,5 +1,5 @@
 /**
- * /admin/map-preview — audit visuel OBLIGATOIRE de la carte de départ
+ * /admin/map-preview : audit visuel OBLIGATOIRE de la carte de départ
  * (spec §20 P0.1). Lit les seeds versionnés (pas la DB) : ce qu'on voit ici
  * est exactement ce qui a été seedé.
  */

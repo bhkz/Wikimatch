@@ -116,7 +116,7 @@ export function eliminateNation(
 
 export function resolveMatch(state: EngineState, input: ResolveInput, cfg: GameConfig): ResolveResult {
   const { matchId, match, labels } = input;
-  if (state.gameOver) throw new Error("resolve: game_over=true — plus aucune mutation (spec §21.16).");
+  if (state.gameOver) throw new Error("resolve: game_over=true : plus aucune mutation (spec §21.16).");
 
   const events: HexEventDraft[] = [];
   const logs: ResolveResult["logs"] = [];

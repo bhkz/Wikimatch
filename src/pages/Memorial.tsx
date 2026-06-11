@@ -1,6 +1,6 @@
 /**
  * /memorial (spec §12) : les nations tombées, leur capitale sanctuarisée,
- * le match fatal. Sobre et solennel — c'est le cimetière du jeu.
+ * le match fatal. Sobre et solennel : c'est le cimetière du jeu.
  */
 
 import { useMemo } from "react";
@@ -35,14 +35,14 @@ export default function Memorial() {
           Memorial
         </h1>
         <p className="font-light text-cream/60 max-w-xl leading-relaxed mb-12">
-          Quand une nation quitte le tournoi, sa capitale devient un memorial doré —
+          Quand une nation quitte le tournoi, sa capitale devient un memorial doré :
           intouchable à jamais, même par le champion du monde.
         </p>
         {error && <div className="font-mono text-xs text-red-signal uppercase tracking-widest mb-6">{error}</div>}
         {!data && <p className="font-light text-cream/60">Chargement…</p>}
         {data && fallen.length === 0 && (
           <p className="font-light text-cream/60">
-            Personne n'est encore tombé. Les 48 nations sont en vie — la phase à
+            Personne n'est encore tombé. Les 48 nations sont en vie : la phase à
             élimination directe commence le 28 juin.
           </p>
         )}

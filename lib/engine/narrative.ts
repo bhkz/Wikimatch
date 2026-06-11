@@ -1,8 +1,8 @@
 /**
  * Récits générés depuis des TEMPLATES FERMÉS (spec §5.7, §22.3).
  * Liste relue à la main. Vocabulaire exclusivement sportif-ludique :
- * mots interdits — guerre, invasion, armée, troupes, occupation, annexion,
- * frappe, ennemi, détruire. Le champ narrative est stocké, jamais regénéré.
+ * mots interdits : guerre, invasion, armée, troupes, occupation, annexion,
+ * frappe, ennemi, détruire. Le champ narrative est stocké, jamais régénéré.
  */
 
 export type NationLabel = { flag: string; name: string };
@@ -35,20 +35,20 @@ export function drawNarrative(
   const parts: string[] = [];
   if (aCity) parts.push(`${a.flag} ${a.name} prend ${aCity}`);
   if (bCity) parts.push(`${b.flag} ${b.name} prend ${bCity}`);
-  if (parts.length === 0) return `${a.flag} ${a.name} et ${b.flag} ${b.name} se quittent dos à dos — la carte ne bouge pas`;
+  if (parts.length === 0) return `${a.flag} ${a.name} et ${b.flag} ${b.name} se quittent dos à dos : la carte ne bouge pas`;
   return parts.join(" · ");
 }
 
-/** Héritage à l'élimination KO (spec §5.8) — le "vae victis" sportif. */
+/** Héritage à l'élimination KO (spec §5.8), le "vae victis" sportif. */
 export function eliminationNarrative(winner: NationLabel, eliminated: NationLabel, inherited: number): string {
-  if (inherited === 0) return `${eliminated.flag} ${eliminated.name} quitte le tournoi — sa capitale entre au memorial`;
+  if (inherited === 0) return `${eliminated.flag} ${eliminated.name} quitte le tournoi : sa capitale entre au memorial`;
   const territoires = inherited === 1 ? "1 territoire" : `${inherited} territoires`;
-  return `${eliminated.flag} ${eliminated.name} quitte le tournoi — ${winner.flag} ${winner.name} recueille ${territoires}`;
+  return `${eliminated.flag} ${eliminated.name} quitte le tournoi : ${winner.flag} ${winner.name} recueille ${territoires}`;
 }
 
 /** Clôture §5.9 : le monde passe au champion. */
 export function worldConqueredNarrative(champion: NationLabel): string {
-  return `${champion.flag} ${champion.name} est sur le toit du monde — la carte entière passe à ses couleurs`;
+  return `${champion.flag} ${champion.name} est sur le toit du monde : la carte entière passe à ses couleurs`;
 }
 
 /** Garde-fou §22.3 : mots interdits dans tout texte généré (tests offline). */
