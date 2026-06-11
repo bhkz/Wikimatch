@@ -1,0 +1,19 @@
+{
+  "_comment": "Ordre des critères de départage (spec §6.4). ⚠️ À VÉRIFIER contre le règlement officiel FIFA 2026 avant activation — si le règlement réel diffère, on change ce JSON, pas le code. 'head_to_head' = mini-classement entre équipes à égalité. 'fair_play_random' = critère fair-play non simulable, remplacé par tirage 50/50 marqué 'départage aléatoire' dans l'UI.",
+  "group_stage": [
+    "points",
+    "goal_difference",
+    "goals_for",
+    "head_to_head",
+    "fair_play_random",
+    "drawing_of_lots"
+  ],
+  "best_thirds": [
+    "points",
+    "goal_difference",
+    "goals_for",
+    "fair_play_random",
+    "drawing_of_lots"
+  ],
+  "verified_against_official_rules": false
+}
