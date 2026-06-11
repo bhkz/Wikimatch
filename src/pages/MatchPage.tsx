@@ -10,6 +10,7 @@ import SiteFooter from "../components/SiteFooter";
 import SectionLabel from "../components/SectionLabel";
 import HexMap from "../components/HexMap";
 import { STAGE_LABELS, isLive, kickoffLabel, nationStyles, useAtlasData } from "../lib/atlas";
+import { FlagEmoji, TextWithFlags } from "../components/FlagEmoji";
 
 export default function MatchPage() {
   const { id } = useParams();
@@ -45,11 +46,11 @@ export default function MatchPage() {
             />
             <div className="mt-6 mb-10 flex flex-wrap items-center gap-x-8 gap-y-4">
               <h1 className="font-display text-4xl md:text-7xl uppercase leading-[0.9] tracking-wide">
-                {home ? `${home.flag} ${home.name}` : "À déterminer"}
+                {home ? <><FlagEmoji flag={home.flag} /> {home.name}</> : "À déterminer"}
                 <span className="text-navy/30 mx-4">
                   {match.score_home !== null ? `${match.score_home} – ${match.score_away}` : "VS"}
                 </span>
-                {away ? `${away.flag} ${away.name}` : "À déterminer"}
+                {away ? <><FlagEmoji flag={away.flag} /> {away.name}</> : "À déterminer"}
               </h1>
               {isLive(match) && (
                 <span className="font-mono text-xs uppercase tracking-widest text-red-signal flex items-center gap-2">
@@ -70,7 +71,7 @@ export default function MatchPage() {
                   <div className="font-mono text-[10px] uppercase font-bold tracking-widest text-navy/50 mb-2">
                     Conséquence sur la carte
                   </div>
-                  <p className="text-xl md:text-3xl font-light leading-relaxed">{resolution.narrative}</p>
+                  <p className="text-xl md:text-3xl font-light leading-relaxed"><TextWithFlags text={resolution.narrative} /></p>
                   <div className="font-mono text-[10px] uppercase tracking-widest text-navy/40 mt-4">
                     {resolution.is_draw
                       ? "Match nul — chaque équipe grappille en terre neutre"

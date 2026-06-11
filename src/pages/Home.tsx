@@ -4,6 +4,7 @@ import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import HexMap from "../components/HexMap";
 import MatchChip from "../components/MatchChip";
+import { TextWithFlags } from "../components/FlagEmoji";
 import {
   liveOwners,
   nationStyles,
@@ -103,7 +104,7 @@ export default function Home() {
                     to={`/m/${r.match_id}`}
                     className="flex items-baseline justify-between gap-4 py-3 hover:bg-navy/5 px-2 transition-colors"
                   >
-                    <span className="font-light">{r.narrative}</span>
+                    <span className="font-light"><TextWithFlags text={r.narrative} /></span>
                     <span className="font-mono text-[10px] uppercase tracking-widest text-navy/40 whitespace-nowrap">
                       {r.is_draw ? "nul" : `+${r.final_gain} hex`}
                     </span>

@@ -16,18 +16,16 @@ export default function SiteFooter() {
             </p>
           </div>
 
+          {/* P0 : mêmes entrées que le header. La Nuit / Groupes / Tableau /
+              Memorial arrivent en P1 (spec §12, §20). */}
           <div className="col-span-6 md:col-span-4 flex flex-col gap-4 font-display text-2xl uppercase tracking-wider">
             <Link to="/" className="hover:text-blue-electric transition-colors">Carte</Link>
-            <Link to="/nuit" className="hover:text-blue-electric transition-colors">La Nuit</Link>
-            <Link to="/groupes" className="hover:text-blue-electric transition-colors">Groupes</Link>
-            <Link to="/tableau" className="hover:text-blue-electric transition-colors">Tableau</Link>
             <Link to="/calendrier" className="hover:text-blue-electric transition-colors">Calendrier</Link>
-            <Link to="/memorial" className="hover:text-blue-electric transition-colors">Memorial</Link>
+            <Link to="/methodo" className="hover:text-blue-electric transition-colors">Comment ça marche</Link>
           </div>
 
           <div className="col-span-6 md:col-span-4 flex flex-col gap-4 font-mono text-xs uppercase tracking-widest text-cream/60">
-            <Link to="/methodo" className="hover:text-cream transition-colors">Comment ça marche</Link>
-            <a href="/feed.xml" className="hover:text-cream transition-colors">Flux RSS</a>
+            <Link to="/methodo" className="hover:text-cream transition-colors">Méthodologie & données</Link>
           </div>
         </div>
 

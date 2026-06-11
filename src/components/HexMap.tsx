@@ -6,6 +6,7 @@
 import { useMemo, useRef, useState } from "react";
 import { axialToPixel, hexCorners } from "../../lib/hex";
 import { colors } from "../design/tokens";
+import { FlagEmoji } from "./FlagEmoji";
 
 export type MapHex = {
   id: number;
@@ -117,9 +118,14 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
         >
           <span className="font-medium">{hovered.cityName}</span>
           {" · "}
-          {hovered.state === "neutral" || hovered.owner === null
-            ? "Eaux neutres"
-            : `${nations.get(hovered.owner)?.flag ?? ""} ${nations.get(hovered.owner)?.name ?? hovered.owner}`}
+          {hovered.state === "neutral" || hovered.owner === null ? (
+            "Eaux neutres"
+          ) : (
+            <>
+              <FlagEmoji flag={nations.get(hovered.owner)?.flag ?? ""} />{" "}
+              {nations.get(hovered.owner)?.name ?? hovered.owner}
+            </>
+          )}
           {hovered.isCapital && " · Capitale"}
           {hovered.state === "ruins" && " · Ruines"}
           {hovered.state === "memorial" && " · Memorial"}

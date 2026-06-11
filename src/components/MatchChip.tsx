@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import type { Match } from "../lib/atlas";
 import { STAGE_LABELS, isLive, kickoffTime } from "../lib/atlas";
 import type { NationStyle } from "./HexMap";
+import { FlagEmoji } from "./FlagEmoji";
 
 type Props = { match: Match; styles: ReadonlyMap<string, NationStyle> };
 
@@ -15,7 +16,7 @@ function TeamLabel({ code, styles }: { code: string | null; styles: Props["style
   const s = styles.get(code);
   return (
     <span className="inline-flex items-center gap-2">
-      <span>{s?.flag}</span>
+      {s && <FlagEmoji flag={s.flag} />}
       <span className="font-medium">{s?.name ?? code}</span>
     </span>
   );

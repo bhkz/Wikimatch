@@ -9,6 +9,7 @@ import SiteHeader from "../../components/SiteHeader";
 import SiteFooter from "../../components/SiteFooter";
 import SectionLabel from "../../components/SectionLabel";
 import HexMap, { type MapHex, type NationStyle } from "../../components/HexMap";
+import { FlagEmoji } from "../../components/FlagEmoji";
 import mapGenerated from "../../../data/map-generated.json";
 import nationsSeed from "../../../data/nations-seed.json";
 
@@ -82,7 +83,7 @@ export default function MapPreview() {
           {[...nations.entries()].map(([code, n]) => (
             <div key={code} className="flex items-center gap-2 font-mono text-xs tracking-widest uppercase">
               <span className="inline-block w-3 h-3 border border-navy/20" style={{ background: n.color }} />
-              <span>{n.flag} {code}</span>
+              <span className="inline-flex items-center gap-1.5"><FlagEmoji flag={n.flag} /> {code}</span>
             </div>
           ))}
         </div>

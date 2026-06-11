@@ -10,6 +10,7 @@ import SectionLabel from "../components/SectionLabel";
 import HexMap from "../components/HexMap";
 import MatchChip from "../components/MatchChip";
 import { nationStyles, useAtlasData } from "../lib/atlas";
+import { FlagEmoji, TextWithFlags } from "../components/FlagEmoji";
 
 export default function NationPage() {
   const { code } = useParams();
@@ -54,7 +55,7 @@ export default function NationPage() {
             <SectionLabel label={`Groupe ${nation.group_letter} · Rang FIFA ${nation.fifa_rank}`} />
             <div className="mt-4 mb-2 flex flex-wrap items-center gap-6">
               <h1 className="font-display text-5xl md:text-8xl uppercase leading-[0.9] tracking-wide">
-                {nation.flag} {nation.name_fr}
+                <FlagEmoji flag={nation.flag} /> {nation.name_fr}
               </h1>
               <span
                 className="inline-block w-6 h-6 border border-navy/20"
@@ -105,7 +106,7 @@ export default function NationPage() {
                   {stories.map((r) => (
                     <li key={r.match_id}>
                       <Link to={`/m/${r.match_id}`} className="block py-3 px-2 font-light hover:bg-navy/5 transition-colors">
-                        {r.narrative}
+                        <TextWithFlags text={r.narrative} />
                       </Link>
                     </li>
                   ))}
