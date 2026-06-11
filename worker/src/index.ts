@@ -13,6 +13,7 @@ import { createServer } from "node:http";
 import { alert, createWorkerClient, loadConfig, loadEngineState, loadNations, logJob } from "./db";
 import { pollMatches } from "./jobs/poll-matches";
 import { resolveFinishedMatches } from "./jobs/resolve-matches";
+import { snapshotIfDue } from "./jobs/snapshot";
 
 const startedAt = new Date().toISOString();
 let lastTickAt: string | null = null;
@@ -44,6 +45,8 @@ async function tick(): Promise<{ anyLive: boolean }> {
     cfg.resolutionConfirmDelayS,
   );
   if (resolvedCount > 0) console.log(`tick: ${resolvedCount} match(s) résolu(s).`);
+
+  await snapshotIfDue(supabase, state);
   return { anyLive: poll.anyLive };
 }
 

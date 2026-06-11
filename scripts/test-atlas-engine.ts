@@ -12,6 +12,7 @@ import { containsForbiddenWord } from "../lib/engine/narrative";
 import { parseCsv } from "../lib/providers/csv-import";
 import { extractScore } from "../lib/providers/extract-score";
 import { FootballDataProvider, UnknownStageError, UnknownTeamError } from "../lib/providers/football-data";
+import { computeStandings } from "../lib/standings";
 import { DEFAULT_GAME_CONFIG, type EngineState } from "../lib/engine/types";
 import type { NormalizedMatch, Stage } from "../lib/providers/types";
 
@@ -372,6 +373,38 @@ check("football-data : équipe placeholder (tableau) → TBD", () => {
     homeTeam: { id: null }, awayTeam: { id: null }, score: null,
   });
   assert(m.homeFifa === "TBD" && m.awayFifa === "TBD", JSON.stringify(m));
+});
+
+console.log("\n— Classements de groupe (§6)");
+check("points puis diff puis buts marqués", () => {
+  const rows = computeStandings(["AAA", "BBB", "CCC", "DDD"], [
+    { home: "AAA", away: "BBB", scoreHome: 2, scoreAway: 0 },
+    { home: "CCC", away: "DDD", scoreHome: 1, scoreAway: 1 },
+    { home: "AAA", away: "CCC", scoreHome: 1, scoreAway: 1 },
+    { home: "BBB", away: "DDD", scoreHome: 3, scoreAway: 0 },
+  ]);
+  assert(rows[0].code === "AAA" && rows[0].points === 4, JSON.stringify(rows.map((r) => r.code)));
+  assert(rows[1].code === "BBB", "BBB 2e (diff +1 vs CCC/DDD)");
+});
+check("confrontation directe départage à égalité parfaite de stats", () => {
+  // AAA et BBB : 3 pts, même diff, mêmes buts — BBB a battu AAA.
+  const rows = computeStandings(["AAA", "BBB", "CCC", "DDD"], [
+    { home: "BBB", away: "AAA", scoreHome: 1, scoreAway: 0 },
+    { home: "AAA", away: "CCC", scoreHome: 1, scoreAway: 0 },
+    { home: "BBB", away: "DDD", scoreHome: 0, scoreAway: 1 },
+  ]);
+  const posBBB = rows.findIndex((r) => r.code === "BBB");
+  const posAAA = rows.findIndex((r) => r.code === "AAA");
+  assert(posBBB < posAAA, `BBB doit devancer AAA (h2h) : ${rows.map((r) => r.code).join(",")}`);
+  assert(!rows[posBBB].unresolvedTie, "départagé proprement");
+});
+check("égalité parfaite résiduelle → marquée unresolvedTie", () => {
+  const rows = computeStandings(["AAA", "BBB", "CCC", "DDD"], [
+    { home: "AAA", away: "BBB", scoreHome: 1, scoreAway: 1 },
+  ]);
+  const a = rows.find((r) => r.code === "AAA")!;
+  const b = rows.find((r) => r.code === "BBB")!;
+  assert(a.unresolvedTie && b.unresolvedTie, "égalité 1-1 sans critère : non départagée");
 });
 
 console.log(`\nTotal: ${passed + failed} | Passed: ${passed} | Failed: ${failed}`);

@@ -1,6 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Calendar from "./pages/Calendar";
+import Groups from "./pages/Groups";
+import Bracket from "./pages/Bracket";
+import Memorial from "./pages/Memorial";
+import Night from "./pages/Night";
 import MatchPage from "./pages/MatchPage";
 import NationPage from "./pages/NationPage";
 import Methodo from "./pages/Methodo";
@@ -18,6 +22,12 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/calendrier" element={<Calendar />} />
+        <Route path="/groupes" element={<Groups />} />
+        <Route path="/groupes/:letter" element={<Groups />} />
+        <Route path="/tableau" element={<Bracket />} />
+        <Route path="/memorial" element={<Memorial />} />
+        <Route path="/nuit" element={<Night />} />
+        <Route path="/nuit/:date" element={<Night />} />
         <Route path="/m/:id" element={<MatchPage />} />
         <Route path="/n/:code" element={<NationPage />} />
         <Route path="/methodo" element={<Methodo />} />

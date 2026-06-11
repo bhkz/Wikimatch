@@ -3,6 +3,39 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/m/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|facebookexternalhit|Twitterbot|WhatsApp|TelegramBot|Slackbot|Discordbot|LinkedInBot|Embedly|preview).*"
+        }
+      ],
+      "destination": "/api/meta?path=/m/:id"
+    },
+    {
+      "source": "/n/:code",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|facebookexternalhit|Twitterbot|WhatsApp|TelegramBot|Slackbot|Discordbot|LinkedInBot|Embedly|preview).*"
+        }
+      ],
+      "destination": "/api/meta?path=/n/:code"
+    },
+    {
+      "source": "/nuit/:date",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|facebookexternalhit|Twitterbot|WhatsApp|TelegramBot|Slackbot|Discordbot|LinkedInBot|Embedly|preview).*"
+        }
+      ],
+      "destination": "/api/meta?path=/nuit/:date"
+    },
+    {
       "source": "/((?!api/|assets/|src/|node_modules/|@id|@vite|@react-refresh).*)",
       "destination": "/index.html"
     }
