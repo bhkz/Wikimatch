@@ -27,13 +27,15 @@ type Props = {
   onHexClick?: (hex: MapHex) => void;
   /** Hexes à mettre en avant (ex : pris cette nuit). */
   highlightIds?: ReadonlySet<number>;
+  /** Nations dont un match est EN COURS : leurs territoires pulsent. */
+  liveOwners?: ReadonlySet<string>;
 };
 
-const NEUTRAL_FILL = "#D8D4C8"; // sable discret sur océan navy
+const NEUTRAL_FILL = "#B8B2A2"; // sable grisé, recule derrière les nations
 const RUINS_FILL = "#3A3F4D";
 const MEMORIAL_FILL = "#C9A227"; // or — sanctuaire
 
-export default function HexMap({ hexes, nations, size = 10, onHexClick, highlightIds }: Props) {
+export default function HexMap({ hexes, nations, size = 10, onHexClick, highlightIds, liveOwners }: Props) {
   const [hovered, setHovered] = useState<MapHex | null>(null);
   const [cursor, setCursor] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,20 +74,24 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
   return (
     <div className="relative w-full" ref={containerRef} onMouseMove={onMouseMove}>
       <svg viewBox={viewBox} className="w-full h-auto block" style={{ background: colors.navy }} role="img" aria-label="Carte du monde hexagonale">
-        {polygons.map(({ hex, points }) => (
-          <polygon
-            key={hex.id}
-            points={points}
-            fill={fillOf(hex)}
-            stroke={colors.navy}
-            strokeWidth={size * 0.06}
-            opacity={highlightIds && !highlightIds.has(hex.id) ? 0.55 : 1}
-            style={{ cursor: onHexClick ? "pointer" : "default", transition: "opacity 150ms" }}
-            onMouseEnter={() => setHovered(hex)}
-            onMouseLeave={() => setHovered((prev) => (prev?.id === hex.id ? null : prev))}
-            onClick={() => onHexClick?.(hex)}
-          />
-        ))}
+        {polygons.map(({ hex, points }) => {
+          const isLive = liveOwners !== undefined && hex.owner !== null && hex.state === "owned" && liveOwners.has(hex.owner);
+          return (
+            <polygon
+              key={hex.id}
+              points={points}
+              fill={fillOf(hex)}
+              stroke={colors.navy}
+              strokeWidth={size * 0.06}
+              opacity={highlightIds && !highlightIds.has(hex.id) ? 0.55 : 1}
+              className={isLive ? "hex-live" : undefined}
+              style={{ cursor: onHexClick ? "pointer" : "default", transition: "opacity 150ms" }}
+              onMouseEnter={() => setHovered(hex)}
+              onMouseLeave={() => setHovered((prev) => (prev?.id === hex.id ? null : prev))}
+              onClick={() => onHexClick?.(hex)}
+            />
+          );
+        })}
         {/* Capitales : anneau + point, par-dessus les aplats. */}
         {polygons
           .filter(({ hex }) => hex.isCapital)

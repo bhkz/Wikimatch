@@ -1,5 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
+import Calendar from "./pages/Calendar";
+import MatchPage from "./pages/MatchPage";
+import NationPage from "./pages/NationPage";
+import Methodo from "./pages/Methodo";
+import AdminHome from "./pages/admin/AdminHome";
 import MapPreview from "./pages/admin/MapPreview";
 
 /**
@@ -12,6 +17,11 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/calendrier" element={<Calendar />} />
+        <Route path="/m/:id" element={<MatchPage />} />
+        <Route path="/n/:code" element={<NationPage />} />
+        <Route path="/methodo" element={<Methodo />} />
+        <Route path="/admin" element={<AdminHome />} />
         <Route path="/admin/map-preview" element={<MapPreview />} />
         <Route path="*" element={<Home />} />
       </Routes>

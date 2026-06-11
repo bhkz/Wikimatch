@@ -3,13 +3,12 @@ import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
+// P0 : seules les pages livrées. La Nuit / Groupes / Tableau / Memorial
+// rejoindront la nav en P1 (spec §12, §20).
 const NAV_ITEMS = [
   { label: "Carte", to: "/" },
-  { label: "La Nuit", to: "/nuit" },
-  { label: "Groupes", to: "/groupes" },
-  { label: "Tableau", to: "/tableau" },
   { label: "Calendrier", to: "/calendrier" },
-  { label: "Memorial", to: "/memorial" },
+  { label: "Comment ça marche", to: "/methodo" },
 ];
 
 export default function SiteHeader() {

@@ -37,3 +37,21 @@ h1, h2, h3, h4, h5, h6, .font-display {
   background-image: linear-gradient(to right, rgba(249, 248, 246, 0.05) 1px, transparent 1px),
                     linear-gradient(to bottom, rgba(249, 248, 246, 0.05) 1px, transparent 1px);
 }
+
+/* Territoires des nations dont un match est EN COURS (HexMap, spec §4/§13). */
+@keyframes hex-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.hex-live {
+  animation: hex-pulse 1.6s ease-in-out infinite;
+}
+
+/* §13 : prefers-reduced-motion → état statique légèrement éclairci. */
+@media (prefers-reduced-motion: reduce) {
+  .hex-live {
+    animation: none;
+    opacity: 0.85;
+  }
+}
