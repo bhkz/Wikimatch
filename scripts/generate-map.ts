@@ -95,6 +95,12 @@ function main() {
     counts.set(code, 1);
   }
 
+  // En zone très dense, un BFS contigu peut être encerclé alors qu'il reste
+  // de la terre libre ailleurs : fallback EXCLAVE déterministe (hex libre le
+  // plus proche de la capitale), signalé pour l'audit visuel. L'égalité
+  // stricte de 10 hexes (spec §4.3) prime sur la contiguïté (non normative).
+  const exclaves = new Map<string, number>();
+
   let progress = true;
   while (progress) {
     progress = false;
@@ -115,6 +121,25 @@ function main() {
         }
         claimed = free[0];
       }
+      if (claimed === null) {
+        // Frontière épuisée : exclave au plus près de la capitale.
+        const cap = mapSeed.capitals[code];
+        let best: Axial | null = null;
+        let bestDist = Infinity;
+        for (const key of land) {
+          if (ownerByKey.has(key)) continue;
+          const [q, r] = key.split(",").map(Number);
+          const d = hexDistance({ q, r }, cap);
+          if (d < bestDist || (d === bestDist && best !== null && compareAxial({ q, r }, best) < 0)) {
+            best = { q, r };
+            bestDist = d;
+          }
+        }
+        if (best) {
+          claimed = best;
+          exclaves.set(code, (exclaves.get(code) ?? 0) + 1);
+        }
+      }
       if (claimed) {
         ownerByKey.set(hexKey(claimed), code);
         frontier.push(claimed);
@@ -131,6 +156,10 @@ function main() {
         .map((c) => `${c}(${counts.get(c)})`)
         .join(", ")}. Élargir la terre ou écarter les capitales dans map-seed.json.`,
     );
+  }
+  if (exclaves.size > 0) {
+    const detail = [...exclaves].map(([c, n]) => `${c}(+${n})`).join(", ");
+    console.warn(`⚠ Exclaves créées (zones denses, à contrôler sur /admin/map-preview) : ${detail}`);
   }
 
   // --- 3 + 4. Hexes neutres + nommage ---------------------------------------

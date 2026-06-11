@@ -1,0 +1,5458 @@
+[
+ {
+  "id": 1,
+  "q": -2,
+  "r": 24,
+  "city_name": "Itauguá",
+  "is_capital": false,
+  "original_owner": "PAR"
+ },
+ {
+  "id": 2,
+  "q": -2,
+  "r": 25,
+  "city_name": "Artigas",
+  "is_capital": false,
+  "original_owner": "URY"
+ },
+ {
+  "id": 3,
+  "q": -1,
+  "r": 22,
+  "city_name": "Tucumán",
+  "is_capital": false,
+  "original_owner": "ARG"
+ },
+ {
+  "id": 4,
+  "q": -1,
+  "r": 23,
+  "city_name": "Mar del Plata",
+  "is_capital": false,
+  "original_owner": "ARG"
+ },
+ {
+  "id": 5,
+  "q": -1,
+  "r": 24,
+  "city_name": "Louga",
+  "is_capital": false,
+  "original_owner": "SEN"
+ },
+ {
+  "id": 6,
+  "q": -1,
+  "r": 25,
+  "city_name": "Atlantique Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 7,
+  "q": 0,
+  "r": 10,
+  "city_name": "Zapopan",
+  "is_capital": false,
+  "original_owner": "MEX"
+ },
+ {
+  "id": 8,
+  "q": 0,
+  "r": 20,
+  "city_name": "Salta",
+  "is_capital": false,
+  "original_owner": "ARG"
+ },
+ {
+  "id": 9,
+  "q": 0,
+  "r": 21,
+  "city_name": "Córdoba",
+  "is_capital": false,
+  "original_owner": "ARG"
+ },
+ {
+  "id": 10,
+  "q": 0,
+  "r": 22,
+  "city_name": "Rosario",
+  "is_capital": false,
+  "original_owner": "ARG"
+ },
+ {
+  "id": 11,
+  "q": 0,
+  "r": 23,
+  "city_name": "Santa Fe",
+  "is_capital": false,
+  "original_owner": "ARG"
+ },
+ {
+  "id": 12,
+  "q": 1,
+  "r": 2,
+  "city_name": "Pacifique Sud",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 13,
+  "q": 1,
+  "r": 4,
+  "city_name": "Mer des Sargasses",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 14,
+  "q": 1,
+  "r": 6,
+  "city_name": "Détroit de Béring",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 15,
+  "q": 1,
+  "r": 7,
+  "city_name": "Mérida",
+  "is_capital": false,
+  "original_owner": "MEX"
+ },
+ {
+  "id": 16,
+  "q": 1,
+  "r": 8,
+  "city_name": "Guadalajara",
+  "is_capital": false,
+  "original_owner": "MEX"
+ },
+ {
+  "id": 17,
+  "q": 1,
+  "r": 9,
+  "city_name": "Monterrey",
+  "is_capital": false,
+  "original_owner": "MEX"
+ },
+ {
+  "id": 18,
+  "q": 1,
+  "r": 10,
+  "city_name": "Cancún",
+  "is_capital": false,
+  "original_owner": "MEX"
+ },
+ {
+  "id": 19,
+  "q": 1,
+  "r": 11,
+  "city_name": "Santiago",
+  "is_capital": false,
+  "original_owner": "PAN"
+ },
+ {
+  "id": 20,
+  "q": 1,
+  "r": 12,
+  "city_name": "Chitré",
+  "is_capital": false,
+  "original_owner": "PAN"
+ },
+ {
+  "id": 21,
+  "q": 1,
+  "r": 14,
+  "city_name": "Manta",
+  "is_capital": false,
+  "original_owner": "ECU"
+ },
+ {
+  "id": 22,
+  "q": 1,
+  "r": 15,
+  "city_name": "Portoviejo",
+  "is_capital": false,
+  "original_owner": "ECU"
+ },
+ {
+  "id": 23,
+  "q": 1,
+  "r": 16,
+  "city_name": "Nieuwpoort",
+  "is_capital": false,
+  "original_owner": "CUW"
+ },
+ {
+  "id": 24,
+  "q": 1,
+  "r": 18,
+  "city_name": "Ambato",
+  "is_capital": false,
+  "original_owner": "ECU"
+ },
+ {
+  "id": 25,
+  "q": 1,
+  "r": 19,
+  "city_name": "Melo",
+  "is_capital": false,
+  "original_owner": "URY"
+ },
+ {
+  "id": 26,
+  "q": 1,
+  "r": 20,
+  "city_name": "Mendoza",
+  "is_capital": false,
+  "original_owner": "ARG"
+ },
+ {
+  "id": 27,
+  "q": 1,
+  "r": 21,
+  "city_name": "Buenos Aires",
+  "is_capital": true,
+  "original_owner": "ARG"
+ },
+ {
+  "id": 28,
+  "q": 1,
+  "r": 22,
+  "city_name": "La Plata",
+  "is_capital": false,
+  "original_owner": "ARG"
+ },
+ {
+  "id": 29,
+  "q": 1,
+  "r": 23,
+  "city_name": "Neuquén",
+  "is_capital": false,
+  "original_owner": "ARG"
+ },
+ {
+  "id": 30,
+  "q": 2,
+  "r": 0,
+  "city_name": "Mer de Corail",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 31,
+  "q": 2,
+  "r": 1,
+  "city_name": "Sahara",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 32,
+  "q": 2,
+  "r": 2,
+  "city_name": "Atacama",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 33,
+  "q": 2,
+  "r": 3,
+  "city_name": "Mer du Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 34,
+  "q": 2,
+  "r": 4,
+  "city_name": "Golfe de Guinée",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 35,
+  "q": 2,
+  "r": 5,
+  "city_name": "Mer d'Arabie",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 36,
+  "q": 2,
+  "r": 6,
+  "city_name": "Pacifique Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 37,
+  "q": 2,
+  "r": 7,
+  "city_name": "Puebla",
+  "is_capital": false,
+  "original_owner": "MEX"
+ },
+ {
+  "id": 38,
+  "q": 2,
+  "r": 8,
+  "city_name": "Mexico",
+  "is_capital": true,
+  "original_owner": "MEX"
+ },
+ {
+  "id": 39,
+  "q": 2,
+  "r": 9,
+  "city_name": "Tijuana",
+  "is_capital": false,
+  "original_owner": "MEX"
+ },
+ {
+  "id": 40,
+  "q": 2,
+  "r": 10,
+  "city_name": "Penonomé",
+  "is_capital": false,
+  "original_owner": "PAN"
+ },
+ {
+  "id": 41,
+  "q": 2,
+  "r": 11,
+  "city_name": "San Miguelito",
+  "is_capital": false,
+  "original_owner": "PAN"
+ },
+ {
+  "id": 42,
+  "q": 2,
+  "r": 12,
+  "city_name": "Colón",
+  "is_capital": false,
+  "original_owner": "PAN"
+ },
+ {
+  "id": 43,
+  "q": 2,
+  "r": 13,
+  "city_name": "Loja",
+  "is_capital": false,
+  "original_owner": "ECU"
+ },
+ {
+  "id": 44,
+  "q": 2,
+  "r": 14,
+  "city_name": "Guayaquil",
+  "is_capital": false,
+  "original_owner": "ECU"
+ },
+ {
+  "id": 45,
+  "q": 2,
+  "r": 15,
+  "city_name": "Cuenca",
+  "is_capital": false,
+  "original_owner": "ECU"
+ },
+ {
+  "id": 46,
+  "q": 2,
+  "r": 16,
+  "city_name": "Porto Alegre",
+  "is_capital": false,
+  "original_owner": "BRA"
+ },
+ {
+  "id": 47,
+  "q": 2,
+  "r": 17,
+  "city_name": "Ibagué",
+  "is_capital": false,
+  "original_owner": "COL"
+ },
+ {
+  "id": 48,
+  "q": 2,
+  "r": 18,
+  "city_name": "Encarnación",
+  "is_capital": false,
+  "original_owner": "PAR"
+ },
+ {
+  "id": 49,
+  "q": 2,
+  "r": 19,
+  "city_name": "Maldonado",
+  "is_capital": false,
+  "original_owner": "URY"
+ },
+ {
+  "id": 50,
+  "q": 2,
+  "r": 20,
+  "city_name": "Salto",
+  "is_capital": false,
+  "original_owner": "URY"
+ },
+ {
+  "id": 51,
+  "q": 2,
+  "r": 21,
+  "city_name": "Paysandú",
+  "is_capital": false,
+  "original_owner": "URY"
+ },
+ {
+  "id": 52,
+  "q": 3,
+  "r": 0,
+  "city_name": "Atlantique Sud",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 53,
+  "q": 3,
+  "r": 1,
+  "city_name": "Mer des Caraïbes",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 54,
+  "q": 3,
+  "r": 2,
+  "city_name": "Océan Indien",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 55,
+  "q": 3,
+  "r": 3,
+  "city_name": "Mer de Tasman",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 56,
+  "q": 3,
+  "r": 4,
+  "city_name": "Gobi",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 57,
+  "q": 3,
+  "r": 5,
+  "city_name": "Miami",
+  "is_capital": false,
+  "original_owner": "USA"
+ },
+ {
+  "id": 58,
+  "q": 3,
+  "r": 6,
+  "city_name": "Kalahari",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 59,
+  "q": 3,
+  "r": 7,
+  "city_name": "León",
+  "is_capital": false,
+  "original_owner": "MEX"
+ },
+ {
+  "id": 60,
+  "q": 3,
+  "r": 8,
+  "city_name": "Ciudad Juárez",
+  "is_capital": false,
+  "original_owner": "MEX"
+ },
+ {
+  "id": 61,
+  "q": 3,
+  "r": 9,
+  "city_name": "Aguadulce",
+  "is_capital": false,
+  "original_owner": "PAN"
+ },
+ {
+  "id": 62,
+  "q": 3,
+  "r": 10,
+  "city_name": "David",
+  "is_capital": false,
+  "original_owner": "PAN"
+ },
+ {
+  "id": 63,
+  "q": 3,
+  "r": 11,
+  "city_name": "Panama",
+  "is_capital": true,
+  "original_owner": "PAN"
+ },
+ {
+  "id": 64,
+  "q": 3,
+  "r": 12,
+  "city_name": "La Chorrera",
+  "is_capital": false,
+  "original_owner": "PAN"
+ },
+ {
+  "id": 65,
+  "q": 3,
+  "r": 13,
+  "city_name": "Santo Domingo",
+  "is_capital": false,
+  "original_owner": "ECU"
+ },
+ {
+  "id": 66,
+  "q": 3,
+  "r": 14,
+  "city_name": "Quito",
+  "is_capital": true,
+  "original_owner": "ECU"
+ },
+ {
+  "id": 67,
+  "q": 3,
+  "r": 15,
+  "city_name": "Machala",
+  "is_capital": false,
+  "original_owner": "ECU"
+ },
+ {
+  "id": 68,
+  "q": 3,
+  "r": 16,
+  "city_name": "Santa Marta",
+  "is_capital": false,
+  "original_owner": "COL"
+ },
+ {
+  "id": 69,
+  "q": 3,
+  "r": 17,
+  "city_name": "Pedro Juan Caballero",
+  "is_capital": false,
+  "original_owner": "PAR"
+ },
+ {
+  "id": 70,
+  "q": 3,
+  "r": 18,
+  "city_name": "Ciudad del Este",
+  "is_capital": false,
+  "original_owner": "PAR"
+ },
+ {
+  "id": 71,
+  "q": 3,
+  "r": 19,
+  "city_name": "San Lorenzo",
+  "is_capital": false,
+  "original_owner": "PAR"
+ },
+ {
+  "id": 72,
+  "q": 3,
+  "r": 20,
+  "city_name": "Montevideo",
+  "is_capital": true,
+  "original_owner": "URY"
+ },
+ {
+  "id": 73,
+  "q": 3,
+  "r": 21,
+  "city_name": "Las Piedras",
+  "is_capital": false,
+  "original_owner": "URY"
+ },
+ {
+  "id": 74,
+  "q": 4,
+  "r": 0,
+  "city_name": "Mer Baltique",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 75,
+  "q": 4,
+  "r": 1,
+  "city_name": "Golfe du Bengale",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 76,
+  "q": 4,
+  "r": 2,
+  "city_name": "Mer de Chine",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 77,
+  "q": 4,
+  "r": 3,
+  "city_name": "Mer Rouge",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 78,
+  "q": 4,
+  "r": 4,
+  "city_name": "Grande Barrière",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 79,
+  "q": 4,
+  "r": 5,
+  "city_name": "Philadelphie",
+  "is_capital": false,
+  "original_owner": "USA"
+ },
+ {
+  "id": 80,
+  "q": 4,
+  "r": 6,
+  "city_name": "San Antonio",
+  "is_capital": false,
+  "original_owner": "USA"
+ },
+ {
+  "id": 81,
+  "q": 4,
+  "r": 7,
+  "city_name": "Changuinola",
+  "is_capital": false,
+  "original_owner": "PAN"
+ },
+ {
+  "id": 82,
+  "q": 4,
+  "r": 8,
+  "city_name": "Léogâne",
+  "is_capital": false,
+  "original_owner": "HAI"
+ },
+ {
+  "id": 83,
+  "q": 4,
+  "r": 9,
+  "city_name": "Port-de-Paix",
+  "is_capital": false,
+  "original_owner": "HAI"
+ },
+ {
+  "id": 84,
+  "q": 4,
+  "r": 10,
+  "city_name": "Les Cayes",
+  "is_capital": false,
+  "original_owner": "HAI"
+ },
+ {
+  "id": 85,
+  "q": 4,
+  "r": 11,
+  "city_name": "Jacmel",
+  "is_capital": false,
+  "original_owner": "HAI"
+ },
+ {
+  "id": 86,
+  "q": 4,
+  "r": 12,
+  "city_name": "Jérémie",
+  "is_capital": false,
+  "original_owner": "HAI"
+ },
+ {
+  "id": 87,
+  "q": 4,
+  "r": 13,
+  "city_name": "Durán",
+  "is_capital": false,
+  "original_owner": "ECU"
+ },
+ {
+  "id": 88,
+  "q": 4,
+  "r": 14,
+  "city_name": "Bucaramanga",
+  "is_capital": false,
+  "original_owner": "COL"
+ },
+ {
+  "id": 89,
+  "q": 4,
+  "r": 15,
+  "city_name": "Pereira",
+  "is_capital": false,
+  "original_owner": "COL"
+ },
+ {
+  "id": 90,
+  "q": 4,
+  "r": 16,
+  "city_name": "Julianadorp",
+  "is_capital": false,
+  "original_owner": "CUW"
+ },
+ {
+  "id": 91,
+  "q": 4,
+  "r": 17,
+  "city_name": "Luque",
+  "is_capital": false,
+  "original_owner": "PAR"
+ },
+ {
+  "id": 92,
+  "q": 4,
+  "r": 18,
+  "city_name": "Asunción",
+  "is_capital": true,
+  "original_owner": "PAR"
+ },
+ {
+  "id": 93,
+  "q": 4,
+  "r": 19,
+  "city_name": "Capiatá",
+  "is_capital": false,
+  "original_owner": "PAR"
+ },
+ {
+  "id": 94,
+  "q": 4,
+  "r": 20,
+  "city_name": "Rivera",
+  "is_capital": false,
+  "original_owner": "URY"
+ },
+ {
+  "id": 95,
+  "q": 5,
+  "r": 0,
+  "city_name": "Mer du Labrador",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 96,
+  "q": 5,
+  "r": 1,
+  "city_name": "Namib",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 97,
+  "q": 5,
+  "r": 2,
+  "city_name": "Mer Égée",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 98,
+  "q": 5,
+  "r": 3,
+  "city_name": "Banquise",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 99,
+  "q": 5,
+  "r": 4,
+  "city_name": "Dallas",
+  "is_capital": false,
+  "original_owner": "USA"
+ },
+ {
+  "id": 100,
+  "q": 5,
+  "r": 5,
+  "city_name": "New York",
+  "is_capital": false,
+  "original_owner": "USA"
+ },
+ {
+  "id": 101,
+  "q": 5,
+  "r": 6,
+  "city_name": "Los Angeles",
+  "is_capital": false,
+  "original_owner": "USA"
+ },
+ {
+  "id": 102,
+  "q": 5,
+  "r": 7,
+  "city_name": "Lille",
+  "is_capital": false,
+  "original_owner": "FRA"
+ },
+ {
+  "id": 103,
+  "q": 5,
+  "r": 8,
+  "city_name": "Saint-Marc",
+  "is_capital": false,
+  "original_owner": "HAI"
+ },
+ {
+  "id": 104,
+  "q": 5,
+  "r": 9,
+  "city_name": "Hinche",
+  "is_capital": false,
+  "original_owner": "HAI"
+ },
+ {
+  "id": 105,
+  "q": 5,
+  "r": 10,
+  "city_name": "Cap-Haïtien",
+  "is_capital": false,
+  "original_owner": "HAI"
+ },
+ {
+  "id": 106,
+  "q": 5,
+  "r": 11,
+  "city_name": "Gonaïves",
+  "is_capital": false,
+  "original_owner": "HAI"
+ },
+ {
+  "id": 107,
+  "q": 5,
+  "r": 12,
+  "city_name": "Sint Willibrordus",
+  "is_capital": false,
+  "original_owner": "CUW"
+ },
+ {
+  "id": 108,
+  "q": 5,
+  "r": 13,
+  "city_name": "Medellín",
+  "is_capital": false,
+  "original_owner": "COL"
+ },
+ {
+  "id": 109,
+  "q": 5,
+  "r": 14,
+  "city_name": "Cali",
+  "is_capital": false,
+  "original_owner": "COL"
+ },
+ {
+  "id": 110,
+  "q": 5,
+  "r": 15,
+  "city_name": "Tera Kora",
+  "is_capital": false,
+  "original_owner": "CUW"
+ },
+ {
+  "id": 111,
+  "q": 5,
+  "r": 16,
+  "city_name": "Diourbel",
+  "is_capital": false,
+  "original_owner": "SEN"
+ },
+ {
+  "id": 112,
+  "q": 5,
+  "r": 17,
+  "city_name": "Lambaré",
+  "is_capital": false,
+  "original_owner": "PAR"
+ },
+ {
+  "id": 113,
+  "q": 5,
+  "r": 18,
+  "city_name": "Fernando de la Mora",
+  "is_capital": false,
+  "original_owner": "PAR"
+ },
+ {
+  "id": 114,
+  "q": 5,
+  "r": 19,
+  "city_name": "Tacuarembó",
+  "is_capital": false,
+  "original_owner": "URY"
+ },
+ {
+  "id": 115,
+  "q": 6,
+  "r": 0,
+  "city_name": "Mer Noire",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 116,
+  "q": 6,
+  "r": 1,
+  "city_name": "Outback",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 117,
+  "q": 6,
+  "r": 2,
+  "city_name": "Mer d'Okhotsk",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 118,
+  "q": 6,
+  "r": 3,
+  "city_name": "Québec",
+  "is_capital": false,
+  "original_owner": "CAN"
+ },
+ {
+  "id": 119,
+  "q": 6,
+  "r": 4,
+  "city_name": "Chicago",
+  "is_capital": false,
+  "original_owner": "USA"
+ },
+ {
+  "id": 120,
+  "q": 6,
+  "r": 5,
+  "city_name": "Washington",
+  "is_capital": true,
+  "original_owner": "USA"
+ },
+ {
+  "id": 121,
+  "q": 6,
+  "r": 6,
+  "city_name": "Houston",
+  "is_capital": false,
+  "original_owner": "USA"
+ },
+ {
+  "id": 122,
+  "q": 6,
+  "r": 7,
+  "city_name": "Ribeira Grande",
+  "is_capital": false,
+  "original_owner": "CPV"
+ },
+ {
+  "id": 123,
+  "q": 6,
+  "r": 8,
+  "city_name": "Porto Novo",
+  "is_capital": false,
+  "original_owner": "CPV"
+ },
+ {
+  "id": 124,
+  "q": 6,
+  "r": 10,
+  "city_name": "Port-au-Prince",
+  "is_capital": true,
+  "original_owner": "HAI"
+ },
+ {
+  "id": 125,
+  "q": 6,
+  "r": 11,
+  "city_name": "Barber",
+  "is_capital": false,
+  "original_owner": "CUW"
+ },
+ {
+  "id": 126,
+  "q": 6,
+  "r": 12,
+  "city_name": "Sint Michiel",
+  "is_capital": false,
+  "original_owner": "CUW"
+ },
+ {
+  "id": 127,
+  "q": 6,
+  "r": 13,
+  "city_name": "Bogotá",
+  "is_capital": true,
+  "original_owner": "COL"
+ },
+ {
+  "id": 128,
+  "q": 6,
+  "r": 14,
+  "city_name": "Barranquilla",
+  "is_capital": false,
+  "original_owner": "COL"
+ },
+ {
+  "id": 129,
+  "q": 6,
+  "r": 15,
+  "city_name": "Curitiba",
+  "is_capital": false,
+  "original_owner": "BRA"
+ },
+ {
+  "id": 130,
+  "q": 6,
+  "r": 16,
+  "city_name": "Mbour",
+  "is_capital": false,
+  "original_owner": "SEN"
+ },
+ {
+  "id": 131,
+  "q": 6,
+  "r": 17,
+  "city_name": "Recife",
+  "is_capital": false,
+  "original_owner": "BRA"
+ },
+ {
+  "id": 132,
+  "q": 6,
+  "r": 18,
+  "city_name": "Mercedes",
+  "is_capital": false,
+  "original_owner": "URY"
+ },
+ {
+  "id": 133,
+  "q": 7,
+  "r": 0,
+  "city_name": "Mer Caspienne",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 134,
+  "q": 7,
+  "r": 1,
+  "city_name": "Terres Australes",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 135,
+  "q": 7,
+  "r": 2,
+  "city_name": "Hamilton",
+  "is_capital": false,
+  "original_owner": "CAN"
+ },
+ {
+  "id": 136,
+  "q": 7,
+  "r": 3,
+  "city_name": "Toronto",
+  "is_capital": false,
+  "original_owner": "CAN"
+ },
+ {
+  "id": 137,
+  "q": 7,
+  "r": 4,
+  "city_name": "Montréal",
+  "is_capital": false,
+  "original_owner": "CAN"
+ },
+ {
+  "id": 138,
+  "q": 7,
+  "r": 5,
+  "city_name": "Phoenix",
+  "is_capital": false,
+  "original_owner": "USA"
+ },
+ {
+  "id": 139,
+  "q": 7,
+  "r": 6,
+  "city_name": "Faro",
+  "is_capital": false,
+  "original_owner": "POR"
+ },
+ {
+  "id": 140,
+  "q": 7,
+  "r": 7,
+  "city_name": "Palma",
+  "is_capital": false,
+  "original_owner": "ESP"
+ },
+ {
+  "id": 141,
+  "q": 7,
+  "r": 10,
+  "city_name": "Soto",
+  "is_capital": false,
+  "original_owner": "CUW"
+ },
+ {
+  "id": 142,
+  "q": 7,
+  "r": 11,
+  "city_name": "Willemstad",
+  "is_capital": true,
+  "original_owner": "CUW"
+ },
+ {
+  "id": 143,
+  "q": 7,
+  "r": 12,
+  "city_name": "Cartagena",
+  "is_capital": false,
+  "original_owner": "COL"
+ },
+ {
+  "id": 144,
+  "q": 7,
+  "r": 13,
+  "city_name": "Cúcuta",
+  "is_capital": false,
+  "original_owner": "COL"
+ },
+ {
+  "id": 145,
+  "q": 7,
+  "r": 14,
+  "city_name": "Ziguinchor",
+  "is_capital": false,
+  "original_owner": "SEN"
+ },
+ {
+  "id": 146,
+  "q": 7,
+  "r": 15,
+  "city_name": "São Paulo",
+  "is_capital": false,
+  "original_owner": "BRA"
+ },
+ {
+  "id": 147,
+  "q": 7,
+  "r": 16,
+  "city_name": "Rio de Janeiro",
+  "is_capital": false,
+  "original_owner": "BRA"
+ },
+ {
+  "id": 148,
+  "q": 7,
+  "r": 17,
+  "city_name": "Kénitra",
+  "is_capital": false,
+  "original_owner": "MAR"
+ },
+ {
+  "id": 149,
+  "q": 8,
+  "r": 0,
+  "city_name": "Mer de Java",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 150,
+  "q": 8,
+  "r": 1,
+  "city_name": "Halifax",
+  "is_capital": false,
+  "original_owner": "CAN"
+ },
+ {
+  "id": 151,
+  "q": 8,
+  "r": 2,
+  "city_name": "Vancouver",
+  "is_capital": false,
+  "original_owner": "CAN"
+ },
+ {
+  "id": 152,
+  "q": 8,
+  "r": 3,
+  "city_name": "Ottawa",
+  "is_capital": true,
+  "original_owner": "CAN"
+ },
+ {
+  "id": 153,
+  "q": 8,
+  "r": 4,
+  "city_name": "Calgary",
+  "is_capital": false,
+  "original_owner": "CAN"
+ },
+ {
+  "id": 154,
+  "q": 8,
+  "r": 5,
+  "city_name": "Grenade",
+  "is_capital": false,
+  "original_owner": "ESP"
+ },
+ {
+  "id": 155,
+  "q": 8,
+  "r": 6,
+  "city_name": "Évora",
+  "is_capital": false,
+  "original_owner": "POR"
+ },
+ {
+  "id": 156,
+  "q": 8,
+  "r": 7,
+  "city_name": "Murcie",
+  "is_capital": false,
+  "original_owner": "ESP"
+ },
+ {
+  "id": 157,
+  "q": 8,
+  "r": 9,
+  "city_name": "Tarrafal",
+  "is_capital": false,
+  "original_owner": "CPV"
+ },
+ {
+  "id": 158,
+  "q": 8,
+  "r": 10,
+  "city_name": "Westpunt",
+  "is_capital": false,
+  "original_owner": "CUW"
+ },
+ {
+  "id": 159,
+  "q": 8,
+  "r": 11,
+  "city_name": "Lagun",
+  "is_capital": false,
+  "original_owner": "CUW"
+ },
+ {
+  "id": 160,
+  "q": 8,
+  "r": 12,
+  "city_name": "Espargos",
+  "is_capital": false,
+  "original_owner": "CPV"
+ },
+ {
+  "id": 161,
+  "q": 8,
+  "r": 13,
+  "city_name": "Saint-Louis",
+  "is_capital": false,
+  "original_owner": "SEN"
+ },
+ {
+  "id": 162,
+  "q": 8,
+  "r": 14,
+  "city_name": "Salvador",
+  "is_capital": false,
+  "original_owner": "BRA"
+ },
+ {
+  "id": 163,
+  "q": 8,
+  "r": 15,
+  "city_name": "Brasília",
+  "is_capital": true,
+  "original_owner": "BRA"
+ },
+ {
+  "id": 164,
+  "q": 8,
+  "r": 16,
+  "city_name": "Fortaleza",
+  "is_capital": false,
+  "original_owner": "BRA"
+ },
+ {
+  "id": 165,
+  "q": 9,
+  "r": 0,
+  "city_name": "Altiplano",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 166,
+  "q": 9,
+  "r": 1,
+  "city_name": "Dunfermline",
+  "is_capital": false,
+  "original_owner": "SCO"
+ },
+ {
+  "id": 167,
+  "q": 9,
+  "r": 2,
+  "city_name": "Edmonton",
+  "is_capital": false,
+  "original_owner": "CAN"
+ },
+ {
+  "id": 168,
+  "q": 9,
+  "r": 3,
+  "city_name": "Winnipeg",
+  "is_capital": false,
+  "original_owner": "CAN"
+ },
+ {
+  "id": 169,
+  "q": 9,
+  "r": 4,
+  "city_name": "Southampton",
+  "is_capital": false,
+  "original_owner": "ENG"
+ },
+ {
+  "id": 170,
+  "q": 9,
+  "r": 5,
+  "city_name": "Mons",
+  "is_capital": false,
+  "original_owner": "BEL"
+ },
+ {
+  "id": 171,
+  "q": 9,
+  "r": 6,
+  "city_name": "Aveiro",
+  "is_capital": false,
+  "original_owner": "POR"
+ },
+ {
+  "id": 172,
+  "q": 9,
+  "r": 8,
+  "city_name": "Bilbao",
+  "is_capital": false,
+  "original_owner": "ESP"
+ },
+ {
+  "id": 173,
+  "q": 9,
+  "r": 9,
+  "city_name": "Mindelo",
+  "is_capital": false,
+  "original_owner": "CPV"
+ },
+ {
+  "id": 174,
+  "q": 9,
+  "r": 10,
+  "city_name": "Santa Maria",
+  "is_capital": false,
+  "original_owner": "CPV"
+ },
+ {
+  "id": 175,
+  "q": 9,
+  "r": 13,
+  "city_name": "Rufisque",
+  "is_capital": false,
+  "original_owner": "SEN"
+ },
+ {
+  "id": 176,
+  "q": 9,
+  "r": 14,
+  "city_name": "Belo Horizonte",
+  "is_capital": false,
+  "original_owner": "BRA"
+ },
+ {
+  "id": 177,
+  "q": 9,
+  "r": 15,
+  "city_name": "Manaus",
+  "is_capital": false,
+  "original_owner": "BRA"
+ },
+ {
+  "id": 178,
+  "q": 9,
+  "r": 16,
+  "city_name": "Oujda",
+  "is_capital": false,
+  "original_owner": "MAR"
+ },
+ {
+  "id": 179,
+  "q": 10,
+  "r": 1,
+  "city_name": "Guimarães",
+  "is_capital": false,
+  "original_owner": "POR"
+ },
+ {
+  "id": 180,
+  "q": 10,
+  "r": 2,
+  "city_name": "Tétouan",
+  "is_capital": false,
+  "original_owner": "MAR"
+ },
+ {
+  "id": 181,
+  "q": 10,
+  "r": 3,
+  "city_name": "Nottingham",
+  "is_capital": false,
+  "original_owner": "ENG"
+ },
+ {
+  "id": 182,
+  "q": 10,
+  "r": 4,
+  "city_name": "Ostende",
+  "is_capital": false,
+  "original_owner": "BEL"
+ },
+ {
+  "id": 183,
+  "q": 10,
+  "r": 5,
+  "city_name": "Louvain",
+  "is_capital": false,
+  "original_owner": "BEL"
+ },
+ {
+  "id": 184,
+  "q": 10,
+  "r": 7,
+  "city_name": "Setúbal",
+  "is_capital": false,
+  "original_owner": "POR"
+ },
+ {
+  "id": 185,
+  "q": 10,
+  "r": 8,
+  "city_name": "Assomada",
+  "is_capital": false,
+  "original_owner": "CPV"
+ },
+ {
+  "id": 186,
+  "q": 10,
+  "r": 9,
+  "city_name": "Praia",
+  "is_capital": true,
+  "original_owner": "CPV"
+ },
+ {
+  "id": 187,
+  "q": 10,
+  "r": 10,
+  "city_name": "Pedra Badejo",
+  "is_capital": false,
+  "original_owner": "CPV"
+ },
+ {
+  "id": 188,
+  "q": 10,
+  "r": 14,
+  "city_name": "Agadir",
+  "is_capital": false,
+  "original_owner": "MAR"
+ },
+ {
+  "id": 189,
+  "q": 10,
+  "r": 15,
+  "city_name": "Meknès",
+  "is_capital": false,
+  "original_owner": "MAR"
+ },
+ {
+  "id": 190,
+  "q": 11,
+  "r": 7,
+  "city_name": "Coimbra",
+  "is_capital": false,
+  "original_owner": "POR"
+ },
+ {
+  "id": 191,
+  "q": 11,
+  "r": 9,
+  "city_name": "São Filipe",
+  "is_capital": false,
+  "original_owner": "CPV"
+ },
+ {
+  "id": 192,
+  "q": 11,
+  "r": 12,
+  "city_name": "Dakar",
+  "is_capital": true,
+  "original_owner": "SEN"
+ },
+ {
+  "id": 193,
+  "q": 12,
+  "r": 0,
+  "city_name": "Paisley",
+  "is_capital": false,
+  "original_owner": "SCO"
+ },
+ {
+  "id": 194,
+  "q": 12,
+  "r": 1,
+  "city_name": "Stirling",
+  "is_capital": false,
+  "original_owner": "SCO"
+ },
+ {
+  "id": 195,
+  "q": 12,
+  "r": 2,
+  "city_name": "Inverness",
+  "is_capital": false,
+  "original_owner": "SCO"
+ },
+ {
+  "id": 196,
+  "q": 12,
+  "r": 10,
+  "city_name": "Casablanca",
+  "is_capital": false,
+  "original_owner": "MAR"
+ },
+ {
+  "id": 197,
+  "q": 12,
+  "r": 11,
+  "city_name": "Touba",
+  "is_capital": false,
+  "original_owner": "SEN"
+ },
+ {
+  "id": 198,
+  "q": 12,
+  "r": 12,
+  "city_name": "Thiès",
+  "is_capital": false,
+  "original_owner": "SEN"
+ },
+ {
+  "id": 199,
+  "q": 12,
+  "r": 13,
+  "city_name": "Abidjan",
+  "is_capital": false,
+  "original_owner": "CIV"
+ },
+ {
+  "id": 200,
+  "q": 12,
+  "r": 14,
+  "city_name": "Yamoussoukro",
+  "is_capital": true,
+  "original_owner": "CIV"
+ },
+ {
+  "id": 201,
+  "q": 13,
+  "r": 0,
+  "city_name": "Ayr",
+  "is_capital": false,
+  "original_owner": "SCO"
+ },
+ {
+  "id": 202,
+  "q": 13,
+  "r": 1,
+  "city_name": "Perth",
+  "is_capital": false,
+  "original_owner": "SCO"
+ },
+ {
+  "id": 203,
+  "q": 13,
+  "r": 2,
+  "city_name": "Dundee",
+  "is_capital": false,
+  "original_owner": "SCO"
+ },
+ {
+  "id": 204,
+  "q": 13,
+  "r": 6,
+  "city_name": "Lisbonne",
+  "is_capital": true,
+  "original_owner": "POR"
+ },
+ {
+  "id": 205,
+  "q": 13,
+  "r": 7,
+  "city_name": "Porto",
+  "is_capital": false,
+  "original_owner": "POR"
+ },
+ {
+  "id": 206,
+  "q": 13,
+  "r": 8,
+  "city_name": "Barcelone",
+  "is_capital": false,
+  "original_owner": "ESP"
+ },
+ {
+  "id": 207,
+  "q": 13,
+  "r": 9,
+  "city_name": "Valence",
+  "is_capital": false,
+  "original_owner": "ESP"
+ },
+ {
+  "id": 208,
+  "q": 13,
+  "r": 10,
+  "city_name": "Rabat",
+  "is_capital": true,
+  "original_owner": "MAR"
+ },
+ {
+  "id": 209,
+  "q": 13,
+  "r": 11,
+  "city_name": "Fès",
+  "is_capital": false,
+  "original_owner": "MAR"
+ },
+ {
+  "id": 210,
+  "q": 13,
+  "r": 12,
+  "city_name": "Kaolack",
+  "is_capital": false,
+  "original_owner": "SEN"
+ },
+ {
+  "id": 211,
+  "q": 13,
+  "r": 13,
+  "city_name": "Bouaké",
+  "is_capital": false,
+  "original_owner": "CIV"
+ },
+ {
+  "id": 212,
+  "q": 13,
+  "r": 14,
+  "city_name": "Daloa",
+  "is_capital": false,
+  "original_owner": "CIV"
+ },
+ {
+  "id": 213,
+  "q": 13,
+  "r": 15,
+  "city_name": "Korhogo",
+  "is_capital": false,
+  "original_owner": "CIV"
+ },
+ {
+  "id": 214,
+  "q": 13,
+  "r": 16,
+  "city_name": "Gagnoa",
+  "is_capital": false,
+  "original_owner": "CIV"
+ },
+ {
+  "id": 215,
+  "q": 13,
+  "r": 17,
+  "city_name": "Divo",
+  "is_capital": false,
+  "original_owner": "CIV"
+ },
+ {
+  "id": 216,
+  "q": 13,
+  "r": 18,
+  "city_name": "Abengourou",
+  "is_capital": false,
+  "original_owner": "CIV"
+ },
+ {
+  "id": 217,
+  "q": 13,
+  "r": 19,
+  "city_name": "East London",
+  "is_capital": false,
+  "original_owner": "RSA"
+ },
+ {
+  "id": 218,
+  "q": 13,
+  "r": 20,
+  "city_name": "Johannesburg",
+  "is_capital": false,
+  "original_owner": "RSA"
+ },
+ {
+  "id": 219,
+  "q": 13,
+  "r": 21,
+  "city_name": "Le Cap",
+  "is_capital": false,
+  "original_owner": "RSA"
+ },
+ {
+  "id": 220,
+  "q": 14,
+  "r": 0,
+  "city_name": "Bristol",
+  "is_capital": false,
+  "original_owner": "ENG"
+ },
+ {
+  "id": 221,
+  "q": 14,
+  "r": 1,
+  "city_name": "Sheffield",
+  "is_capital": false,
+  "original_owner": "ENG"
+ },
+ {
+  "id": 222,
+  "q": 14,
+  "r": 6,
+  "city_name": "Braga",
+  "is_capital": false,
+  "original_owner": "POR"
+ },
+ {
+  "id": 223,
+  "q": 14,
+  "r": 7,
+  "city_name": "Séville",
+  "is_capital": false,
+  "original_owner": "ESP"
+ },
+ {
+  "id": 224,
+  "q": 14,
+  "r": 8,
+  "city_name": "Madrid",
+  "is_capital": true,
+  "original_owner": "ESP"
+ },
+ {
+  "id": 225,
+  "q": 14,
+  "r": 9,
+  "city_name": "Marrakech",
+  "is_capital": false,
+  "original_owner": "MAR"
+ },
+ {
+  "id": 226,
+  "q": 14,
+  "r": 10,
+  "city_name": "Saragosse",
+  "is_capital": false,
+  "original_owner": "ESP"
+ },
+ {
+  "id": 227,
+  "q": 14,
+  "r": 11,
+  "city_name": "Tanger",
+  "is_capital": false,
+  "original_owner": "MAR"
+ },
+ {
+  "id": 228,
+  "q": 14,
+  "r": 12,
+  "city_name": "San-Pédro",
+  "is_capital": false,
+  "original_owner": "CIV"
+ },
+ {
+  "id": 229,
+  "q": 14,
+  "r": 13,
+  "city_name": "Man",
+  "is_capital": false,
+  "original_owner": "CIV"
+ },
+ {
+  "id": 230,
+  "q": 14,
+  "r": 14,
+  "city_name": "Kumasi",
+  "is_capital": false,
+  "original_owner": "GHA"
+ },
+ {
+  "id": 231,
+  "q": 14,
+  "r": 15,
+  "city_name": "Tamale",
+  "is_capital": false,
+  "original_owner": "GHA"
+ },
+ {
+  "id": 232,
+  "q": 14,
+  "r": 16,
+  "city_name": "Koforidua",
+  "is_capital": false,
+  "original_owner": "GHA"
+ },
+ {
+  "id": 233,
+  "q": 14,
+  "r": 17,
+  "city_name": "Wa",
+  "is_capital": false,
+  "original_owner": "GHA"
+ },
+ {
+  "id": 234,
+  "q": 14,
+  "r": 18,
+  "city_name": "Polokwane",
+  "is_capital": false,
+  "original_owner": "RSA"
+ },
+ {
+  "id": 235,
+  "q": 14,
+  "r": 19,
+  "city_name": "Durban",
+  "is_capital": false,
+  "original_owner": "RSA"
+ },
+ {
+  "id": 236,
+  "q": 14,
+  "r": 20,
+  "city_name": "Pretoria",
+  "is_capital": true,
+  "original_owner": "RSA"
+ },
+ {
+  "id": 237,
+  "q": 14,
+  "r": 21,
+  "city_name": "Gqeberha",
+  "is_capital": false,
+  "original_owner": "RSA"
+ },
+ {
+  "id": 238,
+  "q": 15,
+  "r": 2,
+  "city_name": "Glasgow",
+  "is_capital": false,
+  "original_owner": "SCO"
+ },
+ {
+  "id": 239,
+  "q": 15,
+  "r": 3,
+  "city_name": "Aberdeen",
+  "is_capital": false,
+  "original_owner": "SCO"
+ },
+ {
+  "id": 240,
+  "q": 15,
+  "r": 6,
+  "city_name": "Funchal",
+  "is_capital": false,
+  "original_owner": "POR"
+ },
+ {
+  "id": 241,
+  "q": 15,
+  "r": 7,
+  "city_name": "Marseille",
+  "is_capital": false,
+  "original_owner": "FRA"
+ },
+ {
+  "id": 242,
+  "q": 15,
+  "r": 8,
+  "city_name": "Lyon",
+  "is_capital": false,
+  "original_owner": "FRA"
+ },
+ {
+  "id": 243,
+  "q": 15,
+  "r": 9,
+  "city_name": "Malaga",
+  "is_capital": false,
+  "original_owner": "ESP"
+ },
+ {
+  "id": 244,
+  "q": 15,
+  "r": 10,
+  "city_name": "Oran",
+  "is_capital": false,
+  "original_owner": "ALG"
+ },
+ {
+  "id": 245,
+  "q": 15,
+  "r": 11,
+  "city_name": "Constantine",
+  "is_capital": false,
+  "original_owner": "ALG"
+ },
+ {
+  "id": 246,
+  "q": 15,
+  "r": 12,
+  "city_name": "Sétif",
+  "is_capital": false,
+  "original_owner": "ALG"
+ },
+ {
+  "id": 247,
+  "q": 15,
+  "r": 13,
+  "city_name": "Sekondi-Takoradi",
+  "is_capital": false,
+  "original_owner": "GHA"
+ },
+ {
+  "id": 248,
+  "q": 15,
+  "r": 14,
+  "city_name": "Accra",
+  "is_capital": true,
+  "original_owner": "GHA"
+ },
+ {
+  "id": 249,
+  "q": 15,
+  "r": 15,
+  "city_name": "Cape Coast",
+  "is_capital": false,
+  "original_owner": "GHA"
+ },
+ {
+  "id": 250,
+  "q": 15,
+  "r": 16,
+  "city_name": "Tlemcen",
+  "is_capital": false,
+  "original_owner": "ALG"
+ },
+ {
+  "id": 251,
+  "q": 15,
+  "r": 17,
+  "city_name": "Béjaïa",
+  "is_capital": false,
+  "original_owner": "ALG"
+ },
+ {
+  "id": 252,
+  "q": 15,
+  "r": 18,
+  "city_name": "Bolgatanga",
+  "is_capital": false,
+  "original_owner": "GHA"
+ },
+ {
+  "id": 253,
+  "q": 15,
+  "r": 19,
+  "city_name": "Bloemfontein",
+  "is_capital": false,
+  "original_owner": "RSA"
+ },
+ {
+  "id": 254,
+  "q": 15,
+  "r": 20,
+  "city_name": "Soweto",
+  "is_capital": false,
+  "original_owner": "RSA"
+ },
+ {
+  "id": 255,
+  "q": 16,
+  "r": 2,
+  "city_name": "Édimbourg",
+  "is_capital": true,
+  "original_owner": "SCO"
+ },
+ {
+  "id": 256,
+  "q": 16,
+  "r": 3,
+  "city_name": "Manchester",
+  "is_capital": false,
+  "original_owner": "ENG"
+ },
+ {
+  "id": 257,
+  "q": 16,
+  "r": 4,
+  "city_name": "Birmingham",
+  "is_capital": false,
+  "original_owner": "ENG"
+ },
+ {
+  "id": 258,
+  "q": 16,
+  "r": 6,
+  "city_name": "Toulouse",
+  "is_capital": false,
+  "original_owner": "FRA"
+ },
+ {
+  "id": 259,
+  "q": 16,
+  "r": 7,
+  "city_name": "Paris",
+  "is_capital": true,
+  "original_owner": "FRA"
+ },
+ {
+  "id": 260,
+  "q": 16,
+  "r": 8,
+  "city_name": "Nice",
+  "is_capital": false,
+  "original_owner": "FRA"
+ },
+ {
+  "id": 261,
+  "q": 16,
+  "r": 9,
+  "city_name": "Annaba",
+  "is_capital": false,
+  "original_owner": "ALG"
+ },
+ {
+  "id": 262,
+  "q": 16,
+  "r": 10,
+  "city_name": "Alger",
+  "is_capital": true,
+  "original_owner": "ALG"
+ },
+ {
+  "id": 263,
+  "q": 16,
+  "r": 11,
+  "city_name": "Blida",
+  "is_capital": false,
+  "original_owner": "ALG"
+ },
+ {
+  "id": 264,
+  "q": 16,
+  "r": 12,
+  "city_name": "Slavonski Brod",
+  "is_capital": false,
+  "original_owner": "CRO"
+ },
+ {
+  "id": 265,
+  "q": 16,
+  "r": 13,
+  "city_name": "Sunyani",
+  "is_capital": false,
+  "original_owner": "GHA"
+ },
+ {
+  "id": 266,
+  "q": 16,
+  "r": 14,
+  "city_name": "Ho",
+  "is_capital": false,
+  "original_owner": "GHA"
+ },
+ {
+  "id": 267,
+  "q": 16,
+  "r": 15,
+  "city_name": "Montpellier",
+  "is_capital": false,
+  "original_owner": "FRA"
+ },
+ {
+  "id": 268,
+  "q": 16,
+  "r": 16,
+  "city_name": "Likasi",
+  "is_capital": false,
+  "original_owner": "COD"
+ },
+ {
+  "id": 269,
+  "q": 16,
+  "r": 17,
+  "city_name": "Kolwezi",
+  "is_capital": false,
+  "original_owner": "COD"
+ },
+ {
+  "id": 270,
+  "q": 16,
+  "r": 18,
+  "city_name": "Matadi",
+  "is_capital": false,
+  "original_owner": "COD"
+ },
+ {
+  "id": 271,
+  "q": 16,
+  "r": 19,
+  "city_name": "Kimberley",
+  "is_capital": false,
+  "original_owner": "RSA"
+ },
+ {
+  "id": 272,
+  "q": 17,
+  "r": 2,
+  "city_name": "Liverpool",
+  "is_capital": false,
+  "original_owner": "ENG"
+ },
+ {
+  "id": 273,
+  "q": 17,
+  "r": 3,
+  "city_name": "Londres",
+  "is_capital": true,
+  "original_owner": "ENG"
+ },
+ {
+  "id": 274,
+  "q": 17,
+  "r": 4,
+  "city_name": "Leeds",
+  "is_capital": false,
+  "original_owner": "ENG"
+ },
+ {
+  "id": 275,
+  "q": 17,
+  "r": 5,
+  "city_name": "Anvers",
+  "is_capital": false,
+  "original_owner": "BEL"
+ },
+ {
+  "id": 276,
+  "q": 17,
+  "r": 6,
+  "city_name": "Gand",
+  "is_capital": false,
+  "original_owner": "BEL"
+ },
+ {
+  "id": 277,
+  "q": 17,
+  "r": 7,
+  "city_name": "Bruges",
+  "is_capital": false,
+  "original_owner": "BEL"
+ },
+ {
+  "id": 278,
+  "q": 17,
+  "r": 8,
+  "city_name": "Pula",
+  "is_capital": false,
+  "original_owner": "CRO"
+ },
+ {
+  "id": 279,
+  "q": 17,
+  "r": 9,
+  "city_name": "Batna",
+  "is_capital": false,
+  "original_owner": "ALG"
+ },
+ {
+  "id": 280,
+  "q": 17,
+  "r": 10,
+  "city_name": "Nantes",
+  "is_capital": false,
+  "original_owner": "FRA"
+ },
+ {
+  "id": 281,
+  "q": 17,
+  "r": 11,
+  "city_name": "Gabès",
+  "is_capital": false,
+  "original_owner": "TUN"
+ },
+ {
+  "id": 282,
+  "q": 17,
+  "r": 12,
+  "city_name": "Strasbourg",
+  "is_capital": false,
+  "original_owner": "FRA"
+ },
+ {
+  "id": 283,
+  "q": 17,
+  "r": 13,
+  "city_name": "Djelfa",
+  "is_capital": false,
+  "original_owner": "ALG"
+ },
+ {
+  "id": 284,
+  "q": 17,
+  "r": 14,
+  "city_name": "Gafsa",
+  "is_capital": false,
+  "original_owner": "TUN"
+ },
+ {
+  "id": 285,
+  "q": 17,
+  "r": 15,
+  "city_name": "Bordeaux",
+  "is_capital": false,
+  "original_owner": "FRA"
+ },
+ {
+  "id": 286,
+  "q": 17,
+  "r": 16,
+  "city_name": "Lubumbashi",
+  "is_capital": false,
+  "original_owner": "COD"
+ },
+ {
+  "id": 287,
+  "q": 17,
+  "r": 17,
+  "city_name": "Mbuji-Mayi",
+  "is_capital": false,
+  "original_owner": "COD"
+ },
+ {
+  "id": 288,
+  "q": 17,
+  "r": 18,
+  "city_name": "Mer de Norvège",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 289,
+  "q": 17,
+  "r": 19,
+  "city_name": "Pampa",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 290,
+  "q": 18,
+  "r": 3,
+  "city_name": "Newcastle",
+  "is_capital": false,
+  "original_owner": "ENG"
+ },
+ {
+  "id": 291,
+  "q": 18,
+  "r": 4,
+  "city_name": "Charleroi",
+  "is_capital": false,
+  "original_owner": "BEL"
+ },
+ {
+  "id": 292,
+  "q": 18,
+  "r": 5,
+  "city_name": "Bruxelles",
+  "is_capital": true,
+  "original_owner": "BEL"
+ },
+ {
+  "id": 293,
+  "q": 18,
+  "r": 6,
+  "city_name": "Zurich",
+  "is_capital": false,
+  "original_owner": "SUI"
+ },
+ {
+  "id": 294,
+  "q": 18,
+  "r": 7,
+  "city_name": "Genève",
+  "is_capital": false,
+  "original_owner": "SUI"
+ },
+ {
+  "id": 295,
+  "q": 18,
+  "r": 8,
+  "city_name": "Split",
+  "is_capital": false,
+  "original_owner": "CRO"
+ },
+ {
+  "id": 296,
+  "q": 18,
+  "r": 9,
+  "city_name": "Rijeka",
+  "is_capital": false,
+  "original_owner": "CRO"
+ },
+ {
+  "id": 297,
+  "q": 18,
+  "r": 10,
+  "city_name": "Sfax",
+  "is_capital": false,
+  "original_owner": "TUN"
+ },
+ {
+  "id": 298,
+  "q": 18,
+  "r": 11,
+  "city_name": "Sousse",
+  "is_capital": false,
+  "original_owner": "TUN"
+ },
+ {
+  "id": 299,
+  "q": 18,
+  "r": 12,
+  "city_name": "Ariana",
+  "is_capital": false,
+  "original_owner": "TUN"
+ },
+ {
+  "id": 300,
+  "q": 18,
+  "r": 13,
+  "city_name": "Karlovac",
+  "is_capital": false,
+  "original_owner": "CRO"
+ },
+ {
+  "id": 301,
+  "q": 18,
+  "r": 14,
+  "city_name": "Varaždin",
+  "is_capital": false,
+  "original_owner": "CRO"
+ },
+ {
+  "id": 302,
+  "q": 18,
+  "r": 15,
+  "city_name": "Kisangani",
+  "is_capital": false,
+  "original_owner": "COD"
+ },
+ {
+  "id": 303,
+  "q": 18,
+  "r": 16,
+  "city_name": "Kinshasa",
+  "is_capital": true,
+  "original_owner": "COD"
+ },
+ {
+  "id": 304,
+  "q": 18,
+  "r": 17,
+  "city_name": "Kananga",
+  "is_capital": false,
+  "original_owner": "COD"
+ },
+ {
+  "id": 305,
+  "q": 18,
+  "r": 18,
+  "city_name": "Steppe Kirghize",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 306,
+  "q": 19,
+  "r": 1,
+  "city_name": "Fredrikstad",
+  "is_capital": false,
+  "original_owner": "NOR"
+ },
+ {
+  "id": 307,
+  "q": 19,
+  "r": 2,
+  "city_name": "Winterthour",
+  "is_capital": false,
+  "original_owner": "SUI"
+ },
+ {
+  "id": 308,
+  "q": 19,
+  "r": 4,
+  "city_name": "Liège",
+  "is_capital": false,
+  "original_owner": "BEL"
+ },
+ {
+  "id": 309,
+  "q": 19,
+  "r": 5,
+  "city_name": "Bâle",
+  "is_capital": false,
+  "original_owner": "SUI"
+ },
+ {
+  "id": 310,
+  "q": 19,
+  "r": 6,
+  "city_name": "Berne",
+  "is_capital": true,
+  "original_owner": "SUI"
+ },
+ {
+  "id": 311,
+  "q": 19,
+  "r": 7,
+  "city_name": "Osijek",
+  "is_capital": false,
+  "original_owner": "CRO"
+ },
+ {
+  "id": 312,
+  "q": 19,
+  "r": 8,
+  "city_name": "Zagreb",
+  "is_capital": true,
+  "original_owner": "CRO"
+ },
+ {
+  "id": 313,
+  "q": 19,
+  "r": 9,
+  "city_name": "Kairouan",
+  "is_capital": false,
+  "original_owner": "TUN"
+ },
+ {
+  "id": 314,
+  "q": 19,
+  "r": 10,
+  "city_name": "Tunis",
+  "is_capital": true,
+  "original_owner": "TUN"
+ },
+ {
+  "id": 315,
+  "q": 19,
+  "r": 11,
+  "city_name": "Bizerte",
+  "is_capital": false,
+  "original_owner": "TUN"
+ },
+ {
+  "id": 316,
+  "q": 19,
+  "r": 12,
+  "city_name": "Prijedor",
+  "is_capital": false,
+  "original_owner": "BIH"
+ },
+ {
+  "id": 317,
+  "q": 19,
+  "r": 13,
+  "city_name": "Saint-Gall",
+  "is_capital": false,
+  "original_owner": "SUI"
+ },
+ {
+  "id": 318,
+  "q": 19,
+  "r": 14,
+  "city_name": "Lugano",
+  "is_capital": false,
+  "original_owner": "SUI"
+ },
+ {
+  "id": 319,
+  "q": 19,
+  "r": 15,
+  "city_name": "Bukavu",
+  "is_capital": false,
+  "original_owner": "COD"
+ },
+ {
+  "id": 320,
+  "q": 19,
+  "r": 16,
+  "city_name": "Goma",
+  "is_capital": false,
+  "original_owner": "COD"
+ },
+ {
+  "id": 321,
+  "q": 19,
+  "r": 17,
+  "city_name": "Nabeul",
+  "is_capital": false,
+  "original_owner": "TUN"
+ },
+ {
+  "id": 322,
+  "q": 20,
+  "r": 0,
+  "city_name": "Namur",
+  "is_capital": false,
+  "original_owner": "BEL"
+ },
+ {
+  "id": 323,
+  "q": 20,
+  "r": 1,
+  "city_name": "Bergen",
+  "is_capital": false,
+  "original_owner": "NOR"
+ },
+ {
+  "id": 324,
+  "q": 20,
+  "r": 2,
+  "city_name": "Trondheim",
+  "is_capital": false,
+  "original_owner": "NOR"
+ },
+ {
+  "id": 325,
+  "q": 20,
+  "r": 3,
+  "city_name": "Rotterdam",
+  "is_capital": false,
+  "original_owner": "NED"
+ },
+ {
+  "id": 326,
+  "q": 20,
+  "r": 4,
+  "city_name": "La Haye",
+  "is_capital": false,
+  "original_owner": "NED"
+ },
+ {
+  "id": 327,
+  "q": 20,
+  "r": 5,
+  "city_name": "Lausanne",
+  "is_capital": false,
+  "original_owner": "SUI"
+ },
+ {
+  "id": 328,
+  "q": 20,
+  "r": 6,
+  "city_name": "Stuttgart",
+  "is_capital": false,
+  "original_owner": "GER"
+ },
+ {
+  "id": 329,
+  "q": 20,
+  "r": 7,
+  "city_name": "Zadar",
+  "is_capital": false,
+  "original_owner": "CRO"
+ },
+ {
+  "id": 330,
+  "q": 20,
+  "r": 8,
+  "city_name": "Banja Luka",
+  "is_capital": false,
+  "original_owner": "BIH"
+ },
+ {
+  "id": 331,
+  "q": 20,
+  "r": 9,
+  "city_name": "Tuzla",
+  "is_capital": false,
+  "original_owner": "BIH"
+ },
+ {
+  "id": 332,
+  "q": 20,
+  "r": 10,
+  "city_name": "Bijeljina",
+  "is_capital": false,
+  "original_owner": "BIH"
+ },
+ {
+  "id": 333,
+  "q": 20,
+  "r": 11,
+  "city_name": "Suez",
+  "is_capital": false,
+  "original_owner": "EGY"
+ },
+ {
+  "id": 334,
+  "q": 20,
+  "r": 12,
+  "city_name": "Louxor",
+  "is_capital": false,
+  "original_owner": "EGY"
+ },
+ {
+  "id": 335,
+  "q": 20,
+  "r": 13,
+  "city_name": "Trebinje",
+  "is_capital": false,
+  "original_owner": "BIH"
+ },
+ {
+  "id": 336,
+  "q": 20,
+  "r": 14,
+  "city_name": "Monastir",
+  "is_capital": false,
+  "original_owner": "TUN"
+ },
+ {
+  "id": 337,
+  "q": 20,
+  "r": 15,
+  "city_name": "Šibenik",
+  "is_capital": false,
+  "original_owner": "CRO"
+ },
+ {
+  "id": 338,
+  "q": 20,
+  "r": 16,
+  "city_name": "Mer d'Irlande",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 339,
+  "q": 20,
+  "r": 17,
+  "city_name": "Sahel",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 340,
+  "q": 21,
+  "r": 0,
+  "city_name": "Stavanger",
+  "is_capital": false,
+  "original_owner": "NOR"
+ },
+ {
+  "id": 341,
+  "q": 21,
+  "r": 1,
+  "city_name": "Oslo",
+  "is_capital": true,
+  "original_owner": "NOR"
+ },
+ {
+  "id": 342,
+  "q": 21,
+  "r": 2,
+  "city_name": "Utrecht",
+  "is_capital": false,
+  "original_owner": "NED"
+ },
+ {
+  "id": 343,
+  "q": 21,
+  "r": 3,
+  "city_name": "Amsterdam",
+  "is_capital": true,
+  "original_owner": "NED"
+ },
+ {
+  "id": 344,
+  "q": 21,
+  "r": 4,
+  "city_name": "Hambourg",
+  "is_capital": false,
+  "original_owner": "GER"
+ },
+ {
+  "id": 345,
+  "q": 21,
+  "r": 5,
+  "city_name": "Munich",
+  "is_capital": false,
+  "original_owner": "GER"
+ },
+ {
+  "id": 346,
+  "q": 21,
+  "r": 6,
+  "city_name": "Graz",
+  "is_capital": false,
+  "original_owner": "AUT"
+ },
+ {
+  "id": 347,
+  "q": 21,
+  "r": 7,
+  "city_name": "Linz",
+  "is_capital": false,
+  "original_owner": "AUT"
+ },
+ {
+  "id": 348,
+  "q": 21,
+  "r": 8,
+  "city_name": "Sarajevo",
+  "is_capital": true,
+  "original_owner": "BIH"
+ },
+ {
+  "id": 349,
+  "q": 21,
+  "r": 9,
+  "city_name": "Zenica",
+  "is_capital": false,
+  "original_owner": "BIH"
+ },
+ {
+  "id": 350,
+  "q": 21,
+  "r": 10,
+  "city_name": "Alexandrie",
+  "is_capital": false,
+  "original_owner": "EGY"
+ },
+ {
+  "id": 351,
+  "q": 21,
+  "r": 11,
+  "city_name": "Gizeh",
+  "is_capital": false,
+  "original_owner": "EGY"
+ },
+ {
+  "id": 352,
+  "q": 21,
+  "r": 12,
+  "city_name": "Assouan",
+  "is_capital": false,
+  "original_owner": "EGY"
+ },
+ {
+  "id": 353,
+  "q": 21,
+  "r": 13,
+  "city_name": "Mansoura",
+  "is_capital": false,
+  "original_owner": "EGY"
+ },
+ {
+  "id": 354,
+  "q": 21,
+  "r": 14,
+  "city_name": "Doboj",
+  "is_capital": false,
+  "original_owner": "BIH"
+ },
+ {
+  "id": 355,
+  "q": 21,
+  "r": 15,
+  "city_name": "Mer Ionienne",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 356,
+  "q": 22,
+  "r": 0,
+  "city_name": "Drammen",
+  "is_capital": false,
+  "original_owner": "NOR"
+ },
+ {
+  "id": 357,
+  "q": 22,
+  "r": 1,
+  "city_name": "Groningue",
+  "is_capital": false,
+  "original_owner": "NED"
+ },
+ {
+  "id": 358,
+  "q": 22,
+  "r": 2,
+  "city_name": "Eindhoven",
+  "is_capital": false,
+  "original_owner": "NED"
+ },
+ {
+  "id": 359,
+  "q": 22,
+  "r": 3,
+  "city_name": "Cologne",
+  "is_capital": false,
+  "original_owner": "GER"
+ },
+ {
+  "id": 360,
+  "q": 22,
+  "r": 4,
+  "city_name": "Berlin",
+  "is_capital": true,
+  "original_owner": "GER"
+ },
+ {
+  "id": 361,
+  "q": 22,
+  "r": 5,
+  "city_name": "Salzbourg",
+  "is_capital": false,
+  "original_owner": "AUT"
+ },
+ {
+  "id": 362,
+  "q": 22,
+  "r": 6,
+  "city_name": "Vienne",
+  "is_capital": true,
+  "original_owner": "AUT"
+ },
+ {
+  "id": 363,
+  "q": 22,
+  "r": 7,
+  "city_name": "Innsbruck",
+  "is_capital": false,
+  "original_owner": "AUT"
+ },
+ {
+  "id": 364,
+  "q": 22,
+  "r": 8,
+  "city_name": "Mostar",
+  "is_capital": false,
+  "original_owner": "BIH"
+ },
+ {
+  "id": 365,
+  "q": 22,
+  "r": 9,
+  "city_name": "Choubra El-Kheima",
+  "is_capital": false,
+  "original_owner": "EGY"
+ },
+ {
+  "id": 366,
+  "q": 22,
+  "r": 10,
+  "city_name": "Le Caire",
+  "is_capital": true,
+  "original_owner": "EGY"
+ },
+ {
+  "id": 367,
+  "q": 22,
+  "r": 11,
+  "city_name": "Port-Saïd",
+  "is_capital": false,
+  "original_owner": "EGY"
+ },
+ {
+  "id": 368,
+  "q": 22,
+  "r": 12,
+  "city_name": "Mafraq",
+  "is_capital": false,
+  "original_owner": "JOR"
+ },
+ {
+  "id": 369,
+  "q": 22,
+  "r": 13,
+  "city_name": "Jerash",
+  "is_capital": false,
+  "original_owner": "JOR"
+ },
+ {
+  "id": 370,
+  "q": 22,
+  "r": 14,
+  "city_name": "Tanta",
+  "is_capital": false,
+  "original_owner": "EGY"
+ },
+ {
+  "id": 371,
+  "q": 22,
+  "r": 15,
+  "city_name": "Taïga",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 372,
+  "q": 23,
+  "r": 0,
+  "city_name": "Tilburg",
+  "is_capital": false,
+  "original_owner": "NED"
+ },
+ {
+  "id": 373,
+  "q": 23,
+  "r": 1,
+  "city_name": "Göteborg",
+  "is_capital": false,
+  "original_owner": "SWE"
+ },
+ {
+  "id": 374,
+  "q": 23,
+  "r": 2,
+  "city_name": "Malmö",
+  "is_capital": false,
+  "original_owner": "SWE"
+ },
+ {
+  "id": 375,
+  "q": 23,
+  "r": 3,
+  "city_name": "Francfort",
+  "is_capital": false,
+  "original_owner": "GER"
+ },
+ {
+  "id": 376,
+  "q": 23,
+  "r": 4,
+  "city_name": "Brno",
+  "is_capital": false,
+  "original_owner": "CZE"
+ },
+ {
+  "id": 377,
+  "q": 23,
+  "r": 5,
+  "city_name": "Ostrava",
+  "is_capital": false,
+  "original_owner": "CZE"
+ },
+ {
+  "id": 378,
+  "q": 23,
+  "r": 6,
+  "city_name": "Klagenfurt",
+  "is_capital": false,
+  "original_owner": "AUT"
+ },
+ {
+  "id": 379,
+  "q": 23,
+  "r": 7,
+  "city_name": "Villach",
+  "is_capital": false,
+  "original_owner": "AUT"
+ },
+ {
+  "id": 380,
+  "q": 23,
+  "r": 8,
+  "city_name": "Brčko",
+  "is_capital": false,
+  "original_owner": "BIH"
+ },
+ {
+  "id": 381,
+  "q": 23,
+  "r": 9,
+  "city_name": "Zarqa",
+  "is_capital": false,
+  "original_owner": "JOR"
+ },
+ {
+  "id": 382,
+  "q": 23,
+  "r": 10,
+  "city_name": "Irbid",
+  "is_capital": false,
+  "original_owner": "JOR"
+ },
+ {
+  "id": 383,
+  "q": 23,
+  "r": 11,
+  "city_name": "Salt",
+  "is_capital": false,
+  "original_owner": "JOR"
+ },
+ {
+  "id": 384,
+  "q": 23,
+  "r": 12,
+  "city_name": "Buraydah",
+  "is_capital": false,
+  "original_owner": "KSA"
+ },
+ {
+  "id": 385,
+  "q": 23,
+  "r": 13,
+  "city_name": "Khamis Mushait",
+  "is_capital": false,
+  "original_owner": "KSA"
+ },
+ {
+  "id": 386,
+  "q": 24,
+  "r": 0,
+  "city_name": "Uppsala",
+  "is_capital": false,
+  "original_owner": "SWE"
+ },
+ {
+  "id": 387,
+  "q": 24,
+  "r": 1,
+  "city_name": "Stockholm",
+  "is_capital": true,
+  "original_owner": "SWE"
+ },
+ {
+  "id": 388,
+  "q": 24,
+  "r": 2,
+  "city_name": "Västerås",
+  "is_capital": false,
+  "original_owner": "SWE"
+ },
+ {
+  "id": 389,
+  "q": 24,
+  "r": 3,
+  "city_name": "Plzeň",
+  "is_capital": false,
+  "original_owner": "CZE"
+ },
+ {
+  "id": 390,
+  "q": 24,
+  "r": 4,
+  "city_name": "Prague",
+  "is_capital": true,
+  "original_owner": "CZE"
+ },
+ {
+  "id": 391,
+  "q": 24,
+  "r": 5,
+  "city_name": "Liberec",
+  "is_capital": false,
+  "original_owner": "CZE"
+ },
+ {
+  "id": 392,
+  "q": 24,
+  "r": 6,
+  "city_name": "Lucerne",
+  "is_capital": false,
+  "original_owner": "SUI"
+ },
+ {
+  "id": 393,
+  "q": 24,
+  "r": 7,
+  "city_name": "Gaziantep",
+  "is_capital": false,
+  "original_owner": "TUR"
+ },
+ {
+  "id": 394,
+  "q": 24,
+  "r": 8,
+  "city_name": "Russeifa",
+  "is_capital": false,
+  "original_owner": "JOR"
+ },
+ {
+  "id": 395,
+  "q": 24,
+  "r": 9,
+  "city_name": "Amman",
+  "is_capital": true,
+  "original_owner": "JOR"
+ },
+ {
+  "id": 396,
+  "q": 24,
+  "r": 10,
+  "city_name": "Aqaba",
+  "is_capital": false,
+  "original_owner": "JOR"
+ },
+ {
+  "id": 397,
+  "q": 24,
+  "r": 11,
+  "city_name": "Djeddah",
+  "is_capital": false,
+  "original_owner": "KSA"
+ },
+ {
+  "id": 398,
+  "q": 24,
+  "r": 12,
+  "city_name": "La Mecque",
+  "is_capital": false,
+  "original_owner": "KSA"
+ },
+ {
+  "id": 399,
+  "q": 24,
+  "r": 13,
+  "city_name": "Karak",
+  "is_capital": false,
+  "original_owner": "JOR"
+ },
+ {
+  "id": 400,
+  "q": 25,
+  "r": 0,
+  "city_name": "Örebro",
+  "is_capital": false,
+  "original_owner": "SWE"
+ },
+ {
+  "id": 401,
+  "q": 25,
+  "r": 1,
+  "city_name": "Düsseldorf",
+  "is_capital": false,
+  "original_owner": "GER"
+ },
+ {
+  "id": 402,
+  "q": 25,
+  "r": 2,
+  "city_name": "Kristiansand",
+  "is_capital": false,
+  "original_owner": "NOR"
+ },
+ {
+  "id": 403,
+  "q": 25,
+  "r": 3,
+  "city_name": "Olomouc",
+  "is_capital": false,
+  "original_owner": "CZE"
+ },
+ {
+  "id": 404,
+  "q": 25,
+  "r": 4,
+  "city_name": "České Budějovice",
+  "is_capital": false,
+  "original_owner": "CZE"
+ },
+ {
+  "id": 405,
+  "q": 25,
+  "r": 5,
+  "city_name": "Wels",
+  "is_capital": false,
+  "original_owner": "AUT"
+ },
+ {
+  "id": 406,
+  "q": 25,
+  "r": 6,
+  "city_name": "Konya",
+  "is_capital": false,
+  "original_owner": "TUR"
+ },
+ {
+  "id": 407,
+  "q": 25,
+  "r": 7,
+  "city_name": "Istanbul",
+  "is_capital": false,
+  "original_owner": "TUR"
+ },
+ {
+  "id": 408,
+  "q": 25,
+  "r": 8,
+  "city_name": "Izmir",
+  "is_capital": false,
+  "original_owner": "TUR"
+ },
+ {
+  "id": 409,
+  "q": 25,
+  "r": 9,
+  "city_name": "Madaba",
+  "is_capital": false,
+  "original_owner": "JOR"
+ },
+ {
+  "id": 410,
+  "q": 25,
+  "r": 10,
+  "city_name": "Médine",
+  "is_capital": false,
+  "original_owner": "KSA"
+ },
+ {
+  "id": 411,
+  "q": 25,
+  "r": 11,
+  "city_name": "Riyad",
+  "is_capital": true,
+  "original_owner": "KSA"
+ },
+ {
+  "id": 412,
+  "q": 25,
+  "r": 12,
+  "city_name": "Dammam",
+  "is_capital": false,
+  "original_owner": "KSA"
+ },
+ {
+  "id": 413,
+  "q": 25,
+  "r": 13,
+  "city_name": "Abha",
+  "is_capital": false,
+  "original_owner": "KSA"
+ },
+ {
+  "id": 414,
+  "q": 26,
+  "r": 0,
+  "city_name": "Linköping",
+  "is_capital": false,
+  "original_owner": "SWE"
+ },
+ {
+  "id": 415,
+  "q": 26,
+  "r": 1,
+  "city_name": "Leipzig",
+  "is_capital": false,
+  "original_owner": "GER"
+ },
+ {
+  "id": 416,
+  "q": 26,
+  "r": 2,
+  "city_name": "Hradec Králové",
+  "is_capital": false,
+  "original_owner": "CZE"
+ },
+ {
+  "id": 417,
+  "q": 26,
+  "r": 3,
+  "city_name": "Almere",
+  "is_capital": false,
+  "original_owner": "NED"
+ },
+ {
+  "id": 418,
+  "q": 26,
+  "r": 4,
+  "city_name": "Sankt Pölten",
+  "is_capital": false,
+  "original_owner": "AUT"
+ },
+ {
+  "id": 419,
+  "q": 26,
+  "r": 5,
+  "city_name": "Antalya",
+  "is_capital": false,
+  "original_owner": "TUR"
+ },
+ {
+  "id": 420,
+  "q": 26,
+  "r": 6,
+  "city_name": "Bursa",
+  "is_capital": false,
+  "original_owner": "TUR"
+ },
+ {
+  "id": 421,
+  "q": 26,
+  "r": 7,
+  "city_name": "Ankara",
+  "is_capital": true,
+  "original_owner": "TUR"
+ },
+ {
+  "id": 422,
+  "q": 26,
+  "r": 8,
+  "city_name": "Bassora",
+  "is_capital": false,
+  "original_owner": "IRQ"
+ },
+ {
+  "id": 423,
+  "q": 26,
+  "r": 9,
+  "city_name": "Mossoul",
+  "is_capital": false,
+  "original_owner": "IRQ"
+ },
+ {
+  "id": 424,
+  "q": 26,
+  "r": 10,
+  "city_name": "Taïf",
+  "is_capital": false,
+  "original_owner": "KSA"
+ },
+ {
+  "id": 425,
+  "q": 26,
+  "r": 11,
+  "city_name": "Tabuk",
+  "is_capital": false,
+  "original_owner": "KSA"
+ },
+ {
+  "id": 426,
+  "q": 27,
+  "r": 3,
+  "city_name": "Ústí nad Labem",
+  "is_capital": false,
+  "original_owner": "CZE"
+ },
+ {
+  "id": 427,
+  "q": 27,
+  "r": 4,
+  "city_name": "Dortmund",
+  "is_capital": false,
+  "original_owner": "GER"
+ },
+ {
+  "id": 428,
+  "q": 27,
+  "r": 5,
+  "city_name": "Kayseri",
+  "is_capital": false,
+  "original_owner": "TUR"
+ },
+ {
+  "id": 429,
+  "q": 27,
+  "r": 6,
+  "city_name": "Adana",
+  "is_capital": false,
+  "original_owner": "TUR"
+ },
+ {
+  "id": 430,
+  "q": 27,
+  "r": 7,
+  "city_name": "Erbil",
+  "is_capital": false,
+  "original_owner": "IRQ"
+ },
+ {
+  "id": 431,
+  "q": 27,
+  "r": 8,
+  "city_name": "Bagdad",
+  "is_capital": true,
+  "original_owner": "IRQ"
+ },
+ {
+  "id": 432,
+  "q": 27,
+  "r": 9,
+  "city_name": "Najaf",
+  "is_capital": false,
+  "original_owner": "IRQ"
+ },
+ {
+  "id": 433,
+  "q": 27,
+  "r": 10,
+  "city_name": "Lusail",
+  "is_capital": false,
+  "original_owner": "QAT"
+ },
+ {
+  "id": 434,
+  "q": 27,
+  "r": 11,
+  "city_name": "Al Rayyan",
+  "is_capital": false,
+  "original_owner": "QAT"
+ },
+ {
+  "id": 435,
+  "q": 27,
+  "r": 12,
+  "city_name": "Al Wakrah",
+  "is_capital": false,
+  "original_owner": "QAT"
+ },
+ {
+  "id": 436,
+  "q": 27,
+  "r": 13,
+  "city_name": "Al Daayen",
+  "is_capital": false,
+  "original_owner": "QAT"
+ },
+ {
+  "id": 437,
+  "q": 27,
+  "r": 14,
+  "city_name": "Atlantique Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 438,
+  "q": 28,
+  "r": 0,
+  "city_name": "Tromsø",
+  "is_capital": false,
+  "original_owner": "NOR"
+ },
+ {
+  "id": 439,
+  "q": 28,
+  "r": 1,
+  "city_name": "Helsingborg",
+  "is_capital": false,
+  "original_owner": "SWE"
+ },
+ {
+  "id": 440,
+  "q": 28,
+  "r": 2,
+  "city_name": "Breda",
+  "is_capital": false,
+  "original_owner": "NED"
+ },
+ {
+  "id": 441,
+  "q": 28,
+  "r": 3,
+  "city_name": "Dornbirn",
+  "is_capital": false,
+  "original_owner": "AUT"
+ },
+ {
+  "id": 442,
+  "q": 28,
+  "r": 4,
+  "city_name": "Pardubice",
+  "is_capital": false,
+  "original_owner": "CZE"
+ },
+ {
+  "id": 443,
+  "q": 28,
+  "r": 5,
+  "city_name": "Essen",
+  "is_capital": false,
+  "original_owner": "GER"
+ },
+ {
+  "id": 444,
+  "q": 28,
+  "r": 6,
+  "city_name": "Kerbala",
+  "is_capital": false,
+  "original_owner": "IRQ"
+ },
+ {
+  "id": 445,
+  "q": 28,
+  "r": 7,
+  "city_name": "Kirkouk",
+  "is_capital": false,
+  "original_owner": "IRQ"
+ },
+ {
+  "id": 446,
+  "q": 28,
+  "r": 8,
+  "city_name": "Souleimaniye",
+  "is_capital": false,
+  "original_owner": "IRQ"
+ },
+ {
+  "id": 447,
+  "q": 28,
+  "r": 9,
+  "city_name": "Nassiriya",
+  "is_capital": false,
+  "original_owner": "IRQ"
+ },
+ {
+  "id": 448,
+  "q": 28,
+  "r": 10,
+  "city_name": "Al Khor",
+  "is_capital": false,
+  "original_owner": "QAT"
+ },
+ {
+  "id": 449,
+  "q": 28,
+  "r": 11,
+  "city_name": "Doha",
+  "is_capital": true,
+  "original_owner": "QAT"
+ },
+ {
+  "id": 450,
+  "q": 28,
+  "r": 12,
+  "city_name": "Umm Salal",
+  "is_capital": false,
+  "original_owner": "QAT"
+ },
+ {
+  "id": 451,
+  "q": 28,
+  "r": 13,
+  "city_name": "Pacifique Sud",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 452,
+  "q": 28,
+  "r": 14,
+  "city_name": "Mer des Sargasses",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 453,
+  "q": 28,
+  "r": 15,
+  "city_name": "Détroit de Béring",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 454,
+  "q": 29,
+  "r": 0,
+  "city_name": "Sandnes",
+  "is_capital": false,
+  "original_owner": "NOR"
+ },
+ {
+  "id": 455,
+  "q": 29,
+  "r": 1,
+  "city_name": "Jönköping",
+  "is_capital": false,
+  "original_owner": "SWE"
+ },
+ {
+  "id": 456,
+  "q": 29,
+  "r": 2,
+  "city_name": "Nimègue",
+  "is_capital": false,
+  "original_owner": "NED"
+ },
+ {
+  "id": 457,
+  "q": 29,
+  "r": 3,
+  "city_name": "Bienne",
+  "is_capital": false,
+  "original_owner": "SUI"
+ },
+ {
+  "id": 458,
+  "q": 29,
+  "r": 4,
+  "city_name": "Mersin",
+  "is_capital": false,
+  "original_owner": "TUR"
+ },
+ {
+  "id": 459,
+  "q": 29,
+  "r": 5,
+  "city_name": "Mer de Corail",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 460,
+  "q": 29,
+  "r": 6,
+  "city_name": "Amara",
+  "is_capital": false,
+  "original_owner": "IRQ"
+ },
+ {
+  "id": 461,
+  "q": 29,
+  "r": 7,
+  "city_name": "Ahvaz",
+  "is_capital": false,
+  "original_owner": "IRN"
+ },
+ {
+  "id": 462,
+  "q": 29,
+  "r": 8,
+  "city_name": "Kermanshah",
+  "is_capital": false,
+  "original_owner": "IRN"
+ },
+ {
+  "id": 463,
+  "q": 29,
+  "r": 9,
+  "city_name": "Madinat ash Shamal",
+  "is_capital": false,
+  "original_owner": "QAT"
+ },
+ {
+  "id": 464,
+  "q": 29,
+  "r": 10,
+  "city_name": "Dukhan",
+  "is_capital": false,
+  "original_owner": "QAT"
+ },
+ {
+  "id": 465,
+  "q": 29,
+  "r": 11,
+  "city_name": "Mesaieed",
+  "is_capital": false,
+  "original_owner": "QAT"
+ },
+ {
+  "id": 466,
+  "q": 29,
+  "r": 12,
+  "city_name": "Sahara",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 467,
+  "q": 29,
+  "r": 13,
+  "city_name": "Atacama",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 468,
+  "q": 29,
+  "r": 14,
+  "city_name": "Mer du Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 469,
+  "q": 29,
+  "r": 15,
+  "city_name": "Golfe de Guinée",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 470,
+  "q": 30,
+  "r": 0,
+  "city_name": "Ålesund",
+  "is_capital": false,
+  "original_owner": "NOR"
+ },
+ {
+  "id": 471,
+  "q": 30,
+  "r": 1,
+  "city_name": "Norrköping",
+  "is_capital": false,
+  "original_owner": "SWE"
+ },
+ {
+  "id": 472,
+  "q": 30,
+  "r": 2,
+  "city_name": "Mer d'Arabie",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 473,
+  "q": 30,
+  "r": 3,
+  "city_name": "Pacifique Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 474,
+  "q": 30,
+  "r": 4,
+  "city_name": "Atlantique Sud",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 475,
+  "q": 30,
+  "r": 5,
+  "city_name": "Mer des Caraïbes",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 476,
+  "q": 30,
+  "r": 6,
+  "city_name": "Ourmia",
+  "is_capital": false,
+  "original_owner": "IRN"
+ },
+ {
+  "id": 477,
+  "q": 30,
+  "r": 7,
+  "city_name": "Mashhad",
+  "is_capital": false,
+  "original_owner": "IRN"
+ },
+ {
+  "id": 478,
+  "q": 30,
+  "r": 8,
+  "city_name": "Ispahan",
+  "is_capital": false,
+  "original_owner": "IRN"
+ },
+ {
+  "id": 479,
+  "q": 30,
+  "r": 9,
+  "city_name": "Océan Indien",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 480,
+  "q": 30,
+  "r": 10,
+  "city_name": "Mer de Tasman",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 481,
+  "q": 30,
+  "r": 11,
+  "city_name": "Gobi",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 482,
+  "q": 30,
+  "r": 12,
+  "city_name": "Kalahari",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 483,
+  "q": 30,
+  "r": 13,
+  "city_name": "Mer Baltique",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 484,
+  "q": 30,
+  "r": 14,
+  "city_name": "Golfe du Bengale",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 485,
+  "q": 30,
+  "r": 15,
+  "city_name": "Mer de Chine",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 486,
+  "q": 30,
+  "r": 18,
+  "city_name": "Mer Rouge",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 487,
+  "q": 30,
+  "r": 19,
+  "city_name": "Grande Barrière",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 488,
+  "q": 30,
+  "r": 20,
+  "city_name": "Mer du Labrador",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 489,
+  "q": 31,
+  "r": 0,
+  "city_name": "Namib",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 490,
+  "q": 31,
+  "r": 1,
+  "city_name": "Mer Égée",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 491,
+  "q": 31,
+  "r": 2,
+  "city_name": "Banquise",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 492,
+  "q": 31,
+  "r": 3,
+  "city_name": "Mer Noire",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 493,
+  "q": 31,
+  "r": 4,
+  "city_name": "Outback",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 494,
+  "q": 31,
+  "r": 5,
+  "city_name": "Mer d'Okhotsk",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 495,
+  "q": 31,
+  "r": 6,
+  "city_name": "Karaj",
+  "is_capital": false,
+  "original_owner": "IRN"
+ },
+ {
+  "id": 496,
+  "q": 31,
+  "r": 7,
+  "city_name": "Téhéran",
+  "is_capital": true,
+  "original_owner": "IRN"
+ },
+ {
+  "id": 497,
+  "q": 31,
+  "r": 8,
+  "city_name": "Chiraz",
+  "is_capital": false,
+  "original_owner": "IRN"
+ },
+ {
+  "id": 498,
+  "q": 31,
+  "r": 9,
+  "city_name": "Mer Caspienne",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 499,
+  "q": 31,
+  "r": 10,
+  "city_name": "Terres Australes",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 500,
+  "q": 31,
+  "r": 11,
+  "city_name": "Mer de Java",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 501,
+  "q": 31,
+  "r": 12,
+  "city_name": "Altiplano",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 502,
+  "q": 31,
+  "r": 13,
+  "city_name": "Mer de Norvège",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 503,
+  "q": 31,
+  "r": 14,
+  "city_name": "Pampa",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 504,
+  "q": 31,
+  "r": 15,
+  "city_name": "Steppe Kirghize",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 505,
+  "q": 31,
+  "r": 17,
+  "city_name": "Mer d'Irlande",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 506,
+  "q": 31,
+  "r": 18,
+  "city_name": "Sahel",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 507,
+  "q": 31,
+  "r": 19,
+  "city_name": "Mer Ionienne",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 508,
+  "q": 31,
+  "r": 20,
+  "city_name": "Taïga",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 509,
+  "q": 32,
+  "r": 0,
+  "city_name": "Atlantique Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 510,
+  "q": 32,
+  "r": 1,
+  "city_name": "Pacifique Sud",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 511,
+  "q": 32,
+  "r": 2,
+  "city_name": "Mer des Sargasses",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 512,
+  "q": 32,
+  "r": 3,
+  "city_name": "Détroit de Béring",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 513,
+  "q": 32,
+  "r": 4,
+  "city_name": "Mer de Corail",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 514,
+  "q": 32,
+  "r": 5,
+  "city_name": "Qarshi",
+  "is_capital": false,
+  "original_owner": "UZB"
+ },
+ {
+  "id": 515,
+  "q": 32,
+  "r": 6,
+  "city_name": "Tabriz",
+  "is_capital": false,
+  "original_owner": "IRN"
+ },
+ {
+  "id": 516,
+  "q": 32,
+  "r": 7,
+  "city_name": "Qom",
+  "is_capital": false,
+  "original_owner": "IRN"
+ },
+ {
+  "id": 517,
+  "q": 32,
+  "r": 8,
+  "city_name": "Sahara",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 518,
+  "q": 32,
+  "r": 9,
+  "city_name": "Atacama",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 519,
+  "q": 32,
+  "r": 10,
+  "city_name": "Mer du Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 520,
+  "q": 32,
+  "r": 11,
+  "city_name": "Golfe de Guinée",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 521,
+  "q": 32,
+  "r": 12,
+  "city_name": "Mer d'Arabie",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 522,
+  "q": 32,
+  "r": 13,
+  "city_name": "Pacifique Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 523,
+  "q": 32,
+  "r": 14,
+  "city_name": "Atlantique Sud",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 524,
+  "q": 32,
+  "r": 15,
+  "city_name": "Mer des Caraïbes",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 525,
+  "q": 32,
+  "r": 16,
+  "city_name": "Océan Indien",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 526,
+  "q": 32,
+  "r": 17,
+  "city_name": "Mer de Tasman",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 527,
+  "q": 32,
+  "r": 18,
+  "city_name": "Newcastle",
+  "is_capital": false,
+  "original_owner": "AUS"
+ },
+ {
+  "id": 528,
+  "q": 32,
+  "r": 19,
+  "city_name": "Wollongong",
+  "is_capital": false,
+  "original_owner": "AUS"
+ },
+ {
+  "id": 529,
+  "q": 32,
+  "r": 20,
+  "city_name": "Gobi",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 530,
+  "q": 33,
+  "r": 0,
+  "city_name": "Kalahari",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 531,
+  "q": 33,
+  "r": 1,
+  "city_name": "Mer Baltique",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 532,
+  "q": 33,
+  "r": 2,
+  "city_name": "Golfe du Bengale",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 533,
+  "q": 33,
+  "r": 3,
+  "city_name": "Mer de Chine",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 534,
+  "q": 33,
+  "r": 4,
+  "city_name": "Kokand",
+  "is_capital": false,
+  "original_owner": "UZB"
+ },
+ {
+  "id": 535,
+  "q": 33,
+  "r": 5,
+  "city_name": "Samarcande",
+  "is_capital": false,
+  "original_owner": "UZB"
+ },
+ {
+  "id": 536,
+  "q": 33,
+  "r": 6,
+  "city_name": "Boukhara",
+  "is_capital": false,
+  "original_owner": "UZB"
+ },
+ {
+  "id": 537,
+  "q": 33,
+  "r": 7,
+  "city_name": "Marguilan",
+  "is_capital": false,
+  "original_owner": "UZB"
+ },
+ {
+  "id": 538,
+  "q": 33,
+  "r": 8,
+  "city_name": "Mer Rouge",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 539,
+  "q": 33,
+  "r": 9,
+  "city_name": "Grande Barrière",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 540,
+  "q": 33,
+  "r": 11,
+  "city_name": "Mer du Labrador",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 541,
+  "q": 33,
+  "r": 12,
+  "city_name": "Namib",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 542,
+  "q": 33,
+  "r": 13,
+  "city_name": "Mer Égée",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 543,
+  "q": 33,
+  "r": 14,
+  "city_name": "Banquise",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 544,
+  "q": 33,
+  "r": 15,
+  "city_name": "Mer Noire",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 545,
+  "q": 33,
+  "r": 16,
+  "city_name": "Outback",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 546,
+  "q": 33,
+  "r": 17,
+  "city_name": "Hobart",
+  "is_capital": false,
+  "original_owner": "AUS"
+ },
+ {
+  "id": 547,
+  "q": 33,
+  "r": 18,
+  "city_name": "Sydney",
+  "is_capital": false,
+  "original_owner": "AUS"
+ },
+ {
+  "id": 548,
+  "q": 33,
+  "r": 19,
+  "city_name": "Melbourne",
+  "is_capital": false,
+  "original_owner": "AUS"
+ },
+ {
+  "id": 549,
+  "q": 33,
+  "r": 20,
+  "city_name": "Mer d'Okhotsk",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 550,
+  "q": 34,
+  "r": 0,
+  "city_name": "Mer Caspienne",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 551,
+  "q": 34,
+  "r": 1,
+  "city_name": "Terres Australes",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 552,
+  "q": 34,
+  "r": 2,
+  "city_name": "Mer de Java",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 553,
+  "q": 34,
+  "r": 3,
+  "city_name": "Altiplano",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 554,
+  "q": 34,
+  "r": 4,
+  "city_name": "Namangan",
+  "is_capital": false,
+  "original_owner": "UZB"
+ },
+ {
+  "id": 555,
+  "q": 34,
+  "r": 5,
+  "city_name": "Tachkent",
+  "is_capital": true,
+  "original_owner": "UZB"
+ },
+ {
+  "id": 556,
+  "q": 34,
+  "r": 6,
+  "city_name": "Andijan",
+  "is_capital": false,
+  "original_owner": "UZB"
+ },
+ {
+  "id": 557,
+  "q": 34,
+  "r": 7,
+  "city_name": "Mer de Norvège",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 558,
+  "q": 34,
+  "r": 8,
+  "city_name": "Pampa",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 559,
+  "q": 34,
+  "r": 9,
+  "city_name": "Steppe Kirghize",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 560,
+  "q": 34,
+  "r": 12,
+  "city_name": "Mer d'Irlande",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 561,
+  "q": 34,
+  "r": 13,
+  "city_name": "Sahel",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 562,
+  "q": 34,
+  "r": 14,
+  "city_name": "Mer Ionienne",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 563,
+  "q": 34,
+  "r": 15,
+  "city_name": "Taïga",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 564,
+  "q": 34,
+  "r": 16,
+  "city_name": "Atlantique Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 565,
+  "q": 34,
+  "r": 17,
+  "city_name": "Brisbane",
+  "is_capital": false,
+  "original_owner": "AUS"
+ },
+ {
+  "id": 566,
+  "q": 34,
+  "r": 18,
+  "city_name": "Canberra",
+  "is_capital": true,
+  "original_owner": "AUS"
+ },
+ {
+  "id": 567,
+  "q": 34,
+  "r": 19,
+  "city_name": "Perth",
+  "is_capital": false,
+  "original_owner": "AUS"
+ },
+ {
+  "id": 568,
+  "q": 34,
+  "r": 20,
+  "city_name": "Pacifique Sud",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 569,
+  "q": 35,
+  "r": 0,
+  "city_name": "Mer des Sargasses",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 570,
+  "q": 35,
+  "r": 1,
+  "city_name": "Détroit de Béring",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 571,
+  "q": 35,
+  "r": 2,
+  "city_name": "Mer de Corail",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 572,
+  "q": 35,
+  "r": 3,
+  "city_name": "Sahara",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 573,
+  "q": 35,
+  "r": 4,
+  "city_name": "Noukous",
+  "is_capital": false,
+  "original_owner": "UZB"
+ },
+ {
+  "id": 574,
+  "q": 35,
+  "r": 5,
+  "city_name": "Fergana",
+  "is_capital": false,
+  "original_owner": "UZB"
+ },
+ {
+  "id": 575,
+  "q": 35,
+  "r": 6,
+  "city_name": "Atacama",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 576,
+  "q": 35,
+  "r": 7,
+  "city_name": "Ulsan",
+  "is_capital": false,
+  "original_owner": "KOR"
+ },
+ {
+  "id": 577,
+  "q": 35,
+  "r": 13,
+  "city_name": "Mer du Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 578,
+  "q": 35,
+  "r": 14,
+  "city_name": "Golfe de Guinée",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 579,
+  "q": 35,
+  "r": 15,
+  "city_name": "Mer d'Arabie",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 580,
+  "q": 35,
+  "r": 16,
+  "city_name": "Pacifique Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 581,
+  "q": 35,
+  "r": 17,
+  "city_name": "Adélaïde",
+  "is_capital": false,
+  "original_owner": "AUS"
+ },
+ {
+  "id": 582,
+  "q": 35,
+  "r": 18,
+  "city_name": "Gold Coast",
+  "is_capital": false,
+  "original_owner": "AUS"
+ },
+ {
+  "id": 583,
+  "q": 35,
+  "r": 19,
+  "city_name": "Atlantique Sud",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 584,
+  "q": 35,
+  "r": 20,
+  "city_name": "Mer des Caraïbes",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 585,
+  "q": 36,
+  "r": 0,
+  "city_name": "Océan Indien",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 586,
+  "q": 36,
+  "r": 1,
+  "city_name": "Mer de Tasman",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 587,
+  "q": 36,
+  "r": 2,
+  "city_name": "Gobi",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 588,
+  "q": 36,
+  "r": 3,
+  "city_name": "Kalahari",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 589,
+  "q": 36,
+  "r": 4,
+  "city_name": "Mer Baltique",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 590,
+  "q": 36,
+  "r": 5,
+  "city_name": "Golfe du Bengale",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 591,
+  "q": 36,
+  "r": 6,
+  "city_name": "Changwon",
+  "is_capital": false,
+  "original_owner": "KOR"
+ },
+ {
+  "id": 592,
+  "q": 36,
+  "r": 7,
+  "city_name": "Daegu",
+  "is_capital": false,
+  "original_owner": "KOR"
+ },
+ {
+  "id": 593,
+  "q": 36,
+  "r": 16,
+  "city_name": "Mer de Chine",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 594,
+  "q": 36,
+  "r": 17,
+  "city_name": "Mer Rouge",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 595,
+  "q": 36,
+  "r": 18,
+  "city_name": "Grande Barrière",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 596,
+  "q": 36,
+  "r": 19,
+  "city_name": "Mer du Labrador",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 597,
+  "q": 36,
+  "r": 20,
+  "city_name": "Namib",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 598,
+  "q": 36,
+  "r": 21,
+  "city_name": "Napier",
+  "is_capital": false,
+  "original_owner": "NZL"
+ },
+ {
+  "id": 599,
+  "q": 36,
+  "r": 22,
+  "city_name": "Auckland",
+  "is_capital": false,
+  "original_owner": "NZL"
+ },
+ {
+  "id": 600,
+  "q": 36,
+  "r": 23,
+  "city_name": "Christchurch",
+  "is_capital": false,
+  "original_owner": "NZL"
+ },
+ {
+  "id": 601,
+  "q": 37,
+  "r": 0,
+  "city_name": "Mer Égée",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 602,
+  "q": 37,
+  "r": 1,
+  "city_name": "Banquise",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 603,
+  "q": 37,
+  "r": 2,
+  "city_name": "Mer Noire",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 604,
+  "q": 37,
+  "r": 3,
+  "city_name": "Outback",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 605,
+  "q": 37,
+  "r": 4,
+  "city_name": "Mer d'Okhotsk",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 606,
+  "q": 37,
+  "r": 5,
+  "city_name": "Goyang",
+  "is_capital": false,
+  "original_owner": "KOR"
+ },
+ {
+  "id": 607,
+  "q": 37,
+  "r": 6,
+  "city_name": "Daejeon",
+  "is_capital": false,
+  "original_owner": "KOR"
+ },
+ {
+  "id": 608,
+  "q": 37,
+  "r": 7,
+  "city_name": "Busan",
+  "is_capital": false,
+  "original_owner": "KOR"
+ },
+ {
+  "id": 609,
+  "q": 37,
+  "r": 8,
+  "city_name": "Séoul",
+  "is_capital": true,
+  "original_owner": "KOR"
+ },
+ {
+  "id": 610,
+  "q": 37,
+  "r": 16,
+  "city_name": "Mer Caspienne",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 611,
+  "q": 37,
+  "r": 17,
+  "city_name": "Terres Australes",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 612,
+  "q": 37,
+  "r": 18,
+  "city_name": "Mer de Java",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 613,
+  "q": 37,
+  "r": 19,
+  "city_name": "Altiplano",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 614,
+  "q": 37,
+  "r": 21,
+  "city_name": "Hamilton",
+  "is_capital": false,
+  "original_owner": "NZL"
+ },
+ {
+  "id": 615,
+  "q": 37,
+  "r": 22,
+  "city_name": "Wellington",
+  "is_capital": true,
+  "original_owner": "NZL"
+ },
+ {
+  "id": 616,
+  "q": 37,
+  "r": 23,
+  "city_name": "Tauranga",
+  "is_capital": false,
+  "original_owner": "NZL"
+ },
+ {
+  "id": 617,
+  "q": 38,
+  "r": 0,
+  "city_name": "Mer de Norvège",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 618,
+  "q": 38,
+  "r": 1,
+  "city_name": "Pampa",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 619,
+  "q": 38,
+  "r": 2,
+  "city_name": "Steppe Kirghize",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 620,
+  "q": 38,
+  "r": 3,
+  "city_name": "Mer d'Irlande",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 621,
+  "q": 38,
+  "r": 4,
+  "city_name": "Sahel",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 622,
+  "q": 38,
+  "r": 5,
+  "city_name": "Mer Ionienne",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 623,
+  "q": 38,
+  "r": 6,
+  "city_name": "Gwangju",
+  "is_capital": false,
+  "original_owner": "KOR"
+ },
+ {
+  "id": 624,
+  "q": 38,
+  "r": 7,
+  "city_name": "Incheon",
+  "is_capital": false,
+  "original_owner": "KOR"
+ },
+ {
+  "id": 625,
+  "q": 38,
+  "r": 8,
+  "city_name": "Yokohama",
+  "is_capital": false,
+  "original_owner": "JPN"
+ },
+ {
+  "id": 626,
+  "q": 38,
+  "r": 9,
+  "city_name": "Osaka",
+  "is_capital": false,
+  "original_owner": "JPN"
+ },
+ {
+  "id": 627,
+  "q": 38,
+  "r": 16,
+  "city_name": "Taïga",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 628,
+  "q": 38,
+  "r": 17,
+  "city_name": "Atlantique Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 629,
+  "q": 38,
+  "r": 18,
+  "city_name": "Pacifique Sud",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 630,
+  "q": 38,
+  "r": 19,
+  "city_name": "Mer des Sargasses",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 631,
+  "q": 38,
+  "r": 21,
+  "city_name": "Dunedin",
+  "is_capital": false,
+  "original_owner": "NZL"
+ },
+ {
+  "id": 632,
+  "q": 38,
+  "r": 22,
+  "city_name": "Palmerston North",
+  "is_capital": false,
+  "original_owner": "NZL"
+ },
+ {
+  "id": 633,
+  "q": 38,
+  "r": 23,
+  "city_name": "Rotorua",
+  "is_capital": false,
+  "original_owner": "NZL"
+ },
+ {
+  "id": 634,
+  "q": 39,
+  "r": 0,
+  "city_name": "Détroit de Béring",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 635,
+  "q": 39,
+  "r": 1,
+  "city_name": "Mer de Corail",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 636,
+  "q": 39,
+  "r": 2,
+  "city_name": "Sahara",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 637,
+  "q": 39,
+  "r": 3,
+  "city_name": "Atacama",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 638,
+  "q": 39,
+  "r": 4,
+  "city_name": "Mer du Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 639,
+  "q": 39,
+  "r": 5,
+  "city_name": "Golfe de Guinée",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 640,
+  "q": 39,
+  "r": 6,
+  "city_name": "Suwon",
+  "is_capital": false,
+  "original_owner": "KOR"
+ },
+ {
+  "id": 641,
+  "q": 39,
+  "r": 7,
+  "city_name": "Nagoya",
+  "is_capital": false,
+  "original_owner": "JPN"
+ },
+ {
+  "id": 642,
+  "q": 39,
+  "r": 8,
+  "city_name": "Tokyo",
+  "is_capital": true,
+  "original_owner": "JPN"
+ },
+ {
+  "id": 643,
+  "q": 39,
+  "r": 9,
+  "city_name": "Sapporo",
+  "is_capital": false,
+  "original_owner": "JPN"
+ },
+ {
+  "id": 644,
+  "q": 39,
+  "r": 17,
+  "city_name": "Mer d'Arabie",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 645,
+  "q": 39,
+  "r": 21,
+  "city_name": "Nelson",
+  "is_capital": false,
+  "original_owner": "NZL"
+ },
+ {
+  "id": 646,
+  "q": 40,
+  "r": 0,
+  "city_name": "Pacifique Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 647,
+  "q": 40,
+  "r": 1,
+  "city_name": "Atlantique Sud",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 648,
+  "q": 40,
+  "r": 2,
+  "city_name": "Mer des Caraïbes",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 649,
+  "q": 40,
+  "r": 3,
+  "city_name": "Océan Indien",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 650,
+  "q": 40,
+  "r": 4,
+  "city_name": "Mer de Tasman",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 651,
+  "q": 40,
+  "r": 5,
+  "city_name": "Gobi",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 652,
+  "q": 40,
+  "r": 6,
+  "city_name": "Kyoto",
+  "is_capital": false,
+  "original_owner": "JPN"
+ },
+ {
+  "id": 653,
+  "q": 40,
+  "r": 7,
+  "city_name": "Fukuoka",
+  "is_capital": false,
+  "original_owner": "JPN"
+ },
+ {
+  "id": 654,
+  "q": 40,
+  "r": 8,
+  "city_name": "Kobe",
+  "is_capital": false,
+  "original_owner": "JPN"
+ },
+ {
+  "id": 655,
+  "q": 40,
+  "r": 9,
+  "city_name": "Kawasaki",
+  "is_capital": false,
+  "original_owner": "JPN"
+ },
+ {
+  "id": 656,
+  "q": 41,
+  "r": 0,
+  "city_name": "Kalahari",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 657,
+  "q": 41,
+  "r": 1,
+  "city_name": "Mer Baltique",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 658,
+  "q": 41,
+  "r": 2,
+  "city_name": "Golfe du Bengale",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 659,
+  "q": 41,
+  "r": 3,
+  "city_name": "Mer de Chine",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 660,
+  "q": 41,
+  "r": 4,
+  "city_name": "Mer Rouge",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 661,
+  "q": 41,
+  "r": 5,
+  "city_name": "Grande Barrière",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 662,
+  "q": 41,
+  "r": 6,
+  "city_name": "Hiroshima",
+  "is_capital": false,
+  "original_owner": "JPN"
+ },
+ {
+  "id": 663,
+  "q": 41,
+  "r": 7,
+  "city_name": "Mer du Labrador",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 664,
+  "q": 42,
+  "r": 0,
+  "city_name": "Namib",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 665,
+  "q": 42,
+  "r": 1,
+  "city_name": "Mer Égée",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 666,
+  "q": 42,
+  "r": 2,
+  "city_name": "Banquise",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 667,
+  "q": 42,
+  "r": 3,
+  "city_name": "Mer Noire",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 668,
+  "q": 42,
+  "r": 4,
+  "city_name": "Outback",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 669,
+  "q": 42,
+  "r": 5,
+  "city_name": "Mer d'Okhotsk",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 670,
+  "q": 42,
+  "r": 6,
+  "city_name": "Mer Caspienne",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 671,
+  "q": 43,
+  "r": 0,
+  "city_name": "Terres Australes",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 672,
+  "q": 43,
+  "r": 1,
+  "city_name": "Mer de Java",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 673,
+  "q": 43,
+  "r": 2,
+  "city_name": "Altiplano",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 674,
+  "q": 43,
+  "r": 3,
+  "city_name": "Mer de Norvège",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 675,
+  "q": 43,
+  "r": 4,
+  "city_name": "Pampa",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 676,
+  "q": 43,
+  "r": 5,
+  "city_name": "Steppe Kirghize",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 677,
+  "q": 44,
+  "r": 0,
+  "city_name": "Mer d'Irlande",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 678,
+  "q": 44,
+  "r": 1,
+  "city_name": "Sahel",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 679,
+  "q": 44,
+  "r": 2,
+  "city_name": "Mer Ionienne",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 680,
+  "q": 44,
+  "r": 3,
+  "city_name": "Taïga",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 681,
+  "q": 45,
+  "r": 0,
+  "city_name": "Atlantique Nord",
+  "is_capital": false,
+  "original_owner": null
+ },
+ {
+  "id": 682,
+  "q": 45,
+  "r": 1,
+  "city_name": "Pacifique Sud",
+  "is_capital": false,
+  "original_owner": null
+ }
+]
