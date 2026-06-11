@@ -213,7 +213,7 @@ export function nationStyles(nations: Nation[]): Map<string, NationStyle> {
 }
 
 export function isLive(m: Match): boolean {
-  return m.status === "IN_PLAY" || m.status === "PAUSED";
+  return m.status === "IN_PLAY" || m.status === "PAUSED" || m.status === "LIVE";
 }
 
 /** Nations dont un match est en cours (pour le pulse de la carte). */

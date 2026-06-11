@@ -28,6 +28,8 @@ type Props = {
   onHexClick?: (hex: MapHex) => void;
   /** Hexes à mettre en avant (ex : pris cette nuit). */
   highlightIds?: ReadonlySet<number>;
+  /** Nations à garder lisibles en priorité, par exemple sur une fiche pays. */
+  focusOwners?: ReadonlySet<string>;
   /** Nations dont un match est EN COURS : leurs territoires pulsent. */
   liveOwners?: ReadonlySet<string>;
 };
@@ -36,7 +38,7 @@ const NEUTRAL_FILL = "#B8B2A2"; // sable grisé, recule derrière les nations
 const RUINS_FILL = "#3A3F4D";
 const MEMORIAL_FILL = "#C9A227"; // or, sanctuaire
 
-export default function HexMap({ hexes, nations, size = 10, onHexClick, highlightIds, liveOwners }: Props) {
+export default function HexMap({ hexes, nations, size = 10, onHexClick, highlightIds, focusOwners, liveOwners }: Props) {
   const [hovered, setHovered] = useState<MapHex | null>(null);
   const [cursor, setCursor] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,6 +74,24 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
     if (rect) setCursor({ x: e.clientX - rect.left, y: e.clientY - rect.top });
   }
 
+  const hoverOwner = hovered?.state === "owned" && hovered.owner ? hovered.owner : null;
+  const requestedFocusOwners =
+    focusOwners && focusOwners.size > 0 ? focusOwners : hoverOwner ? new Set([hoverOwner]) : undefined;
+  const focusedOwners =
+    requestedFocusOwners &&
+    polygons.some(({ hex }) => hex.state === "owned" && hex.owner !== null && requestedFocusOwners.has(hex.owner))
+      ? requestedFocusOwners
+      : undefined;
+
+  function isFocusedCountry(h: MapHex): boolean {
+    return h.state === "owned" && h.owner !== null && focusedOwners !== undefined && focusedOwners.has(h.owner);
+  }
+
+  function isDimmed(h: MapHex): boolean {
+    if (focusedOwners) return !isFocusedCountry(h);
+    return highlightIds !== undefined && !highlightIds.has(h.id);
+  }
+
   return (
     <div className="relative w-full" ref={containerRef} onMouseMove={onMouseMove}>
       <svg viewBox={viewBox} className="w-full h-auto block" style={{ background: colors.navy }} role="img" aria-label="Carte du monde hexagonale">
@@ -84,7 +104,7 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
               fill={fillOf(hex)}
               stroke={colors.navy}
               strokeWidth={size * 0.06}
-              opacity={highlightIds && !highlightIds.has(hex.id) ? 0.55 : 1}
+              opacity={isDimmed(hex) ? 0.34 : 1}
               className={isLive ? "hex-live" : undefined}
               style={{ cursor: onHexClick ? "pointer" : "default", transition: "opacity 150ms" }}
               onMouseEnter={() => setHovered(hex)}
@@ -93,6 +113,22 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
             />
           );
         })}
+        {polygons
+          .filter(({ hex }) => isFocusedCountry(hex) || highlightIds?.has(hex.id))
+          .map(({ hex, points }) => {
+            const countryFocus = isFocusedCountry(hex);
+            return (
+              <polygon
+                key={`outline-${hex.id}`}
+                points={points}
+                fill="none"
+                stroke={countryFocus ? colors.cream : colors.greenAcid}
+                strokeWidth={countryFocus ? size * 0.16 : size * 0.12}
+                opacity={countryFocus ? 0.95 : 0.85}
+                pointerEvents="none"
+              />
+            );
+          })}
         {/* Capitales : anneau + point, par-dessus les aplats. */}
         {polygons
           .filter(({ hex }) => hex.isCapital)

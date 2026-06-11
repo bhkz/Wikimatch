@@ -20,6 +20,7 @@ import { groupOutlook } from "../lib/conditions";
 import { finalizeGroupStagePlan } from "../lib/group-stage";
 import { DEFAULT_GAME_CONFIG, type EngineState } from "../lib/engine/types";
 import type { NormalizedMatch, Stage } from "../lib/providers/types";
+import { isLive, liveOwners, type Match as FrontMatch } from "../src/lib/atlas";
 
 let passed = 0;
 let failed = 0;
@@ -465,6 +466,33 @@ check("composition pondérée bornée 0-100", () => {
   const min = composeDrama({ swing: 0, close: 0, elim: 0, stage: 0, upset: 0 }, weights);
   assert(max === 100 && min === 0, `max=${max} min=${min}`);
   assert(elimFlag("R16", null) === 1 && elimFlag("GROUP", 3) === 1 && elimFlag("GROUP", 1) === 0, "elim flags");
+});
+
+console.log("\n— Carte live (front)");
+function frontMatch(status: string, home = "AAA", away = "BBB"): FrontMatch {
+  return {
+    id: 1,
+    stage: "GROUP",
+    group_letter: "A",
+    home,
+    away,
+    kickoff_utc: "2026-06-11T19:00:00Z",
+    status,
+    score_home: null,
+    score_away: null,
+    duration: null,
+    pens_home: null,
+    pens_away: null,
+  };
+}
+check("liveOwners pulse les deux équipes live", () => {
+  for (const status of ["IN_PLAY", "PAUSED", "LIVE"]) {
+    const match = frontMatch(status);
+    const owners = liveOwners([match]);
+    assert(isLive(match), `${status} doit être live`);
+    assert(owners.has("AAA") && owners.has("BBB") && owners.size === 2, `${status}: ${[...owners].join(",")}`);
+  }
+  assert(liveOwners([frontMatch("TIMED")]).size === 0, "TIMED ne doit pas pulser");
 });
 
 console.log("\n— Conditions de qualification (§6.5)");

@@ -40,18 +40,20 @@ h1, h2, h3, h4, h5, h6, .font-display {
 
 /* Territoires des nations dont un match est EN COURS (HexMap, spec §4/§13). */
 @keyframes hex-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.45; }
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.7) saturate(1.25); }
 }
 
 .hex-live {
   animation: hex-pulse 1.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 /* §13 : prefers-reduced-motion → état statique légèrement éclairci. */
 @media (prefers-reduced-motion: reduce) {
   .hex-live {
     animation: none;
-    opacity: 0.85;
+    filter: brightness(1.25);
   }
 }

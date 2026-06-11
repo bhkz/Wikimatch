@@ -26,6 +26,7 @@ export default function NationPage() {
     [data, upper],
   );
   const highlight = useMemo(() => new Set(territory.map((h) => h.id)), [territory]);
+  const focusOwners = useMemo(() => new Set([upper]), [upper]);
   const matches = useMemo(
     () => (data ? data.matches.filter((m) => m.home === upper || m.away === upper) : []),
     [data, upper],
@@ -88,7 +89,12 @@ export default function NationPage() {
             </div>
 
             <div className="border border-navy/10 mb-12">
-              <HexMap hexes={data.hexes} nations={styles} highlightIds={highlight.size > 0 ? highlight : undefined} />
+              <HexMap
+                hexes={data.hexes}
+                nations={styles}
+                highlightIds={highlight.size > 0 ? highlight : undefined}
+                focusOwners={focusOwners}
+              />
             </div>
 
             {territory.length > 0 && (
