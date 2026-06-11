@@ -1,12 +1,19 @@
 import { motion } from "motion/react";
-import { Search, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+
+const NAV_ITEMS = [
+  { label: "Carte", to: "/" },
+  { label: "La Nuit", to: "/nuit" },
+  { label: "Groupes", to: "/groupes" },
+  { label: "Tableau", to: "/tableau" },
+  { label: "Calendrier", to: "/calendrier" },
+  { label: "Memorial", to: "/memorial" },
+];
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const location = useLocation();
-  const isHome = location.pathname === "/";
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -15,11 +22,6 @@ export default function SiteHeader() {
     }
   }, [menuOpen]);
 
-  // Handle local anchors carefully if not on home
-  const getNavPath = (hash: string) => {
-    return isHome ? hash : `/${hash}`;
-  };
-
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-cream/80 backdrop-blur-md border-b-[0.5px] border-navy/10 transition-colors duration-300 text-navy">
@@ -27,21 +29,18 @@ export default function SiteHeader() {
           
           <div className="flex items-baseline gap-4">
             <Link to="/" className="font-display text-2xl md:text-3xl tracking-wide uppercase hover:text-blue-electric transition-colors">
-              REVISION 90
+              L'ATLAS DU MONDIAL
             </Link>
-            <span className="hidden md:inline font-mono text-xs text-navy/50">WIKIMATCH · WC26</span>
+            <span className="hidden md:inline font-mono text-xs text-navy/50">MONDIAL 2026</span>
           </div>
 
           <div className="flex items-center gap-6">
-            <Link to="/search" aria-label="Recherche" className="hover:text-blue-electric transition-colors">
-              <Search className="w-5 h-5" />
-            </Link>
             <div className="hidden lg:flex gap-6 font-medium text-sm">
-              <Link to="/stories" className="hover:text-blue-electric transition-colors uppercase font-mono tracking-widest text-[10px] font-bold">Histoires</Link>
-              <Link to="/matches" className="hover:text-blue-electric transition-colors uppercase font-mono tracking-widest text-[10px] font-bold">Matchs</Link>
-              <Link to="/explorer" className="hover:text-blue-electric transition-colors uppercase font-mono tracking-widest text-[10px] font-bold">Explorer</Link>
-              <Link to="/observatoire" className="hover:text-blue-electric transition-colors uppercase font-mono tracking-widest text-[10px] font-bold">Observatoire</Link>
-              <Link to="/methodology" className="hover:text-blue-electric transition-colors uppercase font-mono tracking-widest text-[10px] font-bold">Méthodologie</Link>
+              {NAV_ITEMS.map((item) => (
+                <Link key={item.to} to={item.to} className="hover:text-blue-electric transition-colors uppercase font-mono tracking-widest text-[10px] font-bold">
+                  {item.label}
+                </Link>
+              ))}
             </div>
             <button 
               aria-label="Menu" 
@@ -62,26 +61,26 @@ export default function SiteHeader() {
         className="fixed inset-0 z-40 bg-navy text-cream flex flex-col pt-24 px-6 md:px-12 lg:hidden"
       >
         <nav className="flex flex-col gap-6 mt-12">
-          {["Histoires", "Matchs", "Explorer", "Observatoire", "Méthodologie"].map((item, i) => (
+          {NAV_ITEMS.map((item, i) => (
             <motion.div
-              key={item}
+              key={item.to}
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 + i * 0.1 }}
             >
               <Link
-                to={item === "Histoires" ? "/stories" : item === "Matchs" ? "/matches" : item === "Explorer" ? "/explorer" : item === "Observatoire" ? "/observatoire" : "/methodology"}
+                to={item.to}
                 onClick={() => setMenuOpen(false)}
                 className="font-display text-5xl sm:text-6xl uppercase tracking-wider hover:text-blue-electric transition-colors"
               >
-                {item}
+                {item.label}
               </Link>
             </motion.div>
           ))}
         </nav>
 
         <div className="mt-auto mb-12 font-mono text-xs text-cream/50 max-w-xs">
-          Un projet indépendant basé sur les modifications publiques de Wikipédia.
+          Site indépendant de visualisation, non affilié à la FIFA ni à aucune fédération.
         </div>
       </motion.div>
     </>
