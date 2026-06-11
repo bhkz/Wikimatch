@@ -33,8 +33,22 @@ function groupStandings(data: AtlasData, letter: string): StandingRow[] {
   );
 }
 
+function QualifyBar({ p }: { p: number | undefined }) {
+  if (p === undefined) return <span className="text-navy/30">—</span>;
+  const pct = Math.round(p * 100);
+  return (
+    <span className="inline-flex items-center gap-2" title={`Probabilité de qualification : ${pct} %`}>
+      <span className="inline-block w-12 h-1.5 bg-navy/10 align-middle">
+        <span className="block h-full bg-blue-electric" style={{ width: `${pct}%` }} />
+      </span>
+      <span className="tabular-nums">{pct}%</span>
+    </span>
+  );
+}
+
 function StandingsTable({ rows, data, compact }: { rows: StandingRow[]; data: AtlasData; compact?: boolean }) {
   const styles = nationStyles(data.nations);
+  const probs = data.sim?.probs;
   return (
     <table className="w-full font-mono text-xs">
       <thead>
@@ -46,6 +60,7 @@ function StandingsTable({ rows, data, compact }: { rows: StandingRow[]; data: At
           {!compact && <th className="font-medium">P</th>}
           <th className="font-medium">+/−</th>
           <th className="font-medium">Pts</th>
+          {!compact && <th className="font-medium pl-4">Qualif</th>}
         </tr>
       </thead>
       <tbody>
@@ -72,6 +87,11 @@ function StandingsTable({ rows, data, compact }: { rows: StandingRow[]; data: At
               {!compact && <td className="text-right">{r.lost}</td>}
               <td className="text-right">{r.gd > 0 ? `+${r.gd}` : r.gd}</td>
               <td className="text-right font-medium">{r.points}</td>
+              {!compact && (
+                <td className="text-right pl-4">
+                  <QualifyBar p={probs?.[r.code]?.p_qualify} />
+                </td>
+              )}
             </tr>
           );
         })}
@@ -119,6 +139,12 @@ export default function Groups() {
               <p className="font-mono text-[10px] uppercase tracking-widest text-navy/40 mt-4">
                 <span className="text-blue-electric">▎</span> qualifiés directs ·{" "}
                 <span className="text-navy/60">▎</span> 3e repêchable · * égalité non départagée
+                {data.sim && (
+                  <>
+                    {" · "}probabilités : {data.sim.iterations.toLocaleString("fr-FR")} simulations,{" "}
+                    {new Date(data.sim.run_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                  </>
+                )}
               </p>
             </div>
             <h2 className="font-display text-2xl md:text-4xl uppercase tracking-wide mb-4">Matchs du groupe</h2>

@@ -14,6 +14,7 @@ import { alert, createWorkerClient, loadConfig, loadEngineState, loadNations, lo
 import { pollMatches } from "./jobs/poll-matches";
 import { resolveFinishedMatches } from "./jobs/resolve-matches";
 import { snapshotIfDue } from "./jobs/snapshot";
+import { simulateIfStale } from "./jobs/simulate";
 
 const startedAt = new Date().toISOString();
 let lastTickAt: string | null = null;
@@ -47,6 +48,7 @@ async function tick(): Promise<{ anyLive: boolean }> {
   if (resolvedCount > 0) console.log(`tick: ${resolvedCount} match(s) résolu(s).`);
 
   await snapshotIfDue(supabase, state);
+  await simulateIfStale(supabase);
   return { anyLive: poll.anyLive };
 }
 

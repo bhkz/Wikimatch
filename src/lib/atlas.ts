@@ -49,6 +49,13 @@ export type Resolution = {
   resolved_at: string;
 };
 
+export type SimProbs = Record<
+  string,
+  { p_win_group: number; p_top2: number; p_third_rescued: number; p_qualify: number }
+>;
+
+export type SimRun = { id: number; run_at: string; iterations: number; probs: SimProbs };
+
 export const STAGE_LABELS: Record<Match["stage"], string> = {
   GROUP: "Groupes",
   R32: "16es de finale",
@@ -96,6 +103,17 @@ export async function fetchMatches(): Promise<Match[]> {
     .limit(200);
   if (error) throw new Error(error.message);
   return (data ?? []) as Match[];
+}
+
+export async function fetchLatestSim(): Promise<SimRun | null> {
+  const { data, error } = await atlas
+    .from("sim_runs")
+    .select("id, run_at, iterations, probs")
+    .order("id", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return (data as SimRun | null) ?? null;
 }
 
 export async function fetchResolutions(): Promise<Resolution[]> {
@@ -156,6 +174,7 @@ export type AtlasData = {
   hexes: MapHex[];
   matches: Match[];
   resolutions: Resolution[];
+  sim: SimRun | null;
 };
 
 /**
@@ -172,14 +191,15 @@ export function useAtlasData(): { data: AtlasData | null; error: string | null }
 
     async function load() {
       try {
-        const [nations, hexes, matches, resolutions] = await Promise.all([
+        const [nations, hexes, matches, resolutions, sim] = await Promise.all([
           fetchNations(),
           fetchHexes(),
           fetchMatches(),
           fetchResolutions(),
+          fetchLatestSim(),
         ]);
         if (cancelled) return;
-        setData({ nations, hexes, matches, resolutions });
+        setData({ nations, hexes, matches, resolutions, sim });
         setError(null);
         timer = setTimeout(load, matches.some(isLive) ? 30_000 : 120_000);
       } catch (err) {

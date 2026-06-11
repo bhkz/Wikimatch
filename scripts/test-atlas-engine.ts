@@ -13,6 +13,7 @@ import { parseCsv } from "../lib/providers/csv-import";
 import { extractScore } from "../lib/providers/extract-score";
 import { FootballDataProvider, UnknownStageError, UnknownTeamError } from "../lib/providers/football-data";
 import { computeStandings } from "../lib/standings";
+import { simulateGroupStage, type SimMatch, type SimNation } from "../lib/sim/simulate";
 import { DEFAULT_GAME_CONFIG, type EngineState } from "../lib/engine/types";
 import type { NormalizedMatch, Stage } from "../lib/providers/types";
 
@@ -405,6 +406,45 @@ check("égalité parfaite résiduelle → marquée unresolvedTie", () => {
   const a = rows.find((r) => r.code === "AAA")!;
   const b = rows.find((r) => r.code === "BBB")!;
   assert(a.unresolvedTie && b.unresolvedTie, "égalité 1-1 sans critère : non départagée");
+});
+
+console.log("\n— Simulation Monte-Carlo (§7)");
+const SIM_NATIONS: SimNation[] = [
+  { code: "AAA", group: "A", elo: 1900 },
+  { code: "BBB", group: "A", elo: 1600 },
+  { code: "CCC", group: "A", elo: 1500 },
+  { code: "DDD", group: "A", elo: 1300 },
+];
+const SIM_MATCHES: SimMatch[] = [
+  { id: 1, group: "A", home: "AAA", away: "BBB", scoreHome: null, scoreAway: null },
+  { id: 2, group: "A", home: "CCC", away: "DDD", scoreHome: null, scoreAway: null },
+  { id: 3, group: "A", home: "AAA", away: "CCC", scoreHome: null, scoreAway: null },
+  { id: 4, group: "A", home: "BBB", away: "DDD", scoreHome: null, scoreAway: null },
+  { id: 5, group: "A", home: "AAA", away: "DDD", scoreHome: null, scoreAway: null },
+  { id: 6, group: "A", home: "BBB", away: "CCC", scoreHome: null, scoreAway: null },
+];
+check("déterminisme : même seed → mêmes probabilités", () => {
+  const a = simulateGroupStage(SIM_NATIONS, SIM_MATCHES, 500, "seed-x");
+  const b = simulateGroupStage(SIM_NATIONS, SIM_MATCHES, 500, "seed-x");
+  assert(JSON.stringify(a.probs) === JSON.stringify(b.probs), "runs divergents");
+});
+check("cohérence : favoris devant, p_win_group somme à 1", () => {
+  const { probs } = simulateGroupStage(SIM_NATIONS, SIM_MATCHES, 2000, "seed-y");
+  const sum = Object.values(probs).reduce((s, p) => s + p.p_win_group, 0);
+  assert(Math.abs(sum - 1) < 1e-9, `somme p_win_group=${sum}`);
+  assert(probs.AAA.p_win_group > probs.DDD.p_win_group, "AAA (1900) doit dominer DDD (1300)");
+  assert(probs.AAA.p_qualify >= probs.AAA.p_top2, "p_qualify ≥ p_top2");
+});
+check("matchs déjà joués respectés + issue forcée (swing)", () => {
+  const played: SimMatch[] = SIM_MATCHES.map((m) =>
+    m.id <= 4 ? { ...m, scoreHome: m.home === "DDD" ? 0 : 3, scoreAway: m.away === "DDD" ? 0 : m.id === 1 ? 1 : 0 } : m,
+  );
+  const base = simulateGroupStage(SIM_NATIONS, played, 1000, "seed-z");
+  const forcedWin = simulateGroupStage(SIM_NATIONS, played, 1000, "seed-z", undefined, {
+    matchId: 5,
+    outcome: "AWAY", // DDD bat AAA
+  });
+  assert(forcedWin.probs.DDD.p_qualify >= base.probs.DDD.p_qualify, "forcer la victoire de DDD doit aider DDD");
 });
 
 console.log(`\nTotal: ${passed + failed} | Passed: ${passed} | Failed: ${failed}`);
