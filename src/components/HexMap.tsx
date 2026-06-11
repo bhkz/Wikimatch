@@ -3,7 +3,7 @@
  * Composant pur et réutilisable : Home (P0), replay (P2), embed, map-preview.
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { axialToPixel, hexCorners } from "../../lib/hex";
 import { colors } from "../design/tokens";
 
@@ -35,6 +35,8 @@ const MEMORIAL_FILL = "#C9A227"; // or — sanctuaire
 
 export default function HexMap({ hexes, nations, size = 10, onHexClick, highlightIds }: Props) {
   const [hovered, setHovered] = useState<MapHex | null>(null);
+  const [cursor, setCursor] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const { polygons, viewBox } = useMemo(() => {
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -62,8 +64,13 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
     return nations.get(h.owner)?.color ?? NEUTRAL_FILL;
   }
 
+  function onMouseMove(e: React.MouseEvent) {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) setCursor({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  }
+
   return (
-    <div className="relative w-full">
+    <div className="relative w-full" ref={containerRef} onMouseMove={onMouseMove}>
       <svg viewBox={viewBox} className="w-full h-auto block" style={{ background: colors.navy }} role="img" aria-label="Carte du monde hexagonale">
         {polygons.map(({ hex, points }) => (
           <polygon
@@ -91,7 +98,15 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
       </svg>
       {hovered && (
         <div
-          className="pointer-events-none absolute left-4 bottom-4 bg-cream text-navy px-3 py-2 font-mono text-xs tracking-widest uppercase border border-navy/10"
+          className="pointer-events-none absolute z-10 bg-cream text-navy px-3 py-2 font-mono text-xs tracking-widest uppercase border border-navy/10 whitespace-nowrap"
+          style={{
+            left: cursor.x + 14,
+            top: cursor.y + 14,
+            transform:
+              containerRef.current && cursor.x > containerRef.current.clientWidth - 240
+                ? "translateX(calc(-100% - 28px))"
+                : undefined,
+          }}
           data-testid="hex-tooltip"
         >
           <span className="font-medium">{hovered.cityName}</span>

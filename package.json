@@ -8,7 +8,12 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "tsx scripts/test-atlas-engine.ts",
+    "worker:start": "tsx worker/src/index.ts",
+    "map:build": "tsx scripts/build-map-seed.ts && tsx scripts/build-nations-seed.ts && tsx scripts/generate-map.ts",
+    "map:rebuild-check": "tsx scripts/rebuild-map.ts",
+    "seed": "tsx scripts/seed-atlas.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",
