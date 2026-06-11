@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import HexMap from "../components/HexMap";
 import MatchChip from "../components/MatchChip";
+import TimeScrubber from "../components/TimeScrubber";
 import { TextWithFlags } from "../components/FlagEmoji";
 import {
   liveOwners,
@@ -19,12 +20,33 @@ import {
 export default function Home() {
   const { data, error } = useAtlasData();
   const navigate = useNavigate();
+  const [selectedSnapshotDate, setSelectedSnapshotDate] = useState<string | null>(null);
 
   const styles = useMemo(() => (data ? nationStyles(data.nations) : new Map()), [data]);
+  const stakesByMatch = useMemo(() => new Map((data?.stakes ?? []).map((s) => [s.match_id, s])), [data]);
+  const displayedHexes = useMemo(() => {
+    if (!data || !selectedSnapshotDate) return data?.hexes ?? [];
+    const snapshot = data.snapshots.find((s) => s.date === selectedSnapshotDate);
+    if (!snapshot) return data.hexes;
+    const frame = new Map(snapshot.frame.map((h) => [h.id, h]));
+    return data.hexes.map((hex) => {
+      const h = frame.get(hex.id);
+      return h ? { ...hex, owner: h.owner, state: h.state } : hex;
+    });
+  }, [data, selectedSnapshotDate]);
   const live = useMemo(() => (data ? liveOwners(data.matches) : new Set<string>()), [data]);
   const today = useMemo(
-    () => (data ? data.matches.filter((m) => sameLocalDay(m.kickoff_utc, new Date())) : []),
-    [data],
+    () =>
+      data
+        ? data.matches
+            .filter((m) => sameLocalDay(m.kickoff_utc, new Date()))
+            .sort(
+              (a, b) =>
+                (stakesByMatch.get(b.id)?.drama ?? -1) - (stakesByMatch.get(a.id)?.drama ?? -1) ||
+                a.kickoff_utc.localeCompare(b.kickoff_utc),
+            )
+        : [],
+    [data, stakesByMatch],
   );
   const lastResolutions = data?.resolutions.slice(0, 6) ?? [];
 
@@ -58,9 +80,9 @@ export default function Home() {
         <div className="border border-navy/10">
           {data ? (
             <HexMap
-              hexes={data.hexes}
+              hexes={displayedHexes}
               nations={styles}
-              liveOwners={live}
+              liveOwners={selectedSnapshotDate ? undefined : live}
               onHexClick={(hex) => hex.owner && navigate(`/n/${hex.owner}`)}
             />
           ) : (
@@ -71,6 +93,14 @@ export default function Home() {
         </div>
 
         {/* Bandeau matchs du jour (§12) */}
+        {data && (
+          <TimeScrubber
+            snapshots={data.snapshots}
+            selectedDate={selectedSnapshotDate}
+            onSelect={setSelectedSnapshotDate}
+          />
+        )}
+
         <section className="mt-12">
           <div className="flex items-baseline justify-between mb-4">
             <h2 className="font-display text-2xl md:text-4xl uppercase tracking-wide">Aujourd'hui</h2>
@@ -83,7 +113,7 @@ export default function Home() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-navy/10 border border-navy/10">
               {today.map((m) => (
-                <MatchChip key={m.id} match={m} styles={styles} />
+                <MatchChip key={m.id} match={m} styles={styles} stake={stakesByMatch.get(m.id)} />
               ))}
             </div>
           )}

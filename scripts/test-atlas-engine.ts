@@ -14,6 +14,10 @@ import { extractScore } from "../lib/providers/extract-score";
 import { FootballDataProvider, UnknownStageError, UnknownTeamError } from "../lib/providers/football-data";
 import { computeStandings } from "../lib/standings";
 import { simulateGroupStage, type SimMatch, type SimNation } from "../lib/sim/simulate";
+import { DEFAULT_MODEL } from "../lib/sim/model";
+import { closeness, composeDrama, elimFlag, upsetPotential } from "../lib/drama";
+import { groupOutlook } from "../lib/conditions";
+import { finalizeGroupStagePlan } from "../lib/group-stage";
 import { DEFAULT_GAME_CONFIG, type EngineState } from "../lib/engine/types";
 import type { NormalizedMatch, Stage } from "../lib/providers/types";
 
@@ -445,6 +449,131 @@ check("matchs déjà joués respectés + issue forcée (swing)", () => {
     outcome: "AWAY", // DDD bat AAA
   });
   assert(forcedWin.probs.DDD.p_qualify >= base.probs.DDD.p_qualify, "forcer la victoire de DDD doit aider DDD");
+});
+
+console.log("\n— Drama-mètre (§9)");
+check("closeness max à forces égales, upset nul à forces égales", () => {
+  const even = closeness(1600, 1600, DEFAULT_MODEL);
+  const skewed = closeness(1900, 1300, DEFAULT_MODEL);
+  assert(even > 0.99 && skewed < even, `even=${even} skewed=${skewed}`);
+  assert(upsetPotential(1600, 1600, DEFAULT_MODEL) === 0, "pas d'exploit possible sans écart");
+  assert(upsetPotential(1900, 1300, DEFAULT_MODEL) > 0.1, "exploit possible avec gros écart");
+});
+check("composition pondérée bornée 0-100", () => {
+  const weights = { swing: 0.35, close: 0.25, elim: 0.2, stage: 0.1, upset: 0.1 };
+  const max = composeDrama({ swing: 1, close: 1, elim: 1, stage: 1, upset: 1 }, weights);
+  const min = composeDrama({ swing: 0, close: 0, elim: 0, stage: 0, upset: 0 }, weights);
+  assert(max === 100 && min === 0, `max=${max} min=${min}`);
+  assert(elimFlag("R16", null) === 1 && elimFlag("GROUP", 3) === 1 && elimFlag("GROUP", 1) === 0, "elim flags");
+});
+
+console.log("\n— Conditions de qualification (§6.5)");
+check("top 2 garanti dans tous les scénarios → qualified", () => {
+  // AAA a gagné ses 2 premiers matchs 3-0 ; les autres se neutralisent.
+  const outlook = groupOutlook(
+    ["AAA", "BBB", "CCC", "DDD"],
+    [
+      { home: "AAA", away: "BBB", scoreHome: 3, scoreAway: 0 },
+      { home: "AAA", away: "CCC", scoreHome: 3, scoreAway: 0 },
+      { home: "CCC", away: "DDD", scoreHome: 0, scoreAway: 0 },
+      { home: "BBB", away: "DDD", scoreHome: 0, scoreAway: 0 },
+    ],
+    [
+      { id: 5, home: "AAA", away: "DDD" },
+      { id: 6, home: "BBB", away: "CCC" },
+    ],
+  );
+  assert(outlook.AAA.status === "qualified", `AAA=${outlook.AAA.status}`);
+  assert(outlook.DDD.status === "contender", `DDD=${outlook.DDD.status}`);
+});
+check("4e dans tous les scénarios → eliminated", () => {
+  // DDD a perdu 0-5, 0-5 et son dernier match est déjà joué (perdu aussi).
+  const outlook = groupOutlook(
+    ["AAA", "BBB", "CCC", "DDD"],
+    [
+      { home: "AAA", away: "DDD", scoreHome: 5, scoreAway: 0 },
+      { home: "BBB", away: "DDD", scoreHome: 5, scoreAway: 0 },
+      { home: "CCC", away: "DDD", scoreHome: 5, scoreAway: 0 },
+      { home: "AAA", away: "BBB", scoreHome: 1, scoreAway: 0 },
+    ],
+    [
+      { id: 9, home: "AAA", away: "CCC" },
+      { id: 10, home: "BBB", away: "CCC" },
+    ],
+  );
+  assert(outlook.DDD.status === "eliminated", `DDD=${outlook.DDD.status}`);
+});
+check("conditions par issue avec templates fermés (et déterministes)", () => {
+  const args = [
+    ["AAA", "BBB", "CCC", "DDD"],
+    [
+      { home: "AAA", away: "BBB", scoreHome: 1, scoreAway: 0 },
+      { home: "CCC", away: "DDD", scoreHome: 1, scoreAway: 0 },
+      { home: "AAA", away: "CCC", scoreHome: 1, scoreAway: 0 },
+      { home: "BBB", away: "DDD", scoreHome: 1, scoreAway: 0 },
+    ],
+    [
+      { id: 5, home: "AAA", away: "DDD" },
+      { id: 6, home: "BBB", away: "CCC" },
+    ],
+  ] as const;
+  const a = groupOutlook([...args[0]], [...args[1]], [...args[2]]);
+  const b = groupOutlook([...args[0]], [...args[1]], [...args[2]]);
+  assert(JSON.stringify(a) === JSON.stringify(b), "non déterministe");
+  assert(a.BBB.status === "contender" && a.BBB.conditions.length === 3, JSON.stringify(a.BBB));
+  assert(a.BBB.conditions.some((c) => c.text.includes("victoire")), "template victoire attendu");
+  for (const code of Object.keys(a)) {
+    for (const c of a[code].conditions) {
+      const bad = containsForbiddenWord(c.text);
+      assert(bad === null, `mot interdit "${bad}" dans : ${c.text}`);
+    }
+  }
+});
+
+console.log("\n— Finalisation groupes / Grande Fracture (§16.5)");
+check("12 groupes → 32 qualifiés, 16 éliminés, events hors match", () => {
+  const groups = "ABCDEFGHIJKL".split("");
+  const nations = groups.flatMap((g) =>
+    [1, 2, 3, 4].map((rank) => ({
+      code: `${g}${rank}X`,
+      group: g,
+      label: { flag: "", name: `${g}${rank}` },
+    })),
+  );
+  const generated: GeneratedHex[] = [];
+  let id = 1;
+  nations.forEach((n, idx) => {
+    for (let q = 0; q < 3; q++) {
+      generated.push({
+        id: id++,
+        q,
+        r: idx,
+        city_name: `${n.code}-${q}`,
+        is_capital: q === 0,
+        original_owner: n.code,
+      });
+    }
+  });
+  const matches = groups.flatMap((g) => {
+    const [a, b, c, d] = [1, 2, 3, 4].map((rank) => `${g}${rank}X`);
+    return [
+      { group: g, home: a, away: b, scoreHome: 1, scoreAway: 0 },
+      { group: g, home: a, away: c, scoreHome: 1, scoreAway: 0 },
+      { group: g, home: a, away: d, scoreHome: 1, scoreAway: 0 },
+      { group: g, home: b, away: c, scoreHome: 1, scoreAway: 0 },
+      { group: g, home: b, away: d, scoreHome: 1, scoreAway: 0 },
+      { group: g, home: c, away: d, scoreHome: 1, scoreAway: 0 },
+    ];
+  });
+  const state = initialState(generated, nations.map((n) => n.code));
+  const plan = finalizeGroupStagePlan(state, nations, matches, CFG);
+  assert(plan.qualified.length === 32, `qualified=${plan.qualified.length}`);
+  assert(plan.eliminated.length === 16, `eliminated=${plan.eliminated.length}`);
+  assert(plan.nationUpdates.length === 16, `updates=${plan.nationUpdates.length}`);
+  assert(plan.events.some((e) => e.type === "memorial" && e.matchId === null), "memorial hors match attendu");
+  for (const code of plan.eliminated) {
+    assert(state.nationStatus.get(code) === "eliminated", `${code} doit être eliminated`);
+  }
 });
 
 console.log(`\nTotal: ${passed + failed} | Passed: ${passed} | Failed: ${failed}`);

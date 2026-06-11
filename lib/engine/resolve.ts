@@ -46,7 +46,7 @@ function label(labels: ReadonlyMap<string, NationLabel>, code: string): NationLa
 function transfer(
   events: HexEventDraft[],
   hex: EngineHex,
-  matchId: number,
+  matchId: number | null,
   type: HexEventDraft["type"],
   toOwner: string | null,
   toState: EngineHex["state"],
@@ -95,7 +95,7 @@ export function eliminateNation(
     if (toInherit > 0) {
       const hexes = selectHexesFromLoser(state, nation, inheritor, toInherit);
       for (const h of hexes) {
-        transfer(events, h, matchId ?? 0, "inherited", inheritor, "owned");
+        transfer(events, h, matchId, "inherited", inheritor, "owned");
         inherited.push(h.id);
       }
     }
@@ -104,12 +104,12 @@ export function eliminateNation(
   // Le reste du territoire devient ruins (nom conservé, décor dramatique).
   for (const h of [...state.hexes.values()].sort((a, b) => compareAxial(a, b))) {
     if (h.owner === nation && h.state === "owned" && !h.isCapital) {
-      transfer(events, h, matchId ?? 0, "ruined", null, "ruins");
+      transfer(events, h, matchId, "ruined", null, "ruins");
     }
   }
 
   // Capitale → memorial (intouchable à jamais).
-  transfer(events, capital, matchId ?? 0, "memorial", null, "memorial", narrative);
+  transfer(events, capital, matchId, "memorial", null, "memorial", narrative);
   state.nationStatus.set(nation, "eliminated");
   return inherited;
 }

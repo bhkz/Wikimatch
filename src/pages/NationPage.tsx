@@ -18,6 +18,7 @@ export default function NationPage() {
   const upper = (code ?? "").toUpperCase();
 
   const styles = useMemo(() => (data ? nationStyles(data.nations) : new Map()), [data]);
+  const stakesByMatch = useMemo(() => new Map((data?.stakes ?? []).map((s) => [s.match_id, s])), [data]);
   const nation = data?.nations.find((n) => n.code === upper);
 
   const territory = useMemo(
@@ -118,7 +119,7 @@ export default function NationPage() {
               <h2 className="font-display text-2xl md:text-4xl uppercase tracking-wide mb-4">Matchs</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-navy/10 border border-navy/10">
                 {matches.map((m) => (
-                  <MatchChip key={m.id} match={m} styles={styles} />
+                  <MatchChip key={m.id} match={m} styles={styles} stake={stakesByMatch.get(m.id)} />
                 ))}
               </div>
             </section>

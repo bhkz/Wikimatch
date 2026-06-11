@@ -36,6 +36,10 @@
       "destination": "/api/meta?path=/nuit/:date"
     },
     {
+      "source": "/feed.xml",
+      "destination": "/api/feed"
+    },
+    {
       "source": "/((?!api/|assets/|src/|node_modules/|@id|@vite|@react-refresh).*)",
       "destination": "/index.html"
     }
@@ -50,11 +54,11 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "GET,OPTIONS"
+          "value": "GET,POST,OPTIONS"
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Accept, Content-Type"
+          "value": "Accept, Content-Type, X-Admin-Token"
         }
       ]
     },

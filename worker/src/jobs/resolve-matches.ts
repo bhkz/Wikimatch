@@ -67,7 +67,7 @@ export async function resolveFinishedMatches(
     } else if (raw.status === "FINISHED") {
       // Délai de confirmation : on attend N secondes après première détection.
       const seenAt = finishedSeen[String(raw.id)];
-      if (!seenAt || now - Date.parse(seenAt) < confirmDelayS * 1000) continue;
+      if (confirmDelayS > 0 && (!seenAt || now - Date.parse(seenAt) < confirmDelayS * 1000)) continue;
       if (!raw.home || !raw.away) {
         await alert(`Match ${raw.id} FINISHED avec équipe inconnue (TBD) — résolution bloquée.`);
         continue;

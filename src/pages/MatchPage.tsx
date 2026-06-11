@@ -11,6 +11,7 @@ import SectionLabel from "../components/SectionLabel";
 import HexMap from "../components/HexMap";
 import { STAGE_LABELS, isLive, kickoffLabel, nationStyles, useAtlasData } from "../lib/atlas";
 import { FlagEmoji, TextWithFlags } from "../components/FlagEmoji";
+import DramaGauge from "../components/DramaGauge";
 
 export default function MatchPage() {
   const { id } = useParams();
@@ -20,6 +21,7 @@ export default function MatchPage() {
   const styles = useMemo(() => (data ? nationStyles(data.nations) : new Map()), [data]);
   const match = data?.matches.find((m) => m.id === matchId);
   const resolution = data?.resolutions.find((r) => r.match_id === matchId);
+  const stake = data?.stakes.find((s) => s.match_id === matchId);
   const highlight = useMemo(
     () => new Set<number>([...(resolution?.hexes_taken ?? []), ...(resolution?.inherited_hexes ?? [])]),
     [resolution],
@@ -63,6 +65,19 @@ export default function MatchPage() {
               <p className="font-mono text-xs uppercase tracking-widest text-navy/60 -mt-6 mb-8">
                 Tirs au but : {match.pens_home}–{match.pens_away}
               </p>
+            )}
+
+            {stake && (
+              <section className="mb-10 max-w-3xl border-y border-navy/10 py-5">
+                <DramaGauge stake={stake} />
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3 font-mono text-[10px] uppercase tracking-widest text-navy/50">
+                  <span>Swing {Math.round(stake.components.swing * 100)}</span>
+                  <span>Équilibre {Math.round(stake.components.close * 100)}</span>
+                  <span>Élim. {Math.round(stake.components.elim * 100)}</span>
+                  <span>Moment {Math.round(stake.components.stage * 100)}</span>
+                  <span>Surprise {Math.round(stake.components.upset * 100)}</span>
+                </div>
+              </section>
             )}
 
             {resolution ? (

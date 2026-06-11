@@ -20,6 +20,7 @@ function dayKey(iso: string): string {
 export default function Calendar() {
   const { data, error } = useAtlasData();
   const styles = useMemo(() => (data ? nationStyles(data.nations) : new Map()), [data]);
+  const stakesByMatch = useMemo(() => new Map((data?.stakes ?? []).map((s) => [s.match_id, s])), [data]);
 
   const byDay = useMemo(() => {
     const groups = new Map<string, Match[]>();
@@ -57,7 +58,7 @@ export default function Calendar() {
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-navy/10 border border-navy/10">
               {matches.map((m) => (
-                <MatchChip key={m.id} match={m} styles={styles} />
+                <MatchChip key={m.id} match={m} styles={styles} stake={stakesByMatch.get(m.id)} />
               ))}
             </div>
           </section>

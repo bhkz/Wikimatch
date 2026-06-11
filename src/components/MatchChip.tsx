@@ -4,12 +4,13 @@
  */
 
 import { Link } from "react-router-dom";
-import type { Match } from "../lib/atlas";
+import type { Match, MatchStake } from "../lib/atlas";
 import { STAGE_LABELS, isLive, kickoffTime } from "../lib/atlas";
 import type { NationStyle } from "./HexMap";
 import { FlagEmoji } from "./FlagEmoji";
+import DramaGauge from "./DramaGauge";
 
-type Props = { match: Match; styles: ReadonlyMap<string, NationStyle> };
+type Props = { match: Match; styles: ReadonlyMap<string, NationStyle>; stake?: MatchStake | null };
 
 function TeamLabel({ code, styles }: { code: string | null; styles: Props["styles"] }) {
   if (!code) return <span className="text-navy/40">À déterminer</span>;
@@ -22,7 +23,7 @@ function TeamLabel({ code, styles }: { code: string | null; styles: Props["style
   );
 }
 
-export default function MatchChip({ match, styles }: Props) {
+export default function MatchChip({ match, styles, stake }: Props) {
   const live = isLive(match);
   const finished = match.status === "FINISHED";
 
@@ -63,6 +64,7 @@ export default function MatchChip({ match, styles }: Props) {
           TAB {match.pens_home}–{match.pens_away}
         </div>
       )}
+      <DramaGauge stake={stake} compact />
     </Link>
   );
 }

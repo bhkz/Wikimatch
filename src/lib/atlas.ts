@@ -56,6 +56,34 @@ export type SimProbs = Record<
 
 export type SimRun = { id: number; run_at: string; iterations: number; probs: SimProbs };
 
+export type MatchStake = {
+  match_id: number;
+  sim_run_id: number | null;
+  drama: number;
+  components: {
+    swing: number;
+    close: number;
+    elim: number;
+    stage: number;
+    upset: number;
+  };
+  computed_at: string;
+};
+
+export type QualificationCondition = {
+  group_letter: string;
+  nation: string;
+  sim_run_id: number | null;
+  status: "qualified" | "eliminated" | "contender";
+  conditions: Array<{ text: string; gd_dependent: boolean }>;
+};
+
+export type SnapshotSummary = {
+  date: string;
+  frame: Array<{ id: number; owner: string | null; state: MapHex["state"] }>;
+  deltas: Record<string, { gained: number; lost: number }>;
+};
+
 export const STAGE_LABELS: Record<Match["stage"], string> = {
   GROUP: "Groupes",
   R32: "16es de finale",
@@ -114,6 +142,35 @@ export async function fetchLatestSim(): Promise<SimRun | null> {
     .maybeSingle();
   if (error) throw new Error(error.message);
   return (data as SimRun | null) ?? null;
+}
+
+export async function fetchMatchStakes(): Promise<MatchStake[]> {
+  const { data, error } = await atlas
+    .from("match_stakes")
+    .select("match_id, sim_run_id, drama, components, computed_at")
+    .order("drama", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as MatchStake[];
+}
+
+export async function fetchQualificationConditions(): Promise<QualificationCondition[]> {
+  const { data, error } = await atlas
+    .from("qualification_conditions")
+    .select("group_letter, nation, sim_run_id, status, conditions")
+    .order("group_letter")
+    .order("nation");
+  if (error) throw new Error(error.message);
+  return (data ?? []) as QualificationCondition[];
+}
+
+export async function fetchSnapshots(): Promise<SnapshotSummary[]> {
+  const { data, error } = await atlas
+    .from("snapshots")
+    .select("date, frame, deltas")
+    .order("date", { ascending: true })
+    .limit(60);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as SnapshotSummary[];
 }
 
 export async function fetchResolutions(): Promise<Resolution[]> {
@@ -175,6 +232,9 @@ export type AtlasData = {
   matches: Match[];
   resolutions: Resolution[];
   sim: SimRun | null;
+  stakes: MatchStake[];
+  conditions: QualificationCondition[];
+  snapshots: SnapshotSummary[];
 };
 
 /**
@@ -191,15 +251,18 @@ export function useAtlasData(): { data: AtlasData | null; error: string | null }
 
     async function load() {
       try {
-        const [nations, hexes, matches, resolutions, sim] = await Promise.all([
+        const [nations, hexes, matches, resolutions, sim, stakes, conditions, snapshots] = await Promise.all([
           fetchNations(),
           fetchHexes(),
           fetchMatches(),
           fetchResolutions(),
           fetchLatestSim(),
+          fetchMatchStakes(),
+          fetchQualificationConditions(),
+          fetchSnapshots(),
         ]);
         if (cancelled) return;
-        setData({ nations, hexes, matches, resolutions, sim });
+        setData({ nations, hexes, matches, resolutions, sim, stakes, conditions, snapshots });
         setError(null);
         timer = setTimeout(load, matches.some(isLive) ? 30_000 : 120_000);
       } catch (err) {

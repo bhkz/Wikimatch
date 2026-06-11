@@ -15,6 +15,7 @@ const KO_STAGES: Match["stage"][] = ["R32", "R16", "QF", "SF", "THIRD", "FINAL"]
 export default function Bracket() {
   const { data, error } = useAtlasData();
   const styles = useMemo(() => (data ? nationStyles(data.nations) : new Map()), [data]);
+  const stakesByMatch = useMemo(() => new Map((data?.stakes ?? []).map((s) => [s.match_id, s])), [data]);
 
   const byStage = useMemo(() => {
     const map = new Map<Match["stage"], Match[]>();
@@ -49,7 +50,7 @@ export default function Bracket() {
                 </h2>
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-navy/10 border border-navy/10">
                   {matches.map((m) => (
-                    <MatchChip key={m.id} match={m} styles={styles} />
+                    <MatchChip key={m.id} match={m} styles={styles} stake={stakesByMatch.get(m.id)} />
                   ))}
                 </div>
               </section>

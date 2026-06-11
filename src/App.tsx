@@ -8,6 +8,9 @@ import Night from "./pages/Night";
 import MatchPage from "./pages/MatchPage";
 import NationPage from "./pages/NationPage";
 import Methodo from "./pages/Methodo";
+import Snapshot from "./pages/Snapshot";
+import EmbedMap from "./pages/EmbedMap";
+import Finale from "./pages/Finale";
 import AdminHome from "./pages/admin/AdminHome";
 import MapPreview from "./pages/admin/MapPreview";
 
@@ -28,9 +31,13 @@ export default function App() {
         <Route path="/memorial" element={<Memorial />} />
         <Route path="/nuit" element={<Night />} />
         <Route path="/nuit/:date" element={<Night />} />
+        <Route path="/snapshot" element={<Snapshot />} />
+        <Route path="/snapshot/:date" element={<Snapshot />} />
         <Route path="/m/:id" element={<MatchPage />} />
         <Route path="/n/:code" element={<NationPage />} />
         <Route path="/methodo" element={<Methodo />} />
+        <Route path="/embed/map" element={<EmbedMap />} />
+        <Route path="/fin" element={<Finale />} />
         <Route path="/admin" element={<AdminHome />} />
         <Route path="/admin/map-preview" element={<MapPreview />} />
         <Route path="*" element={<Home />} />

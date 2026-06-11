@@ -37,6 +37,14 @@ const RULES: Array<{ title: string; body: string }> = [
     body: "Calendrier et scores proviennent de football-data.org, vérifiés et confirmés 5 minutes après le coup de sifflet final avant d'être appliqués. Chaque mouvement de la carte est journalisé et rejouable : l'état complet peut être reconstruit depuis l'historique des événements, publiquement.",
   },
   {
+    title: "Les probabilités",
+    body: "Après chaque résultat, 10 000 fins de phase de groupes sont simulées avec un modèle public basé sur les points FIFA : issue du match, buts simulés pour les départages, puis top 2 et huit meilleurs troisièmes. Les phrases de qualification de la dernière journée viennent d'une énumération exacte des issues restantes.",
+  },
+  {
+    title: "Le Drama-mètre",
+    body: "Chaque match à venir reçoit un score de 0 à 100. Il combine le swing potentiel sur les chances de qualification, l'équilibre des forces, le risque d'élimination, l'importance du moment et le potentiel de surprise. L'objectif est simple : savoir quel match regarder en priorité.",
+  },
+  {
     title: "Ce que ce site n'est pas",
     body: "Une carte géopolitique. Les frontières, noms et couleurs sont un terrain de jeu graphique sans aucune lecture politique. Site indépendant, non affilié à la FIFA ni à aucune fédération. Aucune marque ni écusson officiel n'est utilisé — uniquement des drapeaux Unicode.",
   },

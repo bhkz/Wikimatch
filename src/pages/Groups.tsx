@@ -100,11 +100,69 @@ function StandingsTable({ rows, data, compact }: { rows: StandingRow[]; data: At
   );
 }
 
+function ConditionsPanel({ data, letter }: { data: AtlasData; letter: string }) {
+  const rows = data.conditions.filter((c) => c.group_letter === letter);
+  const hasContent = rows.some((r) => r.status !== "contender" || r.conditions.length > 0);
+  if (!hasContent) return null;
+
+  const styles = nationStyles(data.nations);
+  const statusText = {
+    qualified: "Qualifié quel que soit le résultat",
+    eliminated: "Éliminé quoi qu'il arrive",
+    contender: "Encore en jeu",
+  } as const;
+
+  return (
+    <section className="mb-12">
+      <h2 className="font-display text-2xl md:text-4xl uppercase tracking-wide mb-4">
+        Conditions de qualification
+      </h2>
+      <div className="grid md:grid-cols-2 gap-px bg-navy/10 border border-navy/10 max-w-5xl">
+        {rows.map((row) => {
+          const s = styles.get(row.nation);
+          return (
+            <article key={row.nation} className="bg-cream p-5">
+              <div className="flex items-center justify-between gap-3">
+                <Link to={`/n/${row.nation}`} className="inline-flex items-center gap-2 font-medium hover:text-blue-electric">
+                  {s && <FlagEmoji flag={s.flag} />}
+                  {s?.name ?? row.nation}
+                </Link>
+                <span
+                  className={`font-mono text-[10px] uppercase font-bold tracking-widest ${
+                    row.status === "qualified"
+                      ? "text-blue-electric"
+                      : row.status === "eliminated"
+                        ? "text-red-signal"
+                        : "text-navy/45"
+                  }`}
+                >
+                  {statusText[row.status]}
+                </span>
+              </div>
+              {row.conditions.length > 0 && (
+                <ul className="mt-4 space-y-2 font-mono text-[11px] uppercase tracking-widest text-navy/65">
+                  {row.conditions.map((condition) => (
+                    <li key={condition.text}>
+                      {condition.text}
+                      {condition.gd_dependent && <span className="text-red-signal"> · diff. buts</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function Groups() {
   const { letter } = useParams();
   const { data, error } = useAtlasData();
   const upper = letter?.toUpperCase();
   const styles = useMemo(() => (data ? nationStyles(data.nations) : new Map()), [data]);
+  const stakesByMatch = useMemo(() => new Map((data?.stakes ?? []).map((s) => [s.match_id, s])), [data]);
 
   return (
     <div className="min-h-screen bg-cream text-navy flex flex-col">
@@ -147,12 +205,13 @@ export default function Groups() {
                 )}
               </p>
             </div>
+            <ConditionsPanel data={data} letter={upper} />
             <h2 className="font-display text-2xl md:text-4xl uppercase tracking-wide mb-4">Matchs du groupe</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-navy/10 border border-navy/10">
               {data.matches
                 .filter((m) => m.stage === "GROUP" && m.group_letter === upper)
                 .map((m) => (
-                  <MatchChip key={m.id} match={m} styles={styles} />
+                  <MatchChip key={m.id} match={m} styles={styles} stake={stakesByMatch.get(m.id)} />
                 ))}
             </div>
           </>

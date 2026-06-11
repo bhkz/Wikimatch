@@ -17,12 +17,12 @@ export function setPublicCache(response: ApiResponse, seconds = 60) {
   );
 }
 
-export function sendMethodNotAllowed(response: ApiResponse) {
-  response.setHeader("Allow", "GET");
+export function sendMethodNotAllowed(response: ApiResponse, allow = "GET") {
+  response.setHeader("Allow", allow);
   response.status(405).json({
     error: {
       code: "method_not_allowed",
-      message: "Only GET is allowed.",
+      message: `Only ${allow} is allowed.`,
     },
   });
 }
@@ -32,6 +32,24 @@ export function sendNotFound(response: ApiResponse) {
     error: {
       code: "not_found",
       message: "Resource not found.",
+    },
+  });
+}
+
+export function sendBadRequest(response: ApiResponse, message = "Invalid request.") {
+  response.status(400).json({
+    error: {
+      code: "bad_request",
+      message,
+    },
+  });
+}
+
+export function sendUnauthorized(response: ApiResponse) {
+  response.status(401).json({
+    error: {
+      code: "unauthorized",
+      message: "Invalid admin token.",
     },
   });
 }
