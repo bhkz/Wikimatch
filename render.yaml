@@ -1,0 +1,20 @@
+# Worker Atlas sur Render (spec §16 — adapté de Railway au service existant).
+# Si le service a été créé à la main : reporter buildCommand/startCommand dans
+# Dashboard → Settings (Build & Deploy) et brancher la branche `main`.
+services:
+  - type: worker
+    name: atlas-worker
+    runtime: node
+    branch: main
+    buildCommand: npm ci
+    startCommand: npm run worker:start
+    autoDeploy: true
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: FOOTBALL_DATA_TOKEN
+        sync: false
+      - key: ALERT_WEBHOOK_URL
+        sync: false
