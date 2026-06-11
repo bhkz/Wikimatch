@@ -1,9 +1,14 @@
 /**
  * Rendu SVG de la carte hexagonale (pointy-top, axial), spec §4, DA DESIGN.md.
  * Composant pur et réutilisable : Home (P0), replay (P2), embed, map-preview.
+ *
+ * Interactions (§13) : hover desktop = tooltip au curseur ; molette/pinch =
+ * zoom ; drag = pan (une fois zoomé) ; au doigt, un tap SÉLECTIONNE l'hex
+ * (panneau fixe sous la carte) et le panneau porte le lien vers la nation —
+ * jamais de navigation aveugle au premier contact.
  */
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { axialToPixel, hexCorners } from "../../lib/hex";
 import { colors } from "../design/tokens";
 import { FlagEmoji } from "./FlagEmoji";
@@ -14,6 +19,8 @@ export type MapHex = {
   r: number;
   cityName: string;
   isCapital: boolean;
+  /** Propriétaire d'origine (null = neutre) — sert au memorial et aux fiches nation. */
+  originalOwner?: string | null;
   owner: string | null;
   state: "owned" | "neutral" | "ruins" | "memorial";
 };
@@ -34,16 +41,21 @@ type Props = {
   liveOwners?: ReadonlySet<string>;
 };
 
-const NEUTRAL_FILL = "#B8B2A2"; // sable grisé, recule derrière les nations
-const RUINS_FILL = "#3A3F4D";
-const MEMORIAL_FILL = "#C9A227"; // or, sanctuaire
+type ViewBox = { x: number; y: number; w: number; h: number };
+
+const MAX_ZOOM = 8;
 
 export default function HexMap({ hexes, nations, size = 10, onHexClick, highlightIds, focusOwners, liveOwners }: Props) {
   const [hovered, setHovered] = useState<MapHex | null>(null);
+  const [selected, setSelected] = useState<MapHex | null>(null);
   const [cursor, setCursor] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [view, setView] = useState<ViewBox | null>(null); // null = vue monde
   const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const gesture = useRef<{ moved: boolean; lastDist: number | null }>({ moved: false, lastDist: null });
 
-  const { polygons, viewBox } = useMemo(() => {
+  const { polygons, fullView } = useMemo(() => {
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     const polygons = hexes.map((h) => {
       const { x, y } = axialToPixel(h, size);
@@ -56,22 +68,125 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
       maxY = Math.max(maxY, y + size);
       return { hex: h, x, y, points };
     });
-    return {
-      polygons,
-      viewBox: `${(minX - size).toFixed(0)} ${(minY - size).toFixed(0)} ${(maxX - minX + 2 * size).toFixed(0)} ${(maxY - minY + 2 * size).toFixed(0)}`,
+    const fullView: ViewBox = {
+      x: minX - size,
+      y: minY - size,
+      w: maxX - minX + 2 * size,
+      h: maxY - minY + 2 * size,
     };
+    return { polygons, fullView };
   }, [hexes, size]);
 
-  function fillOf(h: MapHex): string {
-    if (h.state === "memorial") return MEMORIAL_FILL;
-    if (h.state === "ruins") return RUINS_FILL;
-    if (h.state === "neutral" || h.owner === null) return NEUTRAL_FILL;
-    return nations.get(h.owner)?.color ?? NEUTRAL_FILL;
+  const vb = view ?? fullView;
+  const zoomed = view !== null && view.w < fullView.w * 0.98;
+
+  /** Borne la vue dans le monde et neutralise les zooms ≈ 1. */
+  function clampView(next: ViewBox): ViewBox | null {
+    const w = Math.min(Math.max(next.w, fullView.w / MAX_ZOOM), fullView.w);
+    const h = w * (fullView.h / fullView.w);
+    if (w >= fullView.w * 0.98) return null;
+    return {
+      x: Math.min(Math.max(next.x, fullView.x), fullView.x + fullView.w - w),
+      y: Math.min(Math.max(next.y, fullView.y), fullView.y + fullView.h - h),
+      w,
+      h,
+    };
   }
 
-  function onMouseMove(e: React.MouseEvent) {
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (rect) setCursor({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  /** Point client → coordonnées SVG de la vue courante. */
+  function toSvgPoint(clientX: number, clientY: number): { x: number; y: number } {
+    const rect = svgRef.current?.getBoundingClientRect();
+    if (!rect) return { x: vb.x, y: vb.y };
+    return {
+      x: vb.x + ((clientX - rect.left) / rect.width) * vb.w,
+      y: vb.y + ((clientY - rect.top) / rect.height) * vb.h,
+    };
+  }
+
+  function zoomAt(clientX: number, clientY: number, factor: number) {
+    const p = toSvgPoint(clientX, clientY);
+    setView((prev) => {
+      const cur = prev ?? fullView;
+      const w = cur.w * factor;
+      const h = cur.h * factor;
+      return clampView({ x: p.x - (p.x - cur.x) * factor, y: p.y - (p.y - cur.y) * factor, w, h });
+    });
+  }
+
+  function zoomCenter(factor: number) {
+    const rect = svgRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    zoomAt(rect.left + rect.width / 2, rect.top + rect.height / 2, factor);
+  }
+
+  // Molette : listener natif non-passif (React attache wheel en passif → preventDefault inopérant).
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      zoomAt(e.clientX, e.clientY, e.deltaY > 0 ? 1.18 : 1 / 1.18);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vb.x, vb.y, vb.w, vb.h, fullView.w, fullView.h]);
+
+  function onPointerDown(e: React.PointerEvent) {
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    gesture.current.moved = false;
+    gesture.current.lastDist = null;
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+  }
+
+  function onPointerMove(e: React.PointerEvent) {
+    const prev = pointers.current.get(e.pointerId);
+    if (!prev) {
+      // Souris sans bouton : tooltip au curseur.
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) setCursor({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      return;
+    }
+    const pts = [...pointers.current.entries()];
+    if (pts.length === 2) {
+      // Pinch : zoom sur le centre des deux doigts.
+      const other = pts.find(([id]) => id !== e.pointerId)![1];
+      const dist = Math.hypot(e.clientX - other.x, e.clientY - other.y);
+      if (gesture.current.lastDist !== null && dist > 0) {
+        const factor = gesture.current.lastDist / dist;
+        if (Math.abs(1 - factor) > 0.01) {
+          zoomAt((e.clientX + other.x) / 2, (e.clientY + other.y) / 2, factor);
+          gesture.current.moved = true;
+        }
+      }
+      gesture.current.lastDist = dist;
+    } else if (zoomed) {
+      // Pan (un seul pointeur, vue zoomée).
+      const dx = ((e.clientX - prev.x) / (svgRef.current?.getBoundingClientRect().width ?? 1)) * vb.w;
+      const dy = ((e.clientY - prev.y) / (svgRef.current?.getBoundingClientRect().height ?? 1)) * vb.h;
+      if (Math.abs(e.clientX - prev.x) + Math.abs(e.clientY - prev.y) > 3) gesture.current.moved = true;
+      setView((cur) => (cur ? clampView({ ...cur, x: cur.x - dx, y: cur.y - dy }) : cur));
+    } else if (Math.abs(e.clientX - prev.x) + Math.abs(e.clientY - prev.y) > 8) {
+      gesture.current.moved = true;
+    }
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  }
+
+  function onPointerUp(e: React.PointerEvent) {
+    pointers.current.delete(e.pointerId);
+    gesture.current.lastDist = null;
+  }
+
+  function onHexTap(hex: MapHex) {
+    if (gesture.current.moved) return; // fin de drag/pinch, pas un tap
+    // Souris : clic = navigation directe (le hover a déjà montré le tooltip).
+    if (!isTouchScreen()) {
+      onHexClick?.(hex);
+      return;
+    }
+    // Doigt : 1er tap = sélection (panneau), 2e tap sur le même hex = navigation.
+    if (selected?.id === hex.id) onHexClick?.(hex);
+    else setSelected(hex);
   }
 
   const hoverOwner = hovered?.state === "owned" && hovered.owner ? hovered.owner : null;
@@ -92,9 +207,47 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
     return highlightIds !== undefined && !highlightIds.has(h.id);
   }
 
+  function fillOf(h: MapHex): string {
+    if (h.state === "memorial") return colors.mapMemorial;
+    if (h.state === "ruins") return colors.mapRuins;
+    if (h.state === "neutral" || h.owner === null) return colors.mapNeutral;
+    return nations.get(h.owner)?.color ?? colors.mapNeutral;
+  }
+
+  function hexLabel(h: MapHex): React.ReactNode {
+    return (
+      <>
+        <span className="font-medium">{h.cityName}</span>
+        {" · "}
+        {h.state === "neutral" || h.owner === null ? (
+          "Eaux neutres"
+        ) : (
+          <>
+            <FlagEmoji flag={nations.get(h.owner)?.flag ?? ""} /> {nations.get(h.owner)?.name ?? h.owner}
+          </>
+        )}
+        {h.isCapital && " · Capitale"}
+        {h.state === "ruins" && " · Ruines"}
+        {h.state === "memorial" && " · Memorial"}
+      </>
+    );
+  }
+
   return (
-    <div className="relative w-full" ref={containerRef} onMouseMove={onMouseMove}>
-      <svg viewBox={viewBox} className="w-full h-auto block" style={{ background: colors.navy }} role="img" aria-label="Carte du monde hexagonale">
+    <div className="relative w-full" ref={containerRef}>
+      <svg
+        ref={svgRef}
+        viewBox={`${vb.x.toFixed(1)} ${vb.y.toFixed(1)} ${vb.w.toFixed(1)} ${vb.h.toFixed(1)}`}
+        className="w-full h-auto block select-none"
+        style={{ background: colors.navy, touchAction: zoomed ? "none" : "pan-y" }}
+        role="img"
+        aria-label="Carte du monde hexagonale"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onPointerLeave={() => setHovered(null)}
+      >
         {polygons.map(({ hex, points }) => {
           const isLive = liveOwners !== undefined && hex.owner !== null && hex.state === "owned" && liveOwners.has(hex.owner);
           return (
@@ -109,12 +262,12 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
               style={{ cursor: onHexClick ? "pointer" : "default", transition: "opacity 150ms" }}
               onMouseEnter={() => setHovered(hex)}
               onMouseLeave={() => setHovered((prev) => (prev?.id === hex.id ? null : prev))}
-              onClick={() => onHexClick?.(hex)}
+              onClick={() => onHexTap(hex)}
             />
           );
         })}
         {polygons
-          .filter(({ hex }) => isFocusedCountry(hex) || highlightIds?.has(hex.id))
+          .filter(({ hex }) => isFocusedCountry(hex) || highlightIds?.has(hex.id) || selected?.id === hex.id)
           .map(({ hex, points }) => {
             const countryFocus = isFocusedCountry(hex);
             return (
@@ -139,9 +292,41 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
             </g>
           ))}
       </svg>
-      {hovered && (
+
+      {/* Contrôles zoom : fallback fiable, indispensable mobile. */}
+      <div className="absolute right-2 top-2 flex flex-col gap-px font-mono text-sm" aria-hidden>
+        <button
+          type="button"
+          aria-label="Zoomer"
+          className="w-8 h-8 bg-cream text-navy border border-navy/10 hover:bg-cream-dark"
+          onClick={() => zoomCenter(1 / 1.5)}
+        >
+          +
+        </button>
+        <button
+          type="button"
+          aria-label="Dézoomer"
+          className="w-8 h-8 bg-cream text-navy border border-navy/10 hover:bg-cream-dark"
+          onClick={() => zoomCenter(1.5)}
+        >
+          −
+        </button>
+        {zoomed && (
+          <button
+            type="button"
+            aria-label="Vue monde"
+            className="w-8 h-8 bg-cream text-navy border border-navy/10 hover:bg-cream-dark text-[10px] uppercase"
+            onClick={() => setView(null)}
+          >
+            ⛶
+          </button>
+        )}
+      </div>
+
+      {/* Tooltip souris (desktop). */}
+      {hovered && !selected && (
         <div
-          className="pointer-events-none absolute z-10 bg-cream text-navy px-3 py-2 font-mono text-xs tracking-widest uppercase border border-navy/10 whitespace-nowrap"
+          className="pointer-events-none absolute z-10 bg-cream text-navy px-3 py-2 font-mono text-xs tracking-widest uppercase border border-navy/10 whitespace-nowrap hidden md:block"
           style={{
             left: cursor.x + 14,
             top: cursor.y + 14,
@@ -152,21 +337,38 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
           }}
           data-testid="hex-tooltip"
         >
-          <span className="font-medium">{hovered.cityName}</span>
-          {" · "}
-          {hovered.state === "neutral" || hovered.owner === null ? (
-            "Eaux neutres"
-          ) : (
-            <>
-              <FlagEmoji flag={nations.get(hovered.owner)?.flag ?? ""} />{" "}
-              {nations.get(hovered.owner)?.name ?? hovered.owner}
-            </>
-          )}
-          {hovered.isCapital && " · Capitale"}
-          {hovered.state === "ruins" && " · Ruines"}
-          {hovered.state === "memorial" && " · Memorial"}
+          {hexLabel(hovered)}
+        </div>
+      )}
+
+      {/* Panneau de sélection (tap mobile) : l'info AVANT la navigation. */}
+      {selected && (
+        <div
+          className="absolute inset-x-0 bottom-0 z-10 bg-cream text-navy border-t border-navy/10 px-3 py-2 flex items-center justify-between gap-3 font-mono text-xs tracking-widest uppercase"
+          data-testid="hex-selected-panel"
+        >
+          <span className="truncate">{hexLabel(selected)}</span>
+          <span className="flex items-center gap-3 shrink-0">
+            {onHexClick && selected.state === "owned" && selected.owner !== null && (
+              <button
+                type="button"
+                className="text-blue-electric underline underline-offset-2"
+                onClick={() => onHexClick(selected)}
+              >
+                Voir la nation →
+              </button>
+            )}
+            <button type="button" aria-label="Fermer" className="text-navy/50" onClick={() => setSelected(null)}>
+              ✕
+            </button>
+          </span>
         </div>
       )}
     </div>
   );
+}
+
+/** Pointeur principal grossier = écran tactile : le tap doit informer avant de naviguer. */
+function isTouchScreen(): boolean {
+  return typeof window !== "undefined" && window.matchMedia?.("(pointer: coarse)").matches === true;
 }

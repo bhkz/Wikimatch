@@ -6,7 +6,7 @@ Site spectacle, sans aucun compte utilisateur, qui suit la Coupe du Monde 2026 (
 
 ## État du projet
 
-Phase P0 « La carte vivante » en cours (spec §20). Le concept précédent du repo (observatoire Wikipédia) est abandonné à 100 % ; seules la DA, la toolchain et l'infra (Vercel, Supabase) sont conservées.
+Phases P0, P1 et P2 livrées (spec §20) : carte vivante, moteur de conquête déterministe, simulation Monte-Carlo + conditions de qualification, drama-mètre, recap de nuit (6 sections §8), replay/`?t=`, mode live, Grande Fracture (`finalize_group_stage` depuis /admin), memorial, embed, OG dynamiques, `/feed.xml`, `/sitemap.xml`, `/fin`. Reste hors v1 courante : probabilités de parcours KO (`p_champion`) — activables quand l'API révèle les appariements réels du tableau (§21.5 « jamais deviner »). Le concept précédent du repo (observatoire Wikipédia) est abandonné à 100 % ; seules la DA, la toolchain et l'infra (Vercel, Supabase) sont conservées.
 
 ## Architecture
 

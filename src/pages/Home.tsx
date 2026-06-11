@@ -97,7 +97,7 @@ export default function Home() {
                 onHexClick={(hex) => hex.owner && navigate(`/n/${hex.owner}`)}
               />
             ) : (
-              <div className="aspect-[2/1] flex items-center justify-center font-mono text-xs uppercase tracking-widest text-navy/40 bg-navy/95 text-cream/40">
+              <div className="aspect-[2/1] flex items-center justify-center font-mono text-xs uppercase tracking-widest bg-navy/95 text-cream/40">
                 Chargement de la carte…
               </div>
             )}
@@ -106,7 +106,7 @@ export default function Home() {
         </div>
         <FeedTicker items={lastResolutions} />
 
-        {/* Bandeau matchs du jour (§12) */}
+        {/* Replay : remonter le temps jour par jour (§10) */}
         {data && (
           <TimeScrubber
             snapshots={data.snapshots}

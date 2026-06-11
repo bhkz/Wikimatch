@@ -62,6 +62,10 @@
       "destination": "/api/feed"
     },
     {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
       "source": "/((?!api/|assets/|src/|node_modules/|@id|@vite|@react-refresh).*)",
       "destination": "/index.html"
     }

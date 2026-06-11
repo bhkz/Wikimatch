@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FlagEmoji } from "./FlagEmoji";
 import type { Nation, SnapshotSummary } from "../lib/atlas";
@@ -34,20 +35,21 @@ function Sparkline({ values }: { values: number[] }) {
 }
 
 export default function TerritorySidebar({ nations, hexes, snapshots }: Props) {
+  const [expanded, setExpanded] = useState(false);
   const current = new Map<string, number>();
   for (const h of hexes) {
     if (!h.owner || h.state !== "owned") continue;
     current.set(h.owner, (current.get(h.owner) ?? 0) + 1);
   }
   const historical = snapshots.slice(-7).map((s) => countsForFrame(s.frame));
-  const rows = nations
+  const all = nations
     .map((n) => ({
       nation: n,
       territory: current.get(n.code) ?? 0,
       series: [...historical.map((h) => h.get(n.code) ?? 0), current.get(n.code) ?? 0],
     }))
-    .sort((a, b) => b.territory - a.territory || a.nation.name_fr.localeCompare(b.nation.name_fr))
-    .slice(0, 12);
+    .sort((a, b) => b.territory - a.territory || a.nation.name_fr.localeCompare(b.nation.name_fr));
+  const rows = expanded ? all : all.slice(0, 12);
 
   return (
     <aside className="border border-navy/10 bg-cream p-4">
@@ -67,6 +69,13 @@ export default function TerritorySidebar({ nations, hexes, snapshots }: Props) {
           </li>
         ))}
       </ol>
+      <button
+        type="button"
+        className="mt-3 font-mono text-[10px] uppercase tracking-widest text-navy/50 hover:text-blue-electric"
+        onClick={() => setExpanded((v) => !v)}
+      >
+        {expanded ? "Réduire ↑" : `Voir les ${all.length} nations ↓`}
+      </button>
     </aside>
   );
 }

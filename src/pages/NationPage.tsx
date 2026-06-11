@@ -11,6 +11,7 @@ import HexMap from "../components/HexMap";
 import MatchChip from "../components/MatchChip";
 import { nationStyles, useAtlasData } from "../lib/atlas";
 import { FlagEmoji, TextWithFlags } from "../components/FlagEmoji";
+import ShareBar from "../components/ShareBar";
 
 export default function NationPage() {
   const { code } = useParams();
@@ -64,6 +65,7 @@ export default function NationPage() {
                 style={{ background: nation.color }}
                 title="Couleur sur la carte"
               />
+              <ShareBar title={`${nation.name_fr} sur l'Atlas du Mondial`} />
             </div>
             <div className="font-mono text-xs uppercase tracking-widest mb-10">
               {nation.status === "alive" && (
@@ -74,7 +76,9 @@ export default function NationPage() {
               )}
               {nation.status === "eliminated" && (
                 <span className="text-red-signal">
-                  Éliminée : sa capitale est entrée au memorial
+                  11 juin – {nation.eliminated_at
+                    ? new Date(nation.eliminated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
+                    : "2026"} · sa capitale est entrée au memorial
                   {nation.eliminated_by_match && (
                     <>
                       {" · "}
@@ -87,6 +91,28 @@ export default function NationPage() {
               )}
               {nation.status === "champion" && <span className="text-blue-electric">CHAMPIONNE DU MONDE 🏆</span>}
             </div>
+
+            {/* Probabilités du dernier run Monte-Carlo (§12) — groupes uniquement tant que le bracket réel n'est pas connu. */}
+            {nation.status === "alive" && data.sim?.probs[upper] && (
+              <section className="mb-10 max-w-3xl grid grid-cols-2 md:grid-cols-4 gap-px bg-navy/10 border border-navy/10">
+                {(
+                  [
+                    ["Qualification", data.sim.probs[upper].p_qualify],
+                    ["Top 2 du groupe", data.sim.probs[upper].p_top2],
+                    ["1er du groupe", data.sim.probs[upper].p_win_group],
+                    ["Repêchage 3e", data.sim.probs[upper].p_third_rescued],
+                  ] as const
+                ).map(([label, p]) => (
+                  <div key={label} className="bg-cream p-4">
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-navy/50 mb-1">{label}</div>
+                    <div className="font-display text-3xl">{Math.round(p * 100)} %</div>
+                    <div className="h-1 bg-navy/10 mt-2">
+                      <div className="h-1 bg-blue-electric" style={{ width: `${Math.round(p * 100)}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </section>
+            )}
 
             <div className="border border-navy/10 mb-12">
               <HexMap

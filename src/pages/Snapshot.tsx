@@ -4,13 +4,14 @@ import HexMap, { type MapHex } from "../components/HexMap";
 import SectionLabel from "../components/SectionLabel";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
+import ShareBar from "../components/ShareBar";
 import { atlas } from "../lib/supabase";
 import { nationStyles, useAtlasData } from "../lib/atlas";
 
 type SnapshotRow = {
   date: string;
   frame: Array<{ id: number; owner: string | null; state: MapHex["state"] }>;
-  deltas: Record<string, number>;
+  deltas: Record<string, { gained: number; lost: number }>;
   og_image_url: string | null;
   story_image_url: string | null;
 };
@@ -60,16 +61,21 @@ export default function Snapshot() {
     });
   }, [data, snapshot]);
 
-  const deltas = Object.entries(snapshot?.deltas ?? {}).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+  const deltas = Object.entries(snapshot?.deltas ?? {})
+    .map(([code, d]) => [code, d.gained - d.lost] as const)
+    .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
 
   return (
     <div className="min-h-screen bg-cream text-navy flex flex-col">
       <SiteHeader />
       <main className="flex-1 w-full max-w-screen-2xl mx-auto px-4 md:px-8 pt-24 pb-24">
         <SectionLabel label="Snapshot quotidien" />
-        <h1 className="font-display text-4xl md:text-6xl uppercase leading-none tracking-wide mt-4 mb-10">
-          Carte du {new Date(`${snapshotDate}T12:00:00Z`).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
-        </h1>
+        <div className="mt-4 mb-10 flex flex-wrap items-end justify-between gap-6">
+          <h1 className="font-display text-4xl md:text-6xl uppercase leading-none tracking-wide">
+            Carte du {new Date(`${snapshotDate}T12:00:00Z`).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
+          </h1>
+          <ShareBar title={`L'Atlas du Mondial — carte du ${snapshotDate}`} />
+        </div>
         {(error || snapshotError) && (
           <div className="font-mono text-xs uppercase tracking-widest text-red-signal mb-6">
             {error ?? snapshotError}

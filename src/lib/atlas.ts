@@ -18,6 +18,7 @@ export type Nation = {
   fifa_rank: number;
   group_letter: string;
   status: "alive" | "eliminated" | "champion";
+  eliminated_at: string | null;
   eliminated_by_match: number | null;
 };
 
@@ -112,7 +113,7 @@ export const STAGE_LABELS: Record<Match["stage"], string> = {
 export async function fetchNations(): Promise<Nation[]> {
   const { data, error } = await atlas
     .from("nations")
-    .select("code, name_fr, flag, color, fifa_rank, group_letter, status, eliminated_by_match")
+    .select("code, name_fr, flag, color, fifa_rank, group_letter, status, eliminated_at, eliminated_by_match")
     .order("code");
   if (error) throw new Error(error.message);
   return (data ?? []) as Nation[];
@@ -121,7 +122,7 @@ export async function fetchNations(): Promise<Nation[]> {
 export async function fetchHexes(): Promise<MapHex[]> {
   const { data, error } = await atlas
     .from("hexes")
-    .select("id, q, r, city_name, is_capital, owner, state")
+    .select("id, q, r, city_name, is_capital, original_owner, owner, state")
     .order("id")
     .limit(2000);
   if (error) throw new Error(error.message);
@@ -131,6 +132,7 @@ export async function fetchHexes(): Promise<MapHex[]> {
     r: h.r as number,
     cityName: h.city_name as string,
     isCapital: h.is_capital as boolean,
+    originalOwner: h.original_owner as string | null,
     owner: h.owner as string | null,
     state: h.state as MapHex["state"],
   }));
@@ -262,10 +264,12 @@ export type AtlasData = {
 };
 
 /**
- * Charge tout l'état public et rafraîchit : 30 s si un match est en cours,
- * 120 s sinon (poids minuscule : 4 requêtes lisant des tables de ≤700 lignes).
+ * Charge l'état public et rafraîchit : 30 s si un match est en cours,
+ * 120 s sinon. Les hex_events (lourds, jusqu'à 5000 lignes) ne sont chargés
+ * que sur demande explicite (`withEvents`) — budget perf mobile §14.
  */
-export function useAtlasData(): { data: AtlasData | null; error: string | null } {
+export function useAtlasData(opts?: { withEvents?: boolean }): { data: AtlasData | null; error: string | null } {
+  const withEvents = opts?.withEvents ?? false;
   const [data, setData] = useState<AtlasData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -284,7 +288,7 @@ export function useAtlasData(): { data: AtlasData | null; error: string | null }
           fetchMatchStakes(),
           fetchQualificationConditions(),
           fetchSnapshots(),
-          fetchHexEvents(),
+          withEvents ? fetchHexEvents() : Promise.resolve([] as HexEvent[]),
         ]);
         if (cancelled) return;
         setData({ nations, hexes, matches, resolutions, sim, stakes, conditions, snapshots, events });
@@ -301,7 +305,8 @@ export function useAtlasData(): { data: AtlasData | null; error: string | null }
       cancelled = true;
       clearTimeout(timer);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [withEvents]);
 
   return { data, error };
 }

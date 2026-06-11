@@ -47,14 +47,33 @@ function QualifyBar({ p }: { p: number | undefined }) {
 }
 
 function ThirdsTable({ data }: { data: AtlasData }) {
-  const rows = rankThirds(
-    LETTERS.map((letter) => {
-      const third = groupStandings(data, letter)[2];
-      return { ...third, group: letter };
-    }),
-  );
+  // Avant le premier match terminé, un "classement" des troisièmes serait un
+  // tri alphabétique mensonger : on attend la première journée.
+  const anyPlayed = data.matches.some((m) => m.stage === "GROUP" && m.status === "FINISHED");
+  const rows = anyPlayed
+    ? rankThirds(
+        LETTERS.map((letter) => {
+          const third = groupStandings(data, letter)[2];
+          return { ...third, group: letter };
+        }),
+      )
+    : [];
   const styles = nationStyles(data.nations);
   const probs = data.sim?.probs;
+
+  if (!anyPlayed) {
+    return (
+      <section className="mt-12">
+        <h2 className="font-display text-2xl md:text-4xl uppercase tracking-wide mb-4">
+          Classement des troisièmes
+        </h2>
+        <p className="font-light text-navy/70 max-w-xl">
+          Les 8 meilleurs troisièmes rejoignent les 16es de finale. Le classement
+          apparaîtra dès les premiers matchs terminés.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="mt-12">

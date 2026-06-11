@@ -1,9 +1,9 @@
 /**
  * Worker Atlas (spec §16) — boucle unique :
  * poll_matches (cadence rapide pendant les fenêtres de matchs, lente sinon)
- * → resolve des matchs terminés confirmés → healthcheck HTTP pour Railway.
+ * → resolve des matchs terminés confirmés → healthcheck HTTP pour Render.
  *
- * Déploiement : Railway (npm run worker:start). Env requis :
+ * Déploiement : Render Background Worker (npm run worker:start). Env requis :
  * SUPABASE_URL, SUPABASE_SERVICE_KEY, FOOTBALL_DATA_TOKEN
  * (optionnels : ALERT_WEBHOOK_URL, PORT).
  */
@@ -16,6 +16,7 @@ import { resolveFinishedMatches } from "./jobs/resolve-matches";
 import { snapshotIfDue } from "./jobs/snapshot";
 import { simulateIfStale } from "./jobs/simulate";
 import { buildNightRecapIfDue } from "./jobs/recap";
+import { checkLateMatches } from "./jobs/healthcheck";
 
 const startedAt = new Date().toISOString();
 let lastTickAt: string | null = null;
@@ -51,6 +52,7 @@ async function tick(): Promise<{ anyLive: boolean }> {
   await snapshotIfDue(supabase, state);
   await buildNightRecapIfDue(supabase);
   await simulateIfStale(supabase);
+  await checkLateMatches(supabase);
   return { anyLive: poll.anyLive };
 }
 

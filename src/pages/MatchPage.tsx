@@ -13,8 +13,10 @@ import BeforeAfterMap from "../components/BeforeAfterMap";
 import { STAGE_LABELS, isLive, kickoffLabel, nationStyles, useAtlasData } from "../lib/atlas";
 import { FlagEmoji, TextWithFlags } from "../components/FlagEmoji";
 import DramaGauge from "../components/DramaGauge";
+import ShareBar from "../components/ShareBar";
 
 type ProvisionalPreview = {
+  assumed_score: { home: number; away: number };
   would_gain: number;
   hex_ids: number[];
   inherited_hex_ids: number[];
@@ -23,7 +25,7 @@ type ProvisionalPreview = {
 
 export default function MatchPage() {
   const { id } = useParams();
-  const { data, error } = useAtlasData();
+  const { data, error } = useAtlasData({ withEvents: true });
   const [preview, setPreview] = useState<ProvisionalPreview | null>(null);
   const matchId = Number(id);
 
@@ -116,6 +118,13 @@ export default function MatchPage() {
                   En cours
                 </span>
               )}
+              <ShareBar
+                title={
+                  resolution
+                    ? resolution.narrative
+                    : `${home?.name ?? "?"} – ${away?.name ?? "?"} sur l'Atlas du Mondial`
+                }
+              />
             </div>
             {match.duration === "PENALTY_SHOOTOUT" && match.pens_home !== null && (
               <p className="font-mono text-xs uppercase tracking-widest text-navy/60 -mt-6 mb-8">
@@ -133,6 +142,28 @@ export default function MatchPage() {
                   <span>Moment {Math.round(stake.components.stage * 100)}</span>
                   <span>Surprise {Math.round(stake.components.upset * 100)}</span>
                 </div>
+              </section>
+            )}
+
+            {/* Enjeux de qualification des deux camps (§12), tant que le match n'est pas joué. */}
+            {!resolution && match.stage === "GROUP" && data.sim && match.home && match.away && (
+              <section className="mb-10 max-w-3xl grid grid-cols-2 gap-px bg-navy/10 border border-navy/10">
+                {[match.home, match.away].map((code) => {
+                  const p = data.sim?.probs[code]?.p_qualify;
+                  return (
+                    <div key={code} className="bg-cream p-4">
+                      <div className="font-mono text-[10px] uppercase tracking-widest text-navy/50 mb-1">
+                        {styles.get(code)?.name ?? code} · qualification
+                      </div>
+                      <div className="font-display text-3xl">{p !== undefined ? `${Math.round(p * 100)} %` : "—"}</div>
+                      {p !== undefined && (
+                        <div className="h-1 bg-navy/10 mt-2">
+                          <div className="h-1 bg-blue-electric" style={{ width: `${Math.round(p * 100)}%` }} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </section>
             )}
 
@@ -161,7 +192,9 @@ export default function MatchPage() {
                       <TextWithFlags text={preview.narrative_preview} />
                     </p>
                     <div className="font-mono text-[10px] uppercase tracking-widest text-navy/40 mt-4">
-                      Preview à 1-0 : {preview.would_gain} territoire(s)
+                      {isLive(match)
+                        ? `Au score actuel (${preview.assumed_score.home}-${preview.assumed_score.away}) : ${preview.would_gain} territoire(s) · score il y a ~2 min`
+                        : `Si ça finissait ${preview.assumed_score.home}-${preview.assumed_score.away} : ${preview.would_gain} territoire(s)`}
                     </div>
                   </div>
                 ) : (

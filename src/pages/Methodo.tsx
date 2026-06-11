@@ -46,7 +46,7 @@ const RULES: Array<{ title: string; body: string }> = [
   },
   {
     title: "Ce que ce site n'est pas",
-    body: "Une carte géopolitique. Les frontières, noms et couleurs sont un terrain de jeu graphique sans aucune lecture politique. Site indépendant, non affilié à la FIFA ni à aucune fédération. Aucune marque ni écusson officiel n'est utilisé : uniquement des drapeaux Unicode.",
+    body: "Une carte géopolitique. Les frontières, noms et couleurs sont un terrain de jeu graphique sans aucune lecture politique. Site indépendant, non affilié à la FIFA ni à aucune fédération. Aucune marque ni écusson officiel n'est utilisé : uniquement des drapeaux Unicode (rendus Twemoji © Twitter/X, licence CC-BY 4.0).",
   },
 ];
 

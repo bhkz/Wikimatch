@@ -34,6 +34,7 @@ export default function SiteFooter() {
           <span>
             Site indépendant de visualisation, non affilié à la FIFA ni à aucune fédération.
             <br className="hidden md:block" /> Données : football-data.org. Aucun pari, aucun argent réel.
+            <br className="hidden md:block" /> Drapeaux : Twemoji © Twitter/X et contributeurs, licence CC-BY 4.0.
           </span>
           <span>© 2026 · L'ATLAS DU MONDIAL</span>
         </div>

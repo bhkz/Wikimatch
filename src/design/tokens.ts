@@ -29,6 +29,12 @@ export const colors = {
   redSignal: "#FF3333",
   /** Accent acide, usage parcimonieux (highlights). */
   greenAcid: "#CCFF00",
+  /** Carte : hexes neutres — sable grisé qui recule derrière les nations. */
+  mapNeutral: "#B8B2A2",
+  /** Carte : ruines des nations éliminées — gris sombre dramatique. */
+  mapRuins: "#3A3F4D",
+  /** Carte : capitales-mémoriaux — or, sanctuaire (aussi /memorial). */
+  mapMemorial: "#C9A227",
 } as const;
 
 /**

@@ -4,13 +4,16 @@
  */
 
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import SectionLabel from "../components/SectionLabel";
 import MatchChip from "../components/MatchChip";
+import { FlagEmoji } from "../components/FlagEmoji";
 import { nationStyles, useAtlasData, STAGE_LABELS, type Match } from "../lib/atlas";
 
 const KO_STAGES: Match["stage"][] = ["R32", "R16", "QF", "SF", "THIRD", "FINAL"];
+const GROUPS = "ABCDEFGHIJKL".split("");
 
 export default function Bracket() {
   const { data, error } = useAtlasData();
@@ -26,6 +29,24 @@ export default function Bracket() {
     return map;
   }, [data]);
 
+  // Tant que les affiches réelles sont inconnues : têtes probables par groupe
+  // (placeholders probabilistes §12 — sans deviner les appariements, §21.5).
+  const koTeamsKnown = useMemo(
+    () => (byStage.get("R32") ?? []).some((m) => m.home !== null || m.away !== null),
+    [byStage],
+  );
+  const probableSeeds = useMemo(() => {
+    const probs = data?.sim?.probs;
+    if (!probs) return [];
+    return GROUPS.map((letter) => {
+      const ranked = (data?.nations ?? [])
+        .filter((n) => n.group_letter === letter)
+        .map((n) => ({ nation: n, p: probs[n.code]?.p_win_group ?? 0 }))
+        .sort((a, b) => b.p - a.p);
+      return { letter, top: ranked[0] ?? null };
+    });
+  }, [data]);
+
   return (
     <div className="min-h-screen bg-cream text-navy flex flex-col">
       <SiteHeader />
@@ -36,6 +57,36 @@ export default function Bracket() {
         </h1>
         {error && <div className="font-mono text-xs text-red-signal uppercase tracking-widest mb-6">{error}</div>}
         {!data && <p className="font-light text-navy/70">Chargement…</p>}
+
+        {data && !koTeamsKnown && (
+          <section className="mb-12">
+            <p className="font-light text-navy/70 max-w-2xl mb-6">
+              Le tableau réel se remplit à la fin de la phase de groupes (27 juin).
+              En attendant, les vainqueurs de groupe les plus probables selon la{" "}
+              <Link to="/methodo" className="underline hover:text-blue-electric">simulation</Link> :
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-px bg-navy/10 border border-navy/10">
+              {probableSeeds.map(({ letter, top }) => (
+                <div key={letter} className="bg-cream p-4">
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-navy/40 mb-1">1{letter}</div>
+                  {top ? (
+                    <Link to={`/n/${top.nation.code}`} className="hover:text-blue-electric">
+                      <span className="font-display text-xl uppercase tracking-wide">
+                        <FlagEmoji flag={top.nation.flag} /> {top.nation.name_fr}
+                      </span>
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-navy/50 ml-2">
+                        {Math.round(top.p * 100)} %
+                      </span>
+                    </Link>
+                  ) : (
+                    <span className="font-mono text-[10px] text-navy/40">—</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {data &&
           KO_STAGES.map((stage) => {
             const matches = byStage.get(stage) ?? [];
@@ -56,9 +107,11 @@ export default function Bracket() {
               </section>
             );
           })}
-        <p className="font-mono text-[10px] uppercase tracking-widest text-navy/40">
-          Les affiches s'affichent dès que les qualifications réelles sont connues.
-        </p>
+        {koTeamsKnown && (
+          <p className="font-mono text-[10px] uppercase tracking-widest text-navy/40">
+            Les affiches suivantes s'affichent dès que les qualifications réelles sont connues.
+          </p>
+        )}
       </main>
       <SiteFooter />
     </div>
