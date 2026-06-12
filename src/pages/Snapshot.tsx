@@ -16,10 +16,11 @@ type SnapshotRow = {
   story_image_url: string | null;
 };
 
+/** Dernier snapshot existant : la veille (publié à 07:30), l'avant-veille avant 07:30. */
 function currentAtlasDate(): string {
   const now = new Date();
   const paris = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
-  if (paris.getHours() * 60 + paris.getMinutes() < 7 * 60 + 30) paris.setDate(paris.getDate() - 1);
+  paris.setDate(paris.getDate() - (paris.getHours() * 60 + paris.getMinutes() < 7 * 60 + 30 ? 2 : 1));
   return paris.toLocaleDateString("en-CA");
 }
 

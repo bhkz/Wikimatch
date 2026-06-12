@@ -92,16 +92,23 @@ export default function NationPage() {
               {nation.status === "champion" && <span className="text-blue-electric">CHAMPIONNE DU MONDE 🏆</span>}
             </div>
 
-            {/* Probabilités du dernier run Monte-Carlo (§12) — groupes uniquement tant que le bracket réel n'est pas connu. */}
+            {/* Probabilités du dernier run Monte-Carlo (§12). KO dès que le tableau réel est connu. */}
             {nation.status === "alive" && data.sim?.probs[upper] && (
               <section className="mb-10 max-w-3xl grid grid-cols-2 md:grid-cols-4 gap-px bg-navy/10 border border-navy/10">
                 {(
-                  [
-                    ["Qualification", data.sim.probs[upper].p_qualify],
-                    ["Top 2 du groupe", data.sim.probs[upper].p_top2],
-                    ["1er du groupe", data.sim.probs[upper].p_win_group],
-                    ["Repêchage 3e", data.sim.probs[upper].p_third_rescued],
-                  ] as const
+                  data.sim.probs[upper].p_champion !== undefined
+                    ? ([
+                        ["Quarts de finale", data.sim.probs[upper].p_qf ?? 0],
+                        ["Demi-finales", data.sim.probs[upper].p_sf ?? 0],
+                        ["Finale", data.sim.probs[upper].p_final ?? 0],
+                        ["CHAMPIONNE", data.sim.probs[upper].p_champion ?? 0],
+                      ] as const)
+                    : ([
+                        ["Qualification", data.sim.probs[upper].p_qualify],
+                        ["Top 2 du groupe", data.sim.probs[upper].p_top2],
+                        ["1er du groupe", data.sim.probs[upper].p_win_group],
+                        ["Repêchage 3e", data.sim.probs[upper].p_third_rescued],
+                      ] as const)
                 ).map(([label, p]) => (
                   <div key={label} className="bg-cream p-4">
                     <div className="font-mono text-[10px] uppercase tracking-widest text-navy/50 mb-1">{label}</div>

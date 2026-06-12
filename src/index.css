@@ -50,10 +50,45 @@ h1, h2, h3, h4, h5, h6, .font-display {
   transform-origin: center;
 }
 
+/* La Grande Fracture (spec §5.8, §20 P2.11) : les territoires des nations
+   fraîchement tombées s'éteignent lentement — solennel, pas clinquant. */
+@keyframes hex-extinguish {
+  0% { filter: brightness(1.6) saturate(1.3); opacity: 1; }
+  60% { filter: brightness(0.85) saturate(0.4); opacity: 0.92; }
+  100% { filter: brightness(1) saturate(1); opacity: 1; }
+}
+
+.hex-fracture {
+  animation: hex-extinguish 4.5s ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Transition de conquête (spec §10/§13) : un hex qui vient de changer de main
+   flashe puis se pose — visible pendant le replay et les résolutions live. */
+@keyframes hex-capture {
+  0% { filter: brightness(2.2) saturate(0.3); }
+  35% { filter: brightness(1.9) saturate(1.4); }
+  100% { filter: brightness(1) saturate(1); }
+}
+
+.hex-changed {
+  animation: hex-capture 1.2s ease-out 1;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
 /* §13 : prefers-reduced-motion → état statique légèrement éclairci. */
 @media (prefers-reduced-motion: reduce) {
   .hex-live {
     animation: none;
     filter: brightness(1.25);
+  }
+  .hex-fracture {
+    animation: none;
+  }
+  .hex-changed {
+    animation: none;
+    filter: brightness(1.3);
   }
 }

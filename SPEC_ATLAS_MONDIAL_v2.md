@@ -1,4 +1,13 @@
-# ATLAS MONDIAL 2026 — Spécification complète v2.0 ("Atlas")
+# ATLAS MONDIAL 2026 — Spécification complète v2.1 ("Atlas")
+
+> **CHANGELOG**
+> - **v2.1 (12 juin 2026)** — corrections documentaires, AUCUN changement de règle (engine_version inchangé : `atlas_engine_v1`) :
+>   1. vocabulaire : « annexe »/« annexables » remplacés par « prend »/« récupérables » — la spec doit respecter son propre §22.3 (le code, lui, était déjà conforme) ;
+>   2. infra : worker déployé sur **Render** (Background Worker, `render.yaml`), pas Railway ;
+>   3. carte réelle générée : **682 hexes** (480 nationaux + 202 neutres), pas ≈ 630 ;
+>   4. la route `/tiers` n'existe pas : le ThirdsTable vit dans `/groupes` (le tableau §12 fait foi) ;
+>   5. constat payload réel (12/06) : stage API `LAST_32` confirmé ; score décisif dans `score.fullTime` avec `duration` (`REGULAR`/…), conforme à `lib/providers/extract-score.ts`.
+> - **v2.0** — spécification initiale.
 
 > **Document autonome.** Il remplace toute spec antérieure. L'agent de code qui lit ceci n'a comme autre contexte que le repo existant `Wikimatch`. Tout ce qui n'est pas dans ce document ou dans le repo n'existe pas.
 > Langue produit : français. Code, tables, variables : anglais.
@@ -69,7 +78,7 @@ Le repo contient un ancien projet (observatoire d'éditions Wikipédia liées au
 | **Nation** | Une des 48 équipes qualifiées. États : `alive`, `eliminated`, `champion`. |
 | **Hex** | Case de la carte. Propriété : une nation, `neutral`, `ruins`, `memorial`. |
 | **Capitale (sportive)** | Hex de départ spécial. Imprenable tant que la nation est `alive`. Devient `memorial` (grisé, drapeau, intouchable à jamais) à l'élimination. |
-| **Ruines** | Hexes d'une nation éliminée (hors capitale). Décor dramatique, partiellement annexables (§5.8). |
+| **Ruines** | Hexes d'une nation éliminée (hors capitale). Décor dramatique, partiellement récupérables (§5.8). |
 | **Enclave** | Hexes d'une nation non contigus à son bloc principal. Voulu et célébré. |
 | **Résolution** | Application déterministe d'un match terminé sur la carte. |
 | **Frame** | État de la carte à un instant T, reconstruit depuis `hex_events` (pour le replay). |
@@ -151,7 +160,7 @@ Aucun besoin d'API d'effectifs, de stats individuelles ou de cotes de bookmakers
 ### 4.1 Géométrie
 
 - Grille hexagonale **pointy-top**, coordonnées **axiales** `(q, r)`. Distance : `(|dq| + |dr| + |dq+dr|)/2`.
-- Monde : silhouette de planisphère stylisé dans un rectangle axial ≈ **44 × 26**. Seuls les hexes « terre + zones tampons » existent en base (≈ 630) : **480 hexes nationaux** (48 × 10) + **≈ 150 hexes `neutral`** (zones tampons entre blocs continentaux). L'océan n'est pas stocké : c'est le fond du SVG.
+- Monde : silhouette de planisphère stylisé dans un rectangle axial ≈ **44 × 26**. Seuls les hexes « terre + zones tampons » existent en base (**682 dans la carte générée**) : **480 hexes nationaux** (48 × 10) + **202 hexes `neutral`** (zones tampons entre blocs continentaux). L'océan n'est pas stocké : c'est le fond du SVG.
 
 ### 4.2 Génération (script `scripts/generate-map.ts`)
 
@@ -200,7 +209,7 @@ final_gain = clamp( round( base × clamp(median_alive / T_winner, 0.5, 2.0) ), 1
 
 ### 5.5 Match nul
 
-Chaque équipe annexe **1 hex `neutral`**, le plus proche de sa capitale (tie-break §5.6.4). Plus de neutres disponibles → aucun gain, event `draw_no_neutral`.
+Chaque équipe prend **1 hex `neutral`**, le plus proche de sa capitale (tie-break §5.6.4). Plus de neutres disponibles → aucun gain, event `draw_no_neutral`.
 
 ### 5.6 Sélection déterministe des hexes pris (NORMATIF)
 
@@ -367,7 +376,7 @@ Pendant un match `IN_PLAY`/`PAUSED` : la page match (et un bandeau sur la home) 
 
 ## 13. Composants UI (inventaire à construire, stylés via les tokens §0.2)
 
-- **`HexMap`** : SVG (viewBox monde), 630 polygones, pan/zoom (wheel + pinch), hover tooltip, hexes cliquables → `/n/:code`, props `frame` (état), `highlights` (pulse §9), `animateDiff` (transferts animés). Si perfs mobiles < 30 fps : basculer le fond en canvas, garder le SVG pour l'interaction (décision mesurée, pas anticipée).
+- **`HexMap`** : SVG (viewBox monde), 682 polygones, pan/zoom (wheel + pinch), hover tooltip, hexes cliquables → `/n/:code`, props `frame` (état), `highlights` (pulse §9), `animateDiff` (transferts animés). Si perfs mobiles < 30 fps : basculer le fond en canvas, garder le SVG pour l'interaction (décision mesurée, pas anticipée).
 - **`TimeScrubber`** : slider jours + play/pause + marqueurs résolutions.
 - **`FeedTicker`** : défilement des `narrative` récents, pausable.
 - **`MatchCard`** : drapeaux emoji, heure locale, DramaGauge, statut ; variantes pre/live/post.
@@ -504,7 +513,7 @@ create table atlas.job_log (
 
 ## 16. Jobs & workers (où tourne quoi)
 
-**Topologie** : front + API lecture + OG = **Vercel** (existant). Jobs longs/cron = **un petit worker Node sur Railway** (Dockerfile simple, pattern robuste : reconnexion, backoff, state persisté dans `ingest_state`). Alternative acceptable si on veut éviter Railway : Vercel Cron + fonctions — mais le poller à la minute pendant les matchs est plus sain sur un worker. Décision : **worker Railway**.
+**Topologie** : front + API lecture + OG = **Vercel** (existant). Jobs longs/cron = **un petit worker Node sur Render** (Background Worker, `render.yaml`, pattern robuste : reconnexion, backoff, state persisté dans `ingest_state`). Alternative acceptable : Vercel Cron + fonctions — mais le poller à la minute pendant les matchs est plus sain sur un worker. Décision : **worker Render**.
 
 1. **`poll_matches`** — toutes les 2 min si un match est dans [kickoff−30 min, kickoff+180 min], sinon toutes les 30 min. `fetchWindow(jour)`, upsert `matches`. Détection `FINISHED` inédit → planifie `resolve(match_id)` à +5 min.
 2. **`resolve(match_id)`** — §18.1. Idempotent (PK `resolutions`), verrou `pg_advisory_xact_lock(match_id)`.
@@ -598,14 +607,14 @@ hooks(): simulate(); regen OG /m/:id; touch snapshots du jour
 1. Schéma SQL + RLS ; seeds (nations, villes, map, tiebreakers) ; `generate-map.ts` + audit visuel `/admin/map-preview`.
 2. Providers (§3.3) + seed des 104 matchs + **vérification manuelle du mapping des 48 équipes**.
 3. `resolve` complet + tests (issue, sélection §5.6, idempotence) + `rebuild-map` (§18.4).
-4. Worker Railway : `poll_matches` + `resolve` + `healthcheck`.
+4. Worker Render : `poll_matches` + `resolve` + `healthcheck`.
 5. Front : `/` (HexMap + sidebar + ticker + matchs du soir sans drama), `/m/:id` (post-match), `/n/:code` minimal, `/calendrier`, `/methodo`, `/admin` (overrides + boutons).
 6. `api/meta.ts` + OG basiques + `/snapshot/:date` manuel.
 **Sortie P0 :** 10 matchs réels résolus sans intervention ; `rebuild-map` diff vide ; une journée jouée 100 % en manuel ; carte mobile < 3 s ; le snapshot d'un matin partagé en vrai dans un groupe WhatsApp (le test ultime).
 **⚠️ Rattrapage :** si le déploiement arrive après les premiers matchs, `backfill` = seed + résolution chronologique des matchs déjà joués via le provider (l'idempotence rend ça trivial) — la carte « rattrape » l'histoire, et ce backfill est exactement le test du replay.
 
 ### P1 — « L'utile » (objectif : avant la dernière journée de groupes, ~23 juin)
-7. Simulateur §6 + `/groupes`, `/groupes/:letter`, `/tiers` (ThirdsTable), QualifBar partout.
+7. Simulateur §6 + `/groupes`, `/groupes/:letter` (ThirdsTable intégré à `/groupes`), QualifBar partout.
 8. Drama-mètre + intégration MatchCard/calendrier/home.
 9. `enumerate_conditions` + mode « conditions » (le rendez-vous de la dernière journée).
 10. Recap de la Nuit complet (job + `/nuit/:date` + images auto) + `/feed.xml`.

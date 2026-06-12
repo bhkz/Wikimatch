@@ -39,21 +39,42 @@ type Props = {
   focusOwners?: ReadonlySet<string>;
   /** Nations dont un match est EN COURS : leurs territoires pulsent. */
   liveOwners?: ReadonlySet<string>;
+  /** Nations fraîchement éliminées : leurs anciens territoires s'éteignent (Grande Fracture). */
+  fractureOwners?: ReadonlySet<string>;
 };
 
 type ViewBox = { x: number; y: number; w: number; h: number };
 
 const MAX_ZOOM = 8;
 
-export default function HexMap({ hexes, nations, size = 10, onHexClick, highlightIds, focusOwners, liveOwners }: Props) {
+export default function HexMap({ hexes, nations, size = 10, onHexClick, highlightIds, focusOwners, liveOwners, fractureOwners }: Props) {
   const [hovered, setHovered] = useState<MapHex | null>(null);
   const [selected, setSelected] = useState<MapHex | null>(null);
   const [cursor, setCursor] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [view, setView] = useState<ViewBox | null>(null); // null = vue monde
+  const [changedIds, setChangedIds] = useState<ReadonlySet<number>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const gesture = useRef<{ moved: boolean; lastDist: number | null }>({ moved: false, lastDist: null });
+  const prevFrame = useRef<Map<number, string> | null>(null);
+
+  // Transitions : un hex dont le propriétaire/état change (replay, scrub,
+  // résolution en direct) flashe brièvement — on VOIT où la carte bouge.
+  useEffect(() => {
+    const frame = new Map(hexes.map((h) => [h.id, `${h.owner ?? ""}|${h.state}`]));
+    const prev = prevFrame.current;
+    prevFrame.current = frame;
+    if (!prev) return;
+    const changed = new Set<number>();
+    for (const [id, sig] of frame) {
+      if (prev.has(id) && prev.get(id) !== sig) changed.add(id);
+    }
+    if (changed.size === 0) return;
+    setChangedIds(changed);
+    const timer = setTimeout(() => setChangedIds(new Set()), 1300);
+    return () => clearTimeout(timer);
+  }, [hexes]);
 
   const { polygons, fullView } = useMemo(() => {
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -250,6 +271,12 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
       >
         {polygons.map(({ hex, points }) => {
           const isLive = liveOwners !== undefined && hex.owner !== null && hex.state === "owned" && liveOwners.has(hex.owner);
+          const isFracture =
+            fractureOwners !== undefined &&
+            (hex.state === "ruins" || hex.state === "memorial") &&
+            hex.originalOwner != null &&
+            fractureOwners.has(hex.originalOwner);
+          const isChanged = changedIds.has(hex.id);
           return (
             <polygon
               key={hex.id}
@@ -258,7 +285,7 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
               stroke={colors.navy}
               strokeWidth={size * 0.06}
               opacity={isDimmed(hex) ? 0.34 : 1}
-              className={isLive ? "hex-live" : undefined}
+              className={isChanged ? "hex-changed" : isLive ? "hex-live" : isFracture ? "hex-fracture" : undefined}
               style={{ cursor: onHexClick ? "pointer" : "default", transition: "opacity 150ms" }}
               onMouseEnter={() => setHovered(hex)}
               onMouseLeave={() => setHovered((prev) => (prev?.id === hex.id ? null : prev))}

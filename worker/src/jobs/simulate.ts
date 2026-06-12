@@ -19,7 +19,8 @@ import { ENGINE_VERSION } from "../../../lib/engine/types";
 import type { Stage } from "../../../lib/providers/types";
 import { DEFAULT_MODEL } from "../../../lib/sim/model";
 import { simulateGroupStage, type SimMatch, type SimNation } from "../../../lib/sim/simulate";
-import { logJob } from "../db";
+import { buildKnockoutRounds, simulateKnockout, type KoMatchInput, type KoStage } from "../../../lib/sim/knockout";
+import { alert, logJob } from "../db";
 
 const DEFAULT_DRAMA_WEIGHTS: DramaWeights = {
   swing: 0.35,
@@ -47,10 +48,25 @@ type MatchRow = {
   matchday: number | null;
   home: string | null;
   away: string | null;
+  kickoff_utc: string;
   status: string;
   score_home: number | null;
   score_away: number | null;
+  pens_home: number | null;
+  pens_away: number | null;
 };
+
+/** Vainqueur réel d'un match KO terminé (TAB inclus) ; null si indécidable. */
+function finishedWinner(m: MatchRow): string | null {
+  if (m.status !== "FINISHED" || !m.home || !m.away) return null;
+  if (m.pens_home !== null && m.pens_away !== null && m.pens_home !== m.pens_away) {
+    return m.pens_home > m.pens_away ? m.home : m.away;
+  }
+  if (m.score_home === null || m.score_away === null || m.score_home === m.score_away) return null;
+  return m.score_home > m.score_away ? m.home : m.away;
+}
+
+const KO_STAGES: ReadonlySet<string> = new Set(["R32", "R16", "QF", "SF", "FINAL"]);
 
 type SimConfig = {
   iterations: number;
@@ -221,7 +237,7 @@ export async function simulateIfStale(supabase: SupabaseClient, force = false): 
       atlas.from("nations").select("code, group_letter, fifa_points, status"),
       atlas
         .from("matches")
-        .select("id, stage, group_letter, matchday, home, away, status, score_home, score_away")
+        .select("id, stage, group_letter, matchday, home, away, kickoff_utc, status, score_home, score_away, pens_home, pens_away")
         .order("id")
         .limit(120),
       atlas.from("game_config").select("key, value").in("key", [
@@ -242,8 +258,10 @@ export async function simulateIfStale(supabase: SupabaseClient, force = false): 
 
   const allMatches = (matches ?? []) as MatchRow[];
   const groupMatches = allMatches.filter((m) => m.stage === "GROUP");
-  const fingerprint = groupMatches
-    .map((m) => `${m.id}:${m.status === "FINISHED" ? `${m.score_home}-${m.score_away}` : "?"}`)
+  // L'empreinte couvre TOUS les matchs (groupes + tableau) : un résultat KO
+  // ou une affiche révélée déclenche un nouveau run.
+  const fingerprint = allMatches
+    .map((m) => `${m.id}:${m.home ?? "?"}-${m.away ?? "?"}:${m.status === "FINISHED" ? `${m.score_home}-${m.score_away}` : "?"}`)
     .join("|");
 
   const { data: state } = await atlas.from("ingest_state").select("value").eq("key", "sim_state").maybeSingle();
@@ -279,13 +297,46 @@ export async function simulateIfStale(supabase: SupabaseClient, force = false): 
   const seed = `wc26:${fingerprint.length}:${fingerprint.slice(0, 64)}`;
   const result = simulateGroupStage(simNations, simMatches, cfg.iterations, seed, cfg.model);
 
+  // --- Probabilités KO (§6.1) : activées automatiquement quand les 16
+  // affiches des 16es sont connues (fin des groupes). Jamais avant (§21.5).
+  let mergedProbs: Record<string, Record<string, number>> = result.probs;
+  const koInputs: KoMatchInput[] = allMatches
+    .filter((m) => KO_STAGES.has(m.stage))
+    .map((m) => ({
+      id: m.id,
+      stage: m.stage as KoStage,
+      home: m.home,
+      away: m.away,
+      winner: finishedWinner(m),
+      kickoffUtc: m.kickoff_utc,
+    }));
+  const r32 = koInputs.filter((m) => m.stage === "R32");
+  if (r32.length === 16 && r32.every((m) => m.home !== null && m.away !== null)) {
+    const tree = buildKnockoutRounds(koInputs);
+    if (tree.ok) {
+      const koProbs = simulateKnockout(tree.rounds, new Map(simNations.map((n) => [n.code, n.elo])), cfg.iterations, `${seed}:ko`, cfg.model);
+      mergedProbs = { ...result.probs } as Record<string, Record<string, number>>;
+      for (const [code, probs] of Object.entries(koProbs)) {
+        mergedProbs[code] = { ...(mergedProbs[code] ?? {}), ...probs };
+      }
+      console.log("✓ simulation KO : p_champion calculé sur le tableau réel.");
+    } else {
+      // Arbre incohérent : on n'invente rien — alerte une seule fois.
+      const { data: alerted } = await atlas.from("ingest_state").select("value").eq("key", "ko_tree_alerted").maybeSingle();
+      if (!alerted?.value) {
+        await alert(`Simulation KO désactivée : ${tree.reason}. Vérifier l'ordre du calendrier (§21.5).`);
+        await atlas.from("ingest_state").upsert({ key: "ko_tree_alerted", value: { reason: tree.reason, at: new Date().toISOString() } });
+      }
+    }
+  }
+
   const { data: insertedRun, error: iErr } = await atlas
     .from("sim_runs")
     .insert({
       seed,
       iterations: cfg.iterations,
       engine_version: ENGINE_VERSION,
-      probs: result.probs,
+      probs: mergedProbs,
     })
     .select("id")
     .single();

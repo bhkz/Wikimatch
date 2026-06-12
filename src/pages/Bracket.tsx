@@ -47,6 +47,16 @@ export default function Bracket() {
     });
   }, [data]);
 
+  // % de traversée (§12) : disponible dès que la sim KO tourne (tableau réel connu).
+  const koTraversal = useMemo(() => {
+    const probs = data?.sim?.probs;
+    if (!probs) return [];
+    return (data?.nations ?? [])
+      .map((n) => ({ nation: n, p: probs[n.code] }))
+      .filter((r) => r.p?.p_champion !== undefined && (r.p.p_r16 ?? 0) > 0)
+      .sort((a, b) => (b.p!.p_champion ?? 0) - (a.p!.p_champion ?? 0));
+  }, [data]);
+
   return (
     <div className="min-h-screen bg-cream text-navy flex flex-col">
       <SiteHeader />
@@ -83,6 +93,49 @@ export default function Bracket() {
                   )}
                 </div>
               ))}
+            </div>
+          </section>
+        )}
+
+        {data && koTraversal.length > 0 && (
+          <section className="mb-12">
+            <h2 className="font-display text-2xl md:text-4xl uppercase tracking-wide mb-4">
+              La traversée du tableau
+            </h2>
+            <div className="max-w-3xl border border-navy/10 bg-cream p-5 overflow-x-auto">
+              <table className="w-full font-mono text-xs">
+                <thead>
+                  <tr className="text-[10px] uppercase tracking-widest text-navy/40 text-right">
+                    <th className="text-left font-medium py-1">Nation</th>
+                    <th className="font-medium">8es</th>
+                    <th className="font-medium">Quarts</th>
+                    <th className="font-medium">Demies</th>
+                    <th className="font-medium">Finale</th>
+                    <th className="font-medium">🏆</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {koTraversal.slice(0, 16).map(({ nation, p }) => (
+                    <tr key={nation.code} className="border-b border-navy/10 last:border-b-0">
+                      <td className="py-2 text-left">
+                        <Link to={`/n/${nation.code}`} className="inline-flex items-center gap-2 hover:text-blue-electric">
+                          <FlagEmoji flag={nation.flag} /> {nation.name_fr}
+                        </Link>
+                      </td>
+                      {([p!.p_r16, p!.p_qf, p!.p_sf, p!.p_final, p!.p_champion] as const).map((v, i) => (
+                        <td key={i} className="text-right tabular-nums" style={{ opacity: 0.35 + 0.65 * (v ?? 0) }}>
+                          {Math.round((v ?? 0) * 100)}%
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {data.sim && (
+                <p className="font-mono text-[10px] uppercase tracking-widest text-navy/40 mt-4">
+                  {data.sim.iterations.toLocaleString("fr-FR")} simulations du tableau réel · probabilités d'atteindre chaque tour
+                </p>
+              )}
             </div>
           </section>
         )}

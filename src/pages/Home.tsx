@@ -38,6 +38,17 @@ export default function Home() {
     });
   }, [data, selectedSnapshotDate]);
   const live = useMemo(() => (data ? liveOwners(data.matches) : new Set<string>()), [data]);
+  // Nations tombées dans les dernières 36 h : leurs anciens territoires
+  // s'éteignent sur la carte. ≥ 8 morts simultanées = la Grande Fracture.
+  const recentlyFallen = useMemo(() => {
+    const cutoff = Date.now() - 36 * 3600_000;
+    return new Set(
+      (data?.nations ?? [])
+        .filter((n) => n.status === "eliminated" && n.eliminated_at !== null && Date.parse(n.eliminated_at) > cutoff)
+        .map((n) => n.code),
+    );
+  }, [data]);
+  const isFractureNight = recentlyFallen.size >= 8;
   const today = useMemo(
     () =>
       data
@@ -87,6 +98,21 @@ export default function Home() {
           </div>
         )}
 
+        {/* La Grande Fracture (§5.8) : 16 nations grisées d'un coup — l'image du mois. */}
+        {isFractureNight && (
+          <Link
+            to="/memorial"
+            className="block border-t-4 border-red-signal bg-navy text-cream px-6 py-5 mb-6 hover:bg-navy/90 transition-colors"
+          >
+            <div className="font-mono text-[10px] uppercase font-bold tracking-widest text-red-signal mb-1">
+              La Grande Fracture
+            </div>
+            <div className="font-display text-2xl md:text-4xl uppercase tracking-wide">
+              {recentlyFallen.size} nations sont tombées · leurs capitales entrent au memorial →
+            </div>
+          </Link>
+        )}
+
         <div className="grid xl:grid-cols-[1fr_360px] gap-6">
           <div className="border border-navy/10">
             {data ? (
@@ -94,6 +120,7 @@ export default function Home() {
                 hexes={displayedHexes}
                 nations={styles}
                 liveOwners={selectedSnapshotDate ? undefined : live}
+                fractureOwners={selectedSnapshotDate || recentlyFallen.size === 0 ? undefined : recentlyFallen}
                 onHexClick={(hex) => hex.owner && navigate(`/n/${hex.owner}`)}
               />
             ) : (

@@ -52,7 +52,18 @@ export type Resolution = {
 
 export type SimProbs = Record<
   string,
-  { p_win_group: number; p_top2: number; p_third_rescued: number; p_qualify: number }
+  {
+    p_win_group: number;
+    p_top2: number;
+    p_third_rescued: number;
+    p_qualify: number;
+    /** Présents dès que le tableau réel des 32 est connu (fin des groupes). */
+    p_r16?: number;
+    p_qf?: number;
+    p_sf?: number;
+    p_final?: number;
+    p_champion?: number;
+  }
 >;
 
 export type SimRun = { id: number; run_at: string; iterations: number; probs: SimProbs };
@@ -215,7 +226,14 @@ export function nationStyles(nations: Nation[]): Map<string, NationStyle> {
 }
 
 export function isLive(m: Match): boolean {
-  return m.status === "IN_PLAY" || m.status === "PAUSED" || m.status === "LIVE";
+  if (m.status === "IN_PLAY" || m.status === "PAUSED" || m.status === "LIVE") return true;
+  // Repli : le statut API peut traîner de quelques minutes — dans la fenêtre
+  // du match (coup d'envoi → +130 min) et pas terminé, on considère live.
+  if (m.status === "FINISHED" || m.status === "POSTPONED" || m.status === "CANCELLED" || m.status === "SUSPENDED") {
+    return false;
+  }
+  const elapsed = Date.now() - Date.parse(m.kickoff_utc);
+  return elapsed >= 0 && elapsed < 130 * 60_000;
 }
 
 /** Nations dont un match est en cours (pour le pulse de la carte). */

@@ -15,6 +15,7 @@ import { FootballDataProvider, UnknownStageError, UnknownTeamError } from "../li
 import { computeStandings } from "../lib/standings";
 import { simulateGroupStage, type SimMatch, type SimNation } from "../lib/sim/simulate";
 import { DEFAULT_MODEL } from "../lib/sim/model";
+import { buildKnockoutRounds, simulateKnockout, type KoMatchInput } from "../lib/sim/knockout";
 import { closeness, composeDrama, elimFlag, upsetPotential } from "../lib/drama";
 import { groupOutlook } from "../lib/conditions";
 import { finalizeGroupStagePlan } from "../lib/group-stage";
@@ -602,6 +603,65 @@ check("12 groupes → 32 qualifiés, 16 éliminés, events hors match", () => {
   for (const code of plan.eliminated) {
     assert(state.nationStatus.get(code) === "eliminated", `${code} doit être eliminated`);
   }
+});
+
+console.log("\n— Simulation KO (§6.1, arbre validé §21.5)");
+
+/** Tableau synthétique : 32 équipes K01..K32, 31 matchs R32→FINAL chronologiques. */
+function syntheticKo(): { matches: KoMatchInput[]; elo: Map<string, number> } {
+  const teams = Array.from({ length: 32 }, (_, i) => `K${String(i + 1).padStart(2, "0")}`);
+  const elo = new Map(teams.map((t, i) => [t, 2000 - i * 18]));
+  const matches: KoMatchInput[] = [];
+  let id = 1;
+  const day = (n: number) => `2026-07-${String(n).padStart(2, "0")}T18:00:00Z`;
+  for (let j = 0; j < 16; j++) matches.push({ id: id++, stage: "R32", home: teams[2 * j], away: teams[2 * j + 1], winner: null, kickoffUtc: day(1 + Math.floor(j / 8)) });
+  for (let j = 0; j < 8; j++) matches.push({ id: id++, stage: "R16", home: null, away: null, winner: null, kickoffUtc: day(4) });
+  for (let j = 0; j < 4; j++) matches.push({ id: id++, stage: "QF", home: null, away: null, winner: null, kickoffUtc: day(8) });
+  for (let j = 0; j < 2; j++) matches.push({ id: id++, stage: "SF", home: null, away: null, winner: null, kickoffUtc: day(12) });
+  matches.push({ id: id++, stage: "FINAL", home: null, away: null, winner: null, kickoffUtc: day(19) });
+  return { matches, elo };
+}
+
+check("arbre du tableau construit et validé (16/8/4/2/1)", () => {
+  const { matches } = syntheticKo();
+  const tree = buildKnockoutRounds(matches);
+  assert(tree.ok, !tree.ok ? tree.reason : "");
+  if (tree.ok) assert(tree.rounds[0].length === 16 && tree.rounds[4].length === 1, "structure");
+});
+
+check("arbre invalide refusé : équipe hors nourrices prédites", () => {
+  const { matches } = syntheticKo();
+  const r16 = matches.find((m) => m.stage === "R16")!;
+  r16.home = "K32"; // K32 joue le R32 #16, pas une nourrice du R16 #1
+  const tree = buildKnockoutRounds(matches);
+  assert(!tree.ok, "l'arbre aurait dû être refusé");
+});
+
+check("sim KO : déterministe, p_champion somme à 1, le plus fort devant", () => {
+  const { matches, elo } = syntheticKo();
+  const tree = buildKnockoutRounds(matches);
+  assert(tree.ok, "arbre");
+  if (!tree.ok) return;
+  const a = simulateKnockout(tree.rounds, elo, 4000, "ko-test", DEFAULT_MODEL);
+  const b = simulateKnockout(tree.rounds, elo, 4000, "ko-test", DEFAULT_MODEL);
+  assert(JSON.stringify(a) === JSON.stringify(b), "non déterministe");
+  const sum = Object.values(a).reduce((s, p) => s + p.p_champion, 0);
+  assert(Math.abs(sum - 1) < 1e-9, `somme=${sum}`);
+  const best = Object.entries(a).sort((x, y) => y[1].p_champion - x[1].p_champion)[0][0];
+  assert(best === "K01", `meilleur=${best}`);
+  assert(a.K01.p_r16 >= a.K01.p_qf && a.K01.p_qf >= a.K01.p_champion, "probas décroissantes le long du parcours");
+});
+
+check("résultat réel respecté : vainqueur connu → p_r16 = 1, perdant 0", () => {
+  const { matches, elo } = syntheticKo();
+  const m1 = matches.find((m) => m.stage === "R32")!;
+  m1.winner = m1.away; // l'outsider a gagné en vrai
+  const tree = buildKnockoutRounds(matches);
+  assert(tree.ok, "arbre");
+  if (!tree.ok) return;
+  const probs = simulateKnockout(tree.rounds, elo, 2000, "ko-real", DEFAULT_MODEL);
+  assert(probs[m1.away!].p_r16 === 1, `gagnant p_r16=${probs[m1.away!].p_r16}`);
+  assert(probs[m1.home!].p_r16 === 0, `perdant p_r16=${probs[m1.home!].p_r16}`);
 });
 
 console.log(`\nTotal: ${passed + failed} | Passed: ${passed} | Failed: ${failed}`);

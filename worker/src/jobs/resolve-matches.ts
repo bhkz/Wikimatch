@@ -24,13 +24,20 @@ type DbMatch = MatchRow & {
   pens_away: number | null;
 };
 
+export type ResolveJobResult = {
+  resolved: number;
+  /** Matchs FINISHED en attente du délai de confirmation : la boucle doit
+   *  rester en cadence rapide pour les résoudre dans ~5 min (pas dans 30). */
+  pendingConfirmation: number;
+};
+
 export async function resolveFinishedMatches(
   supabase: SupabaseClient,
   state: EngineState,
   nations: NationRow[],
   cfg: GameConfig,
   confirmDelayS: number,
-): Promise<number> {
+): Promise<ResolveJobResult> {
   const atlas = supabase.schema("atlas");
 
   const [{ data: matches, error: mErr }, { data: resolutions, error: rErr }, { data: overrides, error: oErr }, { data: seenRow }] =
@@ -56,6 +63,7 @@ export async function resolveFinishedMatches(
   const now = Date.now();
 
   let count = 0;
+  let pendingConfirmation = 0;
   for (const raw of (matches ?? []) as DbMatch[]) {
     if (resolved.has(raw.id)) continue;
 
@@ -67,7 +75,10 @@ export async function resolveFinishedMatches(
     } else if (raw.status === "FINISHED") {
       // Délai de confirmation : on attend N secondes après première détection.
       const seenAt = finishedSeen[String(raw.id)];
-      if (confirmDelayS > 0 && (!seenAt || now - Date.parse(seenAt) < confirmDelayS * 1000)) continue;
+      if (confirmDelayS > 0 && (!seenAt || now - Date.parse(seenAt) < confirmDelayS * 1000)) {
+        pendingConfirmation++;
+        continue;
+      }
       if (!raw.home || !raw.away) {
         await alert(`Match ${raw.id} FINISHED avec équipe inconnue (TBD) : résolution bloquée.`);
         continue;
@@ -145,5 +156,5 @@ export async function resolveFinishedMatches(
     console.log(`✓ résolu #${raw.id} : ${result.resolution.narrative}`);
     count++;
   }
-  return count;
+  return { resolved: count, pendingConfirmation };
 }

@@ -40,20 +40,22 @@ async function tick(): Promise<{ anyLive: boolean }> {
   });
 
   const state = await loadEngineState(supabase, nations, cfg.gameOver);
-  const resolvedCount = await resolveFinishedMatches(
+  const { resolved, pendingConfirmation } = await resolveFinishedMatches(
     supabase,
     state,
     nations,
     cfg.game,
     cfg.resolutionConfirmDelayS,
   );
-  if (resolvedCount > 0) console.log(`tick: ${resolvedCount} match(s) résolu(s).`);
+  if (resolved > 0) console.log(`tick: ${resolved} match(s) résolu(s).`);
 
   await snapshotIfDue(supabase, state);
   await buildNightRecapIfDue(supabase);
   await simulateIfStale(supabase);
   await checkLateMatches(supabase);
-  return { anyLive: poll.anyLive };
+  // Cadence rapide aussi tant qu'une résolution attend sa confirmation :
+  // un match fini doit être appliqué en ~5 min, pas au prochain tick lent.
+  return { anyLive: poll.anyLive || pendingConfirmation > 0 };
 }
 
 async function loop(): Promise<void> {

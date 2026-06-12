@@ -38,11 +38,15 @@ function windowOf(date: string): { from: string; to: string } {
   return { from: `${date}T10:00:00Z`, to: `${next.toISOString().slice(0, 10)}T05:30:00Z` };
 }
 
-/** Journée Atlas courante : avant 07:30 on est encore "hier". */
+/**
+ * "La nuit" par défaut = la dernière nuit qui a du contenu : heure de Paris
+ * moins 18 h. Le matin/l'après-midi → la nuit écoulée (recap publié à 07:30) ;
+ * le soir (≥ 18:00) → la nuit en cours (vue dérivée en direct).
+ */
 function currentAtlasDate(): string {
   const now = new Date();
   const paris = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
-  if (paris.getHours() * 60 + paris.getMinutes() < 7 * 60 + 30) paris.setDate(paris.getDate() - 1);
+  paris.setHours(paris.getHours() - 18);
   return paris.toLocaleDateString("en-CA");
 }
 
