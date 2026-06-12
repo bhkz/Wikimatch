@@ -33,6 +33,8 @@ type Props = {
   /** Taille d'un hex en unités SVG. */
   size?: number;
   onHexClick?: (hex: MapHex) => void;
+  /** Libellé de l'action du panneau tactile ; null sur les hexes sans action. */
+  hexActionLabel?: (hex: MapHex) => string | null;
   /** Hexes à mettre en avant (ex : pris cette nuit). */
   highlightIds?: ReadonlySet<number>;
   /** Nations à garder lisibles en priorité, par exemple sur une fiche pays. */
@@ -47,7 +49,9 @@ type ViewBox = { x: number; y: number; w: number; h: number };
 
 const MAX_ZOOM = 8;
 
-export default function HexMap({ hexes, nations, size = 10, onHexClick, highlightIds, focusOwners, liveOwners, fractureOwners }: Props) {
+export default function HexMap({ hexes, nations, size = 10, onHexClick, hexActionLabel, highlightIds, focusOwners, liveOwners, fractureOwners }: Props) {
+  const actionLabel = (h: MapHex): string | null =>
+    hexActionLabel ? hexActionLabel(h) : h.state === "owned" && h.owner !== null ? "Voir la nation →" : null;
   const [hovered, setHovered] = useState<MapHex | null>(null);
   const [selected, setSelected] = useState<MapHex | null>(null);
   const [cursor, setCursor] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -376,13 +380,13 @@ export default function HexMap({ hexes, nations, size = 10, onHexClick, highligh
         >
           <span className="truncate">{hexLabel(selected)}</span>
           <span className="flex items-center gap-3 shrink-0">
-            {onHexClick && selected.state === "owned" && selected.owner !== null && (
+            {onHexClick && actionLabel(selected) !== null && (
               <button
                 type="button"
                 className="text-blue-electric underline underline-offset-2"
                 onClick={() => onHexClick(selected)}
               >
-                Voir la nation →
+                {actionLabel(selected)}
               </button>
             )}
             <button type="button" aria-label="Fermer" className="text-navy/50" onClick={() => setSelected(null)}>

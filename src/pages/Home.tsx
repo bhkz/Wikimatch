@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import HexMap from "../components/HexMap";
@@ -7,6 +7,8 @@ import MatchChip from "../components/MatchChip";
 import TimeScrubber from "../components/TimeScrubber";
 import FeedTicker from "../components/FeedTicker";
 import TerritorySidebar from "../components/TerritorySidebar";
+import HexStoryPanel from "../components/HexStoryPanel";
+import type { MapHex } from "../components/HexMap";
 import { TextWithFlags } from "../components/FlagEmoji";
 import {
   isLive,
@@ -28,8 +30,8 @@ export default function Home() {
   const { data, error } = useAtlasData();
   const [myNationCode] = useMyNation();
   const [pronos, setProno] = usePronos();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [storyHex, setStoryHex] = useState<MapHex | null>(null);
   const selectedSnapshotDate = searchParams.get("t");
 
   const styles = useMemo(() => (data ? nationStyles(data.nations) : new Map()), [data]);
@@ -168,7 +170,8 @@ export default function Home() {
                 nations={styles}
                 liveOwners={selectedSnapshotDate ? undefined : live}
                 fractureOwners={selectedSnapshotDate || recentlyFallen.size === 0 ? undefined : recentlyFallen}
-                onHexClick={(hex) => hex.owner && navigate(`/n/${hex.owner}`)}
+                onHexClick={(hex) => setStoryHex(hex)}
+                hexActionLabel={() => "Son histoire →"}
               />
             ) : (
               <div className="aspect-[2/1] flex items-center justify-center font-mono text-xs uppercase tracking-widest bg-navy/95 text-cream/40">
@@ -270,6 +273,9 @@ export default function Home() {
           )}
         </section>
       </main>
+      {data && storyHex && (
+        <HexStoryPanel hex={storyHex} events={data.events} nations={styles} onClose={() => setStoryHex(null)} />
+      )}
       <SiteFooter />
     </div>
   );

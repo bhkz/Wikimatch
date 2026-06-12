@@ -18,6 +18,7 @@ import { DEFAULT_MODEL } from "../lib/sim/model";
 import { buildKnockoutRounds, simulateKnockout, type KoMatchInput } from "../lib/sim/knockout";
 import { closeness, composeDrama, elimFlag, upsetPotential } from "../lib/drama";
 import { groupOutlook } from "../lib/conditions";
+import { hexStory, hexStoryHeadline } from "../lib/hex-story";
 import { finalizeGroupStagePlan } from "../lib/group-stage";
 import { DEFAULT_GAME_CONFIG, type EngineState } from "../lib/engine/types";
 import type { NormalizedMatch, Stage } from "../lib/providers/types";
@@ -571,6 +572,41 @@ check("conditions par issue avec templates fermés (et déterministes)", () => {
       assert(bad === null, `mot interdit "${bad}" dans : ${c.text}`);
     }
   }
+});
+
+console.log("\n— Mémoire des lieux (P2.B)");
+check("biographie complète : naissance + événements dans l'ordre, sans mot interdit", () => {
+  const labels = new Map([
+    ["MAR", { flag: "\u{1F1F2}\u{1F1E6}", name: "Maroc" }],
+    ["ESP", { flag: "\u{1F1EA}\u{1F1F8}", name: "Espagne" }],
+  ]);
+  const story = hexStory(
+    { cityName: "Casablanca", isCapital: false, originalOwner: "MAR" },
+    [
+      { type: "captured", from_owner: "MAR", to_owner: "ESP", match_id: 12, created_at: "2026-06-19T20:00:00Z" },
+      { type: "captured", from_owner: "ESP", to_owner: "MAR", match_id: 31, created_at: "2026-06-24T20:00:00Z" },
+    ],
+    labels,
+  );
+  assert(story.length === 3, `entries=${story.length}`);
+  assert(story[0].text.includes("Casablanca") && story[0].text.includes("Maroc"), story[0].text);
+  assert(story[1].text.includes("Espagne") && story[1].matchId === 12, story[1].text);
+  assert(story[2].text.includes("Maroc"), story[2].text);
+  for (const e of story) {
+    const bad = containsForbiddenWord(e.text);
+    assert(bad === null, `mot interdit "${bad}" dans : ${e.text}`);
+  }
+});
+check("hex neutre et memorial : templates dédiés", () => {
+  const labels = new Map([["GER", { flag: "\u{1F1E9}\u{1F1EA}", name: "Allemagne" }]]);
+  const neutral = hexStory({ cityName: "Atoll Nord", isCapital: false, originalOwner: null }, [], labels);
+  assert(neutral[0].text.includes("eaux neutres"), neutral[0].text);
+  const memorial = hexStoryHeadline(
+    { cityName: "Berlin", isCapital: true, originalOwner: "GER" },
+    [{ type: "memorial", from_owner: "GER", to_owner: null, match_id: 77, created_at: "2026-07-01T22:00:00Z" }],
+    labels,
+  );
+  assert(memorial.includes("memorial") && memorial.includes("Allemagne"), memorial);
 });
 
 console.log("\n— Finalisation groupes / Grande Fracture (§16.5)");
