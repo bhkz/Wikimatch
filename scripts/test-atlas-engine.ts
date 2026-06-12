@@ -19,6 +19,7 @@ import { buildKnockoutRounds, simulateKnockout, type KoMatchInput } from "../lib
 import { closeness, composeDrama, elimFlag, upsetPotential } from "../lib/drama";
 import { groupOutlook } from "../lib/conditions";
 import { hexStory, hexStoryHeadline } from "../lib/hex-story";
+import { ogFill, ogMapSvg, OG_MAP_COLORS } from "../lib/og-map";
 import { finalizeGroupStagePlan } from "../lib/group-stage";
 import { DEFAULT_GAME_CONFIG, type EngineState } from "../lib/engine/types";
 import type { NormalizedMatch, Stage } from "../lib/providers/types";
@@ -607,6 +608,32 @@ check("hex neutre et memorial : templates dédiés", () => {
     labels,
   );
   assert(memorial.includes("memorial") && memorial.includes("Allemagne"), memorial);
+});
+
+console.log("\n— Images OG (P2.D)");
+check("ogMapSvg : tous les hexes rendus, dans le cadre demandé", () => {
+  const svg = ogMapSvg(
+    [
+      { q: 0, r: 0, fill: "#0055FF" },
+      { q: 5, r: -2, fill: "#FF3333" },
+      { q: -3, r: 4, fill: "#B8B2A2" },
+    ],
+    1200,
+    470,
+  );
+  assert((svg.match(/<polygon/g) ?? []).length === 3, "3 polygones attendus");
+  assert(svg.includes('width="1200"') && svg.includes('height="470"'), "dimensions");
+  const coords = [...svg.matchAll(/([\d.]+),([\d.]+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
+  for (const [x, y] of coords) {
+    assert(x >= -1 && x <= 1201 && y >= -1 && y <= 471, `point hors cadre : ${x},${y}`);
+  }
+});
+check("ogFill : mêmes règles que la carte (memorial > ruins > neutre > couleur)", () => {
+  const colors = new Map([["FRA", "#123456"]]);
+  assert(ogFill("memorial", "FRA", colors) === OG_MAP_COLORS.memorial, "memorial");
+  assert(ogFill("ruins", "FRA", colors) === OG_MAP_COLORS.ruins, "ruins");
+  assert(ogFill("owned", null, colors) === OG_MAP_COLORS.neutral, "sans owner = neutre");
+  assert(ogFill("owned", "FRA", colors) === "#123456", "couleur nation");
 });
 
 console.log("\n— Finalisation groupes / Grande Fracture (§16.5)");

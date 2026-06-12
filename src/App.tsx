@@ -11,6 +11,7 @@ const Memorial = lazy(() => import("./pages/Memorial"));
 const Night = lazy(() => import("./pages/Night"));
 const Snapshot = lazy(() => import("./pages/Snapshot"));
 const Multiverse = lazy(() => import("./pages/Multiverse"));
+const Gazette = lazy(() => import("./pages/Gazette"));
 const MatchPage = lazy(() => import("./pages/MatchPage"));
 const NationPage = lazy(() => import("./pages/NationPage"));
 const Methodo = lazy(() => import("./pages/Methodo"));
@@ -44,6 +45,8 @@ export default function App() {
           <Route path="/tableau" element={<Bracket />} />
           <Route path="/multivers" element={<Multiverse />} />
           <Route path="/memorial" element={<Memorial />} />
+          <Route path="/gazette" element={<Gazette />} />
+          <Route path="/gazette/:date" element={<Gazette />} />
           <Route path="/nuit" element={<Night />} />
           <Route path="/nuit/:date" element={<Night />} />
           <Route path="/snapshot" element={<Snapshot />} />

@@ -77,6 +77,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               ? `${n.name_fr}, championne du monde : la carte entière à ses couleurs.`
               : `Groupe ${n.group_letter} : suivez son territoire évoluer match après match.`;
       }
+    } else if (path.startsWith("/gazette")) {
+      const date = path.match(/^\/gazette\/([\d-]+)$/)?.[1] ?? null;
+      title = date ? `La Gazette de l'Atlas — ${date}` : "La Gazette de l'Atlas";
+      description = "La une du matin : ce que la nuit a changé sur la carte du monde, et ce qui se joue ce soir.";
+      imagePath = date ? `/api/og/snapshot?date=${encodeURIComponent(date)}` : "/api/og/snapshot";
     } else if (path.startsWith("/nuit/")) {
       const date = path.slice(6);
       title = `La nuit du ${date}`;

@@ -25,6 +25,17 @@
       "destination": "/api/meta?path=/n/:code"
     },
     {
+      "source": "/gazette/:date",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Bb]ot|facebookexternalhit|Twitterbot|WhatsApp|TelegramBot|Slackbot|Discordbot|LinkedInBot|Embedly|preview).*"
+        }
+      ],
+      "destination": "/api/meta?path=/gazette/:date"
+    },
+    {
       "source": "/nuit/:date",
       "has": [
         {

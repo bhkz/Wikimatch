@@ -19,7 +19,7 @@ export default function SiteFooter() {
           <div className="col-span-6 md:col-span-4 flex flex-col gap-4 font-display text-2xl uppercase tracking-wider">
             <Link to="/" className="hover:text-blue-electric transition-colors">Carte</Link>
             <Link to="/multivers" className="hover:text-blue-electric transition-colors">Multivers</Link>
-            <Link to="/nuit" className="hover:text-blue-electric transition-colors">La Nuit</Link>
+            <Link to="/gazette" className="hover:text-blue-electric transition-colors">Gazette</Link>
             <Link to="/groupes" className="hover:text-blue-electric transition-colors">Groupes</Link>
             <Link to="/tableau" className="hover:text-blue-electric transition-colors">Tableau</Link>
             <Link to="/calendrier" className="hover:text-blue-electric transition-colors">Calendrier</Link>

@@ -110,6 +110,34 @@ export type HexEvent = {
   created_at: string;
 };
 
+export type RecapTonightMatch = {
+  id: number;
+  stage: Match["stage"];
+  group_letter: string | null;
+  home: string | null;
+  away: string | null;
+  kickoff_utc: string;
+  status: string;
+  drama: number | null;
+};
+
+export type RecapSection = {
+  type: "summary" | "major_event" | "surprise" | "movements" | "qualif_swing" | "tonight";
+  title: string;
+  text?: string;
+  match_id?: number;
+  final_gain?: number;
+  p?: number;
+  resolution_count?: number;
+  nation?: string;
+  delta?: number;
+  gains?: Array<{ code: string; gained: number; lost: number; delta: number }>;
+  losses?: Array<{ code: string; gained: number; lost: number; delta: number }>;
+  matches?: RecapTonightMatch[];
+};
+
+export type Recap = { date: string; sections: RecapSection[]; published_at: string };
+
 export const STAGE_LABELS: Record<Match["stage"], string> = {
   GROUP: "Groupes",
   R32: "16es de finale",
@@ -208,6 +236,16 @@ export async function fetchResolutions(): Promise<Resolution[]> {
     .limit(200);
   if (error) throw new Error(error.message);
   return (data ?? []) as Resolution[];
+}
+
+export async function fetchRecaps(): Promise<Recap[]> {
+  const { data, error } = await atlas
+    .from("recaps")
+    .select("date, sections, published_at")
+    .order("date", { ascending: false })
+    .limit(60);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as Recap[];
 }
 
 export async function fetchHexEvents(): Promise<HexEvent[]> {
