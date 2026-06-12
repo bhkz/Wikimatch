@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 
 const NAV_ITEMS = [
   { label: "Carte", to: "/" },
+  { label: "Multivers", to: "/multivers" },
   { label: "La Nuit", to: "/nuit" },
   { label: "Groupes", to: "/groupes" },
   { label: "Tableau", to: "/tableau" },

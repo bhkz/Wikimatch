@@ -9,6 +9,7 @@ import FeedTicker from "../components/FeedTicker";
 import TerritorySidebar from "../components/TerritorySidebar";
 import { TextWithFlags } from "../components/FlagEmoji";
 import {
+  isLive,
   kickoffLabel,
   liveOwners,
   nationStyles,
@@ -16,6 +17,7 @@ import {
   useAtlasData,
 } from "../lib/atlas";
 import { useMyNation } from "../lib/myNation";
+import { usePronos, type Pick } from "../lib/pronos";
 import { FlagEmoji } from "../components/FlagEmoji";
 
 /**
@@ -25,6 +27,7 @@ import { FlagEmoji } from "../components/FlagEmoji";
 export default function Home() {
   const { data, error } = useAtlasData();
   const [myNationCode] = useMyNation();
+  const [pronos, setProno] = usePronos();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedSnapshotDate = searchParams.get("t");
@@ -197,10 +200,47 @@ export default function Home() {
             <p className="font-light text-navy/70">Pas de match aujourd'hui.</p>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-navy/10 border border-navy/10">
-              {today.map((m) => (
-                <MatchChip key={m.id} match={m} styles={styles} stake={stakesByMatch.get(m.id)} />
-              ))}
+              {today.map((m) => {
+                const prono = pronos[String(m.id)]?.pick;
+                const open = m.status !== "FINISHED" && !isLive(m) && m.home !== null && m.away !== null;
+                return (
+                  <div key={m.id} className="bg-cream flex flex-col">
+                    <MatchChip match={m} styles={styles} stake={stakesByMatch.get(m.id)} />
+                    {(open || prono) && m.home && m.away && (
+                      <div className="px-4 pb-3 flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest">
+                        <span className="text-navy/40 mr-1">{prono ? "Ton prono" : "Ton prono ?"}</span>
+                        {(["HOME", "DRAW", "AWAY"] as Pick[]).map((p) => {
+                          const label = p === "HOME" ? m.home! : p === "AWAY" ? m.away! : "Nul";
+                          const active = prono === p;
+                          return (
+                            <button
+                              key={p}
+                              type="button"
+                              disabled={!open}
+                              onClick={() => setProno(m.id, active ? null : p)}
+                              className={`px-2 py-1 border transition-colors ${
+                                active
+                                  ? "border-blue-electric text-blue-electric font-bold"
+                                  : open
+                                    ? "border-navy/10 text-navy/50 hover:border-navy/40 hover:text-navy"
+                                    : "border-navy/10 text-navy/30"
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+          )}
+          {today.some((m) => pronos[String(m.id)]) && (
+            <p className="font-mono text-[10px] uppercase tracking-widest text-navy/40 mt-3">
+              Verdict demain matin à 07h30 dans <Link to="/nuit" className="underline hover:text-blue-electric">le recap de la nuit</Link>.
+            </p>
           )}
         </section>
 

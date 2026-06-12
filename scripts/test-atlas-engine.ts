@@ -453,6 +453,20 @@ check("matchs déjà joués respectés + issue forcée (swing)", () => {
   assert(forcedWin.probs.DDD.p_qualify >= base.probs.DDD.p_qualify, "forcer la victoire de DDD doit aider DDD");
 });
 
+check("scénario multi-matchs forcés (Multivers) : déterministe et cohérent", () => {
+  const scenario = simulateGroupStage(SIM_NATIONS, SIM_MATCHES, 1000, "seed-mv", undefined, [
+    { matchId: 5, outcome: "AWAY" }, // DDD bat AAA
+    { matchId: 6, outcome: "AWAY" }, // CCC bat BBB
+  ]);
+  const again = simulateGroupStage(SIM_NATIONS, SIM_MATCHES, 1000, "seed-mv", undefined, [
+    { matchId: 6, outcome: "AWAY" },
+    { matchId: 5, outcome: "AWAY" },
+  ]);
+  assert(JSON.stringify(scenario.probs) === JSON.stringify(again.probs), "l'ordre des forces ne doit rien changer");
+  const base = simulateGroupStage(SIM_NATIONS, SIM_MATCHES, 1000, "seed-mv");
+  assert(scenario.probs.DDD.p_qualify > base.probs.DDD.p_qualify, "deux forces doivent aider DDD");
+});
+
 console.log("\n— Drama-mètre (§9)");
 check("closeness max à forces égales, upset nul à forces égales", () => {
   const even = closeness(1600, 1600, DEFAULT_MODEL);

@@ -18,6 +18,8 @@ import { TextWithFlags } from "../components/FlagEmoji";
 import { atlas } from "../lib/supabase";
 import { nationStyles, useAtlasData } from "../lib/atlas";
 import { bumpStreak } from "../lib/myNation";
+import { nightVerdicts, type Verdict } from "../lib/pronos";
+import { exportNightVideo, videoExportSupported } from "../lib/nightVideo";
 
 type RecapSection = {
   type: "summary" | "major_event" | "surprise" | "movements" | "qualif_swing" | "tonight";
@@ -65,6 +67,7 @@ export default function Night() {
   const [recap, setRecap] = useState<RecapRow | null>(null);
   const [recapLoaded, setRecapLoaded] = useState(false);
   const [streak, setStreak] = useState(0);
+  const [exporting, setExporting] = useState(false);
 
   // Streak « X matins de suite » (localStorage, pattern Wordle) — uniquement
   // sur la nuit courante, pas en navigation d'archives.
@@ -143,6 +146,14 @@ export default function Night() {
   const nationName = (code: string) => styles.get(code)?.name ?? code;
   const nationFlag = (code: string) => styles.get(code)?.flag ?? code;
 
+  // Verdict des pronos posés hier soir (localStorage, boucle soir → matin).
+  const pronoVerdict = useMemo(() => {
+    if (!data || nightResolutions.length === 0) return null;
+    const homeOf = (id: number) => data.matches.find((m) => m.id === id)?.home ?? null;
+    const v = nightVerdicts(nightResolutions, homeOf);
+    return v.verdicts.length > 0 ? v : null;
+  }, [data, nightResolutions]);
+
   // Résumé emoji partageable (pattern Wordle : la grille fait l'acquisition).
   const shareText = useMemo(() => {
     const gains = (movements?.gains ?? []).slice(0, 4).map((g) => `${nationFlag(g.code)}+${g.delta}`);
@@ -168,7 +179,36 @@ export default function Night() {
               </div>
             )}
           </div>
-          <ShareBar title={`L'Atlas du Mondial — la nuit du ${label}`} text={shareText} />
+          <div className="flex items-center gap-2 flex-wrap">
+            <ShareBar title={`L'Atlas du Mondial — la nuit du ${label}`} text={shareText} />
+            {videoExportSupported() && nightResolutions.length > 0 && data && (
+              <button
+                type="button"
+                disabled={exporting}
+                onClick={async () => {
+                  setExporting(true);
+                  try {
+                    const byDate = new Map(data.snapshots.map((s) => [s.date, s.frame]));
+                    const toFrame = (f: typeof data.snapshots[number]["frame"] | undefined) =>
+                      f ? new Map(f.map((h) => [h.id, { owner: h.owner, state: h.state }])) : null;
+                    await exportNightVideo({
+                      hexes: data.hexes,
+                      before: toFrame(byDate.get(previousDate(atlasDate))),
+                      after: toFrame(byDate.get(atlasDate)) ?? new Map(data.hexes.map((h) => [h.id, { owner: h.owner, state: h.state }])),
+                      nations: styles,
+                      resolutions: nightResolutions,
+                      dateLabel: label,
+                    });
+                  } finally {
+                    setExporting(false);
+                  }
+                }}
+                className="font-mono text-[10px] uppercase tracking-widest px-3 py-2 border border-navy/15 text-navy/60 hover:text-navy hover:border-navy/40 transition-colors disabled:opacity-50"
+              >
+                {exporting ? "Génération… (~20 s)" : "🎬 Vidéo verticale de la nuit"}
+              </button>
+            )}
+          </div>
         </div>
         {error && <div className="font-mono text-xs text-red-signal uppercase tracking-widest mb-6">{error}</div>}
         {(!data || !recapLoaded) && <p className="font-light text-navy/70">Chargement…</p>}
@@ -178,6 +218,32 @@ export default function Night() {
           <>
             {summary && (
               <p className="font-light text-xl md:text-2xl text-navy/80 max-w-2xl mb-10">{summary.text}</p>
+            )}
+
+            {pronoVerdict && (
+              <section className="mb-10 max-w-3xl border border-navy/10 bg-cream-dark p-5">
+                <div className="font-mono text-[10px] uppercase font-bold tracking-widest text-navy/50 mb-3">
+                  Tes pronos d'hier soir : {pronoVerdict.verdicts.filter((v: Verdict) => v.correct).length}/{pronoVerdict.verdicts.length} ✓
+                  {pronoVerdict.totalScored > 1 && (
+                    <span className="text-navy/35 ml-3">
+                      ({pronoVerdict.totalCorrect}/{pronoVerdict.totalScored} depuis le début)
+                    </span>
+                  )}
+                </div>
+                <ul className="space-y-1 font-mono text-[11px] uppercase tracking-widest">
+                  {pronoVerdict.verdicts.map((v: Verdict) => {
+                    const m = data.matches.find((x) => x.id === v.matchId);
+                    const pickName = (p: typeof v.pick) =>
+                      p === "DRAW" ? "nul" : nationName((p === "HOME" ? m?.home : m?.away) ?? "?");
+                    return (
+                      <li key={v.matchId} className={v.correct ? "text-blue-electric" : "text-navy/50"}>
+                        {v.correct ? "✓" : "✗"} {nationName(m?.home ?? "?")}–{nationName(m?.away ?? "?")} : tu avais dit{" "}
+                        {pickName(v.pick)}{!v.correct && ` · c'était ${pickName(v.actual)}`}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
             )}
 
             {frames && (

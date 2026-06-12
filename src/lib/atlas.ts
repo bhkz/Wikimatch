@@ -16,6 +16,7 @@ export type Nation = {
   flag: string;
   color: string;
   fifa_rank: number;
+  fifa_points: number;
   group_letter: string;
   status: "alive" | "eliminated" | "champion";
   eliminated_at: string | null;
@@ -124,7 +125,7 @@ export const STAGE_LABELS: Record<Match["stage"], string> = {
 export async function fetchNations(): Promise<Nation[]> {
   const { data, error } = await atlas
     .from("nations")
-    .select("code, name_fr, flag, color, fifa_rank, group_letter, status, eliminated_at, eliminated_by_match")
+    .select("code, name_fr, flag, color, fifa_rank, fifa_points, group_letter, status, eliminated_at, eliminated_by_match")
     .order("code");
   if (error) throw new Error(error.message);
   return (data ?? []) as Nation[];

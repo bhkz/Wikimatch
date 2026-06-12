@@ -35,7 +35,10 @@ export type SimResult = {
   probs: Record<string, NationProbs>;
 };
 
-/** Force une issue pour le calcul de swing du drama-mètre (spec §9). */
+/**
+ * Issue(s) forcée(s) : swing du drama-mètre (spec §9) et scénarios du
+ * Multivers (vision P2.A) — un scénario = plusieurs matchs forcés.
+ */
 export type ForcedOutcome = { matchId: number; outcome: "HOME" | "DRAW" | "AWAY" };
 
 function forcedScore(outcome: ForcedOutcome["outcome"]): { scoreHome: number; scoreAway: number } {
@@ -62,8 +65,11 @@ export function simulateGroupStage(
   iterations: number,
   seed: string,
   model: MatchModelConfig = DEFAULT_MODEL,
-  forced?: ForcedOutcome,
+  forced?: ForcedOutcome | ForcedOutcome[],
 ): SimResult {
+  const forcedByMatch = new Map(
+    (Array.isArray(forced) ? forced : forced ? [forced] : []).map((f) => [f.matchId, f.outcome]),
+  );
   const rng = mulberry32(seed);
   const eloByCode = new Map(nations.map((n) => [n.code, n.elo]));
   const groups = [...new Set(nations.map((n) => n.group))].sort();
@@ -80,8 +86,9 @@ export function simulateGroupStage(
 
     for (const g of groups) {
       const played: GroupMatchInput[] = matchesByGroup.get(g)!.map((m) => {
-        if (forced && m.id === forced.matchId) {
-          const s = forcedScore(forced.outcome);
+        const forcedOutcome = forcedByMatch.get(m.id);
+        if (forcedOutcome) {
+          const s = forcedScore(forcedOutcome);
           return { home: m.home, away: m.away, ...s };
         }
         if (m.scoreHome !== null && m.scoreAway !== null) {
