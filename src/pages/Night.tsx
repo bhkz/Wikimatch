@@ -17,6 +17,7 @@ import ShareBar from "../components/ShareBar";
 import { TextWithFlags } from "../components/FlagEmoji";
 import { atlas } from "../lib/supabase";
 import { nationStyles, useAtlasData } from "../lib/atlas";
+import { bumpStreak } from "../lib/myNation";
 
 type RecapSection = {
   type: "summary" | "major_event" | "surprise" | "movements" | "qualif_swing" | "tonight";
@@ -63,6 +64,13 @@ export default function Night() {
   const { from, to } = windowOf(atlasDate);
   const [recap, setRecap] = useState<RecapRow | null>(null);
   const [recapLoaded, setRecapLoaded] = useState(false);
+  const [streak, setStreak] = useState(0);
+
+  // Streak « X matins de suite » (localStorage, pattern Wordle) — uniquement
+  // sur la nuit courante, pas en navigation d'archives.
+  useEffect(() => {
+    if (!date) setStreak(bumpStreak(atlasDate));
+  }, [date, atlasDate]);
 
   useEffect(() => {
     let cancelled = false;
@@ -133,6 +141,16 @@ export default function Night() {
   const movements = sections.find((s) => s.type === "movements");
   const swing = sections.find((s) => s.type === "qualif_swing");
   const nationName = (code: string) => styles.get(code)?.name ?? code;
+  const nationFlag = (code: string) => styles.get(code)?.flag ?? code;
+
+  // Résumé emoji partageable (pattern Wordle : la grille fait l'acquisition).
+  const shareText = useMemo(() => {
+    const gains = (movements?.gains ?? []).slice(0, 4).map((g) => `${nationFlag(g.code)}+${g.delta}`);
+    const losses = (movements?.losses ?? []).slice(0, 4).map((l) => `${nationFlag(l.code)}${l.delta}`);
+    if (gains.length === 0 && losses.length === 0) return undefined;
+    return `🌍 L'Atlas du Mondial — la nuit du ${label}\n${[...gains, ...losses].join(" · ")}`;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [movements, label, styles]);
 
   return (
     <div className="min-h-screen bg-cream text-navy flex flex-col">
@@ -140,10 +158,17 @@ export default function Night() {
       <main className="flex-1 w-full max-w-screen-2xl mx-auto px-4 md:px-8 pt-24 pb-24">
         <SectionLabel label="Pendant que tu dormais" />
         <div className="mt-4 mb-12 flex flex-wrap items-end justify-between gap-6">
-          <h1 className="font-display text-4xl md:text-6xl uppercase leading-none tracking-wide">
-            La nuit du {label}
-          </h1>
-          <ShareBar title={`L'Atlas du Mondial — la nuit du ${label}`} />
+          <div>
+            <h1 className="font-display text-4xl md:text-6xl uppercase leading-none tracking-wide">
+              La nuit du {label}
+            </h1>
+            {streak > 1 && (
+              <div className="font-mono text-[10px] uppercase tracking-widest text-blue-electric mt-2">
+                🔥 {streak} matins de suite sur l'Atlas
+              </div>
+            )}
+          </div>
+          <ShareBar title={`L'Atlas du Mondial — la nuit du ${label}`} text={shareText} />
         </div>
         {error && <div className="font-mono text-xs text-red-signal uppercase tracking-widest mb-6">{error}</div>}
         {(!data || !recapLoaded) && <p className="font-light text-navy/70">Chargement…</p>}

@@ -10,18 +10,20 @@ type Props = {
   title: string;
   /** URL à partager ; défaut : l'URL courante. */
   url?: string;
+  /** Texte riche optionnel (résumé emoji façon Wordle) joint au partage/à la copie. */
+  text?: string;
   /** Inverser les couleurs sur fond sombre (memorial, /fin). */
   onDark?: boolean;
 };
 
-export default function ShareBar({ title, url, onDark = false }: Props) {
+export default function ShareBar({ title, url, text, onDark = false }: Props) {
   const [copied, setCopied] = useState(false);
   const shareUrl = url ?? (typeof window !== "undefined" ? window.location.href : "");
   const canNativeShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
 
   async function share() {
     try {
-      await navigator.share({ title, url: shareUrl });
+      await navigator.share({ title, text, url: shareUrl });
     } catch {
       // partage annulé par l'utilisateur : rien à faire
     }
@@ -29,7 +31,7 @@ export default function ShareBar({ title, url, onDark = false }: Props) {
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(text ? `${text}\n${shareUrl}` : shareUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {

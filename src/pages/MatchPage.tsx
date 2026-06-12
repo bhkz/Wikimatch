@@ -102,6 +102,11 @@ export default function MatchPage() {
             <SectionLabel
               label={`${STAGE_LABELS[match.stage]}${match.group_letter ? ` · Groupe ${match.group_letter}` : ""} · ${kickoffLabel(match.kickoff_utc)}`}
             />
+            {!resolution && match.status !== "FINISHED" && (
+              <p className="font-mono text-[10px] uppercase tracking-widest text-navy/40 mt-2">
+                📺 En France : 54 matchs en clair sur M6 &amp; M6+ (dont tous les Bleus) · l'intégralité sur beIN Sports
+              </p>
+            )}
             <div className="mt-6 mb-10 flex flex-wrap items-center gap-x-8 gap-y-4">
               <h1 className="font-display text-4xl md:text-7xl uppercase leading-[0.9] tracking-wide">
                 {home ? <><FlagEmoji flag={home.flag} /> {home.name}</> : "À déterminer"}

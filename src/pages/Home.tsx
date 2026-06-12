@@ -9,11 +9,14 @@ import FeedTicker from "../components/FeedTicker";
 import TerritorySidebar from "../components/TerritorySidebar";
 import { TextWithFlags } from "../components/FlagEmoji";
 import {
+  kickoffLabel,
   liveOwners,
   nationStyles,
   sameLocalDay,
   useAtlasData,
 } from "../lib/atlas";
+import { useMyNation } from "../lib/myNation";
+import { FlagEmoji } from "../components/FlagEmoji";
 
 /**
  * Accueil (spec §12) : la carte vivante plein écran + bandeau des matchs du
@@ -21,6 +24,7 @@ import {
  */
 export default function Home() {
   const { data, error } = useAtlasData();
+  const [myNationCode] = useMyNation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedSnapshotDate = searchParams.get("t");
@@ -64,6 +68,19 @@ export default function Home() {
   );
   const lastResolutions = data?.resolutions.slice(0, 6) ?? [];
 
+  // « Ma nation » (localStorage) : son état + son prochain match, en un regard.
+  const myNation = useMemo(() => {
+    if (!data || !myNationCode) return null;
+    const nation = data.nations.find((n) => n.code === myNationCode);
+    if (!nation) return null;
+    const territory = data.hexes.filter((h) => h.owner === myNationCode && h.state === "owned").length;
+    const next = data.matches.find(
+      (m) => (m.home === myNationCode || m.away === myNationCode) && m.status !== "FINISHED",
+    );
+    const p = data.sim?.probs[myNationCode];
+    return { nation, territory, next, p };
+  }, [data, myNationCode]);
+
   function selectSnapshot(date: string | null) {
     const next = new URLSearchParams(searchParams);
     if (date) next.set("t", date);
@@ -96,6 +113,33 @@ export default function Home() {
           <div className="font-mono text-xs uppercase tracking-widest text-red-signal border border-red-signal/30 px-4 py-3 mb-6">
             Données indisponibles : {error}
           </div>
+        )}
+
+        {/* Ma nation (localStorage, zéro compte) : l'empire suivi en un regard. */}
+        {myNation && (
+          <Link
+            to={`/n/${myNation.nation.code}`}
+            className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border border-navy/10 bg-cream-dark px-4 py-3 mb-6 hover:border-navy/30 transition-colors font-mono text-xs uppercase tracking-widest"
+          >
+            <span className="font-bold">
+              <FlagEmoji flag={myNation.nation.flag} /> {myNation.nation.name_fr}
+            </span>
+            <span className="text-navy/60">{myNation.territory} territoire{myNation.territory > 1 ? "s" : ""}</span>
+            {myNation.p && (
+              <span className="text-blue-electric">
+                {myNation.p.p_champion !== undefined
+                  ? `${Math.round((myNation.p.p_champion ?? 0) * 100)} % champion`
+                  : `${Math.round(myNation.p.p_qualify * 100)} % qualif`}
+              </span>
+            )}
+            {myNation.next && (
+              <span className="text-navy/60">
+                Prochain match : {myNation.next.home === myNation.nation.code ? myNation.next.away : myNation.next.home} ·{" "}
+                {kickoffLabel(myNation.next.kickoff_utc)}
+              </span>
+            )}
+            {myNation.nation.status === "eliminated" && <span className="text-red-signal">au memorial</span>}
+          </Link>
         )}
 
         {/* La Grande Fracture (§5.8) : 16 nations grisées d'un coup — l'image du mois. */}

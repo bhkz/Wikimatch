@@ -10,12 +10,14 @@ import SectionLabel from "../components/SectionLabel";
 import HexMap from "../components/HexMap";
 import MatchChip from "../components/MatchChip";
 import { nationStyles, useAtlasData } from "../lib/atlas";
+import { useMyNation } from "../lib/myNation";
 import { FlagEmoji, TextWithFlags } from "../components/FlagEmoji";
 import ShareBar from "../components/ShareBar";
 
 export default function NationPage() {
   const { code } = useParams();
   const { data, error } = useAtlasData();
+  const [myNation, setMyNation] = useMyNation();
   const upper = (code ?? "").toUpperCase();
 
   const styles = useMemo(() => (data ? nationStyles(data.nations) : new Map()), [data]);
@@ -66,6 +68,23 @@ export default function NationPage() {
                 title="Couleur sur la carte"
               />
               <ShareBar title={`${nation.name_fr} sur l'Atlas du Mondial`} />
+              <button
+                type="button"
+                onClick={() => setMyNation(myNation === upper ? null : upper)}
+                className={`font-mono text-[10px] uppercase tracking-widest px-3 py-2 border transition-colors ${
+                  myNation === upper
+                    ? "border-blue-electric text-blue-electric"
+                    : "border-navy/15 text-navy/60 hover:text-navy hover:border-navy/40"
+                }`}
+              >
+                {myNation === upper ? "★ Ma nation" : "☆ Suivre cette nation"}
+              </button>
+              <a
+                href={`/api/ics/${upper}`}
+                className="font-mono text-[10px] uppercase tracking-widest px-3 py-2 border border-navy/15 text-navy/60 hover:text-navy hover:border-navy/40 transition-colors"
+              >
+                📅 Ses matchs dans mon agenda
+              </a>
             </div>
             <div className="font-mono text-xs uppercase tracking-widest mb-10">
               {nation.status === "alive" && (

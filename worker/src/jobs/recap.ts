@@ -208,6 +208,31 @@ export async function buildNightRecapIfDue(supabase: SupabaseClient): Promise<bo
   });
   if (iErr) throw new Error(`recaps insert: ${iErr.message}`);
 
+  // Distribution : poste le recap sur les webhooks Discord configurés
+  // (RECAP_WEBHOOK_URLS, séparés par des virgules — ton serveur + partenaires).
+  // Échec non bloquant : la publication site prime.
+  const webhooks = (process.env.RECAP_WEBHOOK_URLS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  if (webhooks.length > 0) {
+    const lines = [
+      `**🌍 L'Atlas du Mondial — la nuit du ${recapDate}**`,
+      sections[0] && "text" in sections[0] ? String(sections[0].text) : "",
+      biggest ? `Fait majeur : ${biggest.narrative}` : "",
+      surprise ? `La surprise : ${surprise.text}` : "",
+      `→ https://atlas-mondial.vercel.app/nuit/${recapDate}`,
+    ].filter(Boolean);
+    for (const url of webhooks) {
+      try {
+        await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: lines.join("\n") }),
+        });
+      } catch (err) {
+        console.error(`recap webhook KO : ${err instanceof Error ? err.message : err}`);
+      }
+    }
+  }
+
   await logJob(supabase, "build_night_recap", true, {
     date: recapDate,
     resolutions: resolutions?.length ?? 0,

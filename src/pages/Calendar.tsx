@@ -65,9 +65,13 @@ export default function Calendar() {
       <SiteHeader />
       <main className="flex-1 w-full max-w-screen-2xl mx-auto px-4 md:px-8 pt-24 pb-24">
         <SectionLabel label="Mondial 2026 · 104 matchs" />
-        <h1 className="font-display text-4xl md:text-6xl uppercase leading-none tracking-wide mt-4 mb-8">
+        <h1 className="font-display text-4xl md:text-6xl uppercase leading-none tracking-wide mt-4 mb-3">
           Calendrier
         </h1>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-navy/40 mb-8">
+          Heures locales de ton appareil · 📺 M6 &amp; M6+ (54 matchs en clair) · beIN Sports (tous les matchs) ·
+          les matchs de la nuit sont résumés ici chaque matin à 07h30
+        </p>
 
         <div className="flex flex-wrap gap-3 mb-10 font-mono text-xs uppercase tracking-widest">
           <select
