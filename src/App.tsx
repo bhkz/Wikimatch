@@ -17,6 +17,7 @@ const NationPage = lazy(() => import("./pages/NationPage"));
 const Methodo = lazy(() => import("./pages/Methodo"));
 const EmbedMap = lazy(() => import("./pages/EmbedMap"));
 const Finale = lazy(() => import("./pages/Finale"));
+const Touchline = lazy(() => import("./pages/Touchline"));
 const AdminHome = lazy(() => import("./pages/admin/AdminHome"));
 const MapPreview = lazy(() => import("./pages/admin/MapPreview"));
 
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/n/:code" element={<NationPage />} />
           <Route path="/methodo" element={<Methodo />} />
           <Route path="/embed/map" element={<EmbedMap />} />
+          <Route path="/touchline" element={<Touchline />} />
           <Route path="/fin" element={<Finale />} />
           <Route path="/admin" element={<AdminHome />} />
           <Route path="/admin/map-preview" element={<MapPreview />} />

@@ -28,6 +28,7 @@ export default function SiteFooter() {
 
           <div className="col-span-6 md:col-span-4 flex flex-col gap-4 font-mono text-xs uppercase tracking-widest text-cream/60">
             <Link to="/methodo" className="hover:text-cream transition-colors">Comment ça marche</Link>
+            <Link to="/touchline" className="hover:text-cream transition-colors">Touchline Commander · labo 🎙</Link>
           </div>
         </div>
 
